@@ -1,0 +1,35 @@
+.header {
+    height: 3rem;
+    display: flex;
+    flex: 1 1 auto;
+    flex-basis: content;
+    flex-direction: row;
+    padding: 0 1rem;
+    align-items: center;
+    background-color: coral;
+}
+
+.header_input {
+    max-width: 10rem;
+    height: 1rem;
+    width: 100%;
+    /* max-width: 6rem; */
+    /* flex-basis: 6rem; */
+}
+
+.header_input_wrapper {
+    width: 100%;
+}
+
+.header_avatar {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background-color: rgb(236, 181, 28);
+    flex-shrink: 0;
+}
+
+.header > :nth-child(n+2) {
+    margin-left: 1rem;
+}
+

@@ -3,8 +3,8 @@ services:
     build: ./frontend
     volumes:
       - ./frontend:/frontend
-    ports:
-      - 3000:3000
+    networks:
+      - main
   backend:
     env_file: development.env
     build: ./backend
@@ -12,8 +12,6 @@ services:
       - ./backend:/backend
     networks:
       - main
-    ports:
-      - 3001:3000
   db:
     image: postgres
     env_file: development.env
@@ -25,7 +23,15 @@ services:
     networks:
       - main
     ports:
-      - 3002:80
+      - 3001:80
+  nginx:
+    image: nginx:alpine
+    networks:
+      - main
+    ports:
+      - 3000:80
+    volumes:
+      - "./proxy/nginx.conf:/etc/nginx/nginx.conf"
 
 networks:
   main:
