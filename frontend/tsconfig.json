@@ -1,34 +1,22 @@
 {
-  "extends": "../tsconfig.json",
   "compilerOptions": {
     "lib": [
       "dom",
-      "esnext"
-    ],
-    "rootDirs": [
-      ".",
-      "../common"
     ],
     "noEmit": true,
     "paths": {
       "@common/*": [
-        "../common/*"
+        "../../common/*"
       ]
     },
-    "baseUrl": ".",
+    "baseUrl": "./src",
     "jsx": "preserve",
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
     "isolatedModules": true,
     "strict": false,
-    "tsBuildInfoFile": "../dist/client.tsbuildinfo"
+    "outDir": "../dist/frontend",
+    "allowSyntheticDefaultImports": true
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "../common/**/*"
-  ],
   "exclude": [
     "node_modules"
   ]

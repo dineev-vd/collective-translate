@@ -1,27 +1,14 @@
 {
-    "compilerOptions": {
-      "module": "commonjs",
-      "lib": [
-        "es2020"
-      ],
-      "moduleResolution": "node",
-      "declaration": true,
-      "allowJs": false,
-      "esModuleInterop": true,
-      "removeComments": true,
-      "resolveJsonModule": true,
-      "emitDecoratorMetadata": true,
-      "experimentalDecorators": true,
-      "allowSyntheticDefaultImports": true,
-      "target": "es2020",
-      "sourceMap": false,
-      "rootDirs": [
-        "client/src",
-        "common",
-        "server/src"
-      ],
-      "skipLibCheck": true,
-      "incremental": true,
-      "jsx": "react"
-    }
+    "files": [],
+    "references": [
+      {
+        "path": "./backend"
+      },
+      {
+        "path": "./frontend"
+      },
+      {
+        "path": "./common"
+      }
+    ]
   }

@@ -1,3 +1,3 @@
 FROM node:16
-WORKDIR /backend
+WORKDIR /app/backend
 CMD npm run start:dev

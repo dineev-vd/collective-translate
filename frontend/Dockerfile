@@ -1,3 +1,3 @@
 FROM node:16
-WORKDIR /frontend
+WORKDIR /app/frontend
 CMD npm run start

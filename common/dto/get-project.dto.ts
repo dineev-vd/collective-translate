@@ -1,4 +1,5 @@
 export class GetProjectDto {
-    id: string;
+    id: number;
     name: string;
+    description: string;
 }
