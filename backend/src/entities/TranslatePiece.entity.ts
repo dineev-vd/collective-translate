@@ -1,5 +1,6 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import Project from "./Project.entity";
+import { TextPiece } from "./TextPiece.entity";
 
 @Entity()
 class TranslatePiece {
@@ -7,14 +8,18 @@ class TranslatePiece {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(() => Project)
-    project: Project
+    @ManyToOne(() => Project, {cascade: false})
+    project: Project;
+
+    @ManyToMany(() => TextPiece, {cascade: true})
+    @JoinTable()
+    textPieces: TextPiece[];
+
+    @Column({default: ""})
+    after: string;
 
     @Column()
     before: string;
-
-    @Column()
-    after: string;
 
 }
 

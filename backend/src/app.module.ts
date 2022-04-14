@@ -5,6 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import Project from './entities/Project.entity';
 import TranslatePiece from './entities/TranslatePiece.entity';
 import User from './entities/User.entity';
+import { PieceModule } from './piece/piece.module';
+import { TextPiece } from '@entities/TextPiece.entity';
 
 const {
   POSTGRES_HOST,
@@ -28,11 +30,13 @@ const {
       entities: [
         Project,
         TranslatePiece,
-        User
+        User,
+        TextPiece
       ]
     }),
     ProjectModule,
-    UserModule
+    UserModule,
+    PieceModule
   ],
   controllers: [],
   providers: [],

@@ -20,6 +20,8 @@
     "paths": {
       "@entities/*":["src/entities/*"],
       "@common/*":["../common/*"]
-    },
-  }
+    }
+  },
+  "include": ["**/*.ts",
+    "../common/**/*"]
 }

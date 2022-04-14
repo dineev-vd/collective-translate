@@ -9,7 +9,7 @@ const ProjectPage: React.FC<{}> = (_) => {
         <Link to={'details'}>Детали</Link>
         <Link to={'pieces'}>Перевод</Link>
         <Routes>
-            <Route path="pieces" element={<ProjectPieces />} />
+            <Route path="pieces" element={<ProjectPieces projectId={id}/>} />
             <Route path="details" element={<ProjectSummary projectId={id}/>} />
             <Route path="*" element={<Navigate to={"details"} replace />} />
         </Routes>

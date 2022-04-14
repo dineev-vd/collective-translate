@@ -13,7 +13,7 @@ const Root = () => {
             <Header />
             <Routes>
                 <Route path='/search' element={<SearchResults />} />
-                <Route path='/project/:id*' element={<ProjectPage/>} />
+                <Route path='/project/:id/*' element={<ProjectPage/>} />
                 <Route path='/' element={<LandingPage/>}/>
             </Routes>
         </div>

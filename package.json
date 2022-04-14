@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "detect-character-encoding": "^0.8.0"
+  }
+}
