@@ -1,10 +1,10 @@
 import { api } from "api/Api";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { selectUser } from "store/userReducer";
+import { selectUser, setUser } from "store/userReducer";
 
 const TopMenuProfile: React.FC = () => {
-    const user = useSelector(selectUser);
+    const curUser = useSelector(selectUser);
     const dispatch = useDispatch();
 
 
@@ -14,7 +14,9 @@ const TopMenuProfile: React.FC = () => {
     function handleLogin() {
         api.login(curEmail, curPass).then(([token, _]) => {
             localStorage.setItem("access_token", token.accessToken);
-            
+            api.getProfile().then(([user, _]) => {
+                dispatch(setUser(user))
+            })
         })
     }
 
@@ -28,7 +30,8 @@ const TopMenuProfile: React.FC = () => {
         "overflow": "hidden",
         "right": 0,
         "backgroundColor": "lightgray",
-        "padding": "5px"
+        "padding": "5px",
+        "opacity": curUser ? 0 : 1
     }}>
         email:
         <input onChange={e => setEmail(e.target.value)}></input>

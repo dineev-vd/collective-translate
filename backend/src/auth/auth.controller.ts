@@ -18,11 +18,10 @@ export class AuthController {
     @UseGuards(LocalAuthGuard)
     @Post(LOGIN_ENDPOINT)
     async login(@Request() { user }: ExtendedRequest, @Res({ passthrough: true }) res: Response): Promise<JwtDto> {
-
         // set refresh token
         const refreshToken = this.authService.getRefreshToken(user.id);
-        this.userService.setCurrentRefreshToken(refreshToken, user.id);
-        res.cookie("X-Refresh-Token", refreshToken, { maxAge: 3000, secure: true, httpOnly: true });
+        await this.userService.setCurrentRefreshToken(refreshToken, user.id);
+        res.cookie("refresh_token", refreshToken, { maxAge: 300000 });
 
 
         return this.authService.login(user);
@@ -38,22 +37,27 @@ export class AuthController {
 
         // set refresh token
         const refreshToken = this.authService.getRefreshToken(createdUser.id);
-        this.userService.setCurrentRefreshToken(refreshToken, createdUser.id);
-        res.cookie("X-Refresh-Token", refreshToken, { maxAge: 3000, secure: true, httpOnly: true });
+        await this.userService.setCurrentRefreshToken(refreshToken, createdUser.id);
+        res.cookie("refresh_token", refreshToken, { maxAge: 30000, secure: false, httpOnly: false });
 
         return this.authService.login(createdUser);
     }
 
     @UseGuards(RefreshAuthGuard)
     @Get(REFRESH_ENDPOINT)
-    async refresh(@Req() request: RequestExpress, @Request() { user }: ExtendedRequest) {
-        const refreshToken = request.cookies['X-Refresh-Token'];
-        const verifiedUser = this.userService.getUserIfRefreshTokenMatches(refreshToken, user.id.toString());
-
+    async refresh(@Req() request: RequestExpress, @Request() { user }: ExtendedRequest, @Res({ passthrough: true }) res: Response) {
+        console.log(user);
+        
         if(!user) {
             throw new UnauthorizedException();
         }
 
         
+
+        const newRefreshToken = this.authService.getRefreshToken(user.id);
+        await this.userService.setCurrentRefreshToken(newRefreshToken, user.id);
+        res.cookie("refresh_token", newRefreshToken, { maxAge: 300000 });
+
+        return this.authService.login(user);
     }
 }

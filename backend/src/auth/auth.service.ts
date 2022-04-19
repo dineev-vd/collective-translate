@@ -33,7 +33,7 @@ export class AuthService {
     getRefreshToken(userId: number) {
         const payload = { sub: userId };
         const token = this.jwtService.sign(payload, {
-            expiresIn: `$300s`
+            expiresIn: `300s`
         });
 
         return token;

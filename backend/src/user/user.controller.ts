@@ -1,6 +1,7 @@
 import { Controller, Get, UseGuards, Request, Param } from '@nestjs/common';
 import { MY_PROFILE_ENDPOINT, USER_ENDPOINT } from 'common/constants';
 import { JwtAuthGuard } from 'guards/simple-guards.guard';
+import { ExtendedRequest } from 'util/ExtendedRequest';
 import { UserService } from './user.service';
 
 @Controller(USER_ENDPOINT)
@@ -12,8 +13,9 @@ export class UserController {
 
     @UseGuards(JwtAuthGuard)
     @Get(MY_PROFILE_ENDPOINT)
-    getProfile(@Request() req) {
-        return req.user;
+    getProfile(@Request() { user }: any) {
+        console.log(user)
+        return this.userService.findById(user.userId.toString());
     }
 
     @Get(":id")

@@ -20,26 +20,28 @@ class ApiClass {
     }
 
     makeNewInit(init: RequestInit, token: string): RequestInit {
-        return token ? { ...init, headers: { ...init.headers, "Authorization": `Bearer: ${token}` } } : init;
+        return token ? { ...init, headers: { ...init.headers, "Authorization": `Bearer ${token}` } } : init;
     }
 
     async makeRequest(uri: string, options: { init?: RequestInit, tokenRequired: Boolean, credentialsRequired: Boolean }) {
         const { init, tokenRequired, credentialsRequired } = options;
         const newInit = init ?? {};
-        newInit.credentials = credentialsRequired ? "same-origin" : "omit";
+        newInit.credentials = credentialsRequired ? "include" : "omit";
+        console.log(newInit);
 
         if (tokenRequired) {
             const token = auth.getAccessToken();
             const initBeforeCatch = this.makeNewInit(newInit, token);
-            try {
-                const response = await fetch(uri, initBeforeCatch);
+
+            const response = await fetch(uri, initBeforeCatch);
+            if (response.ok) {
                 return response;
-            } catch {
-                const [newToken, _] = await this.refreshToken();
-                auth.setAccessToken(newToken.accessToken);
-                const initAfterCatch = this.makeNewInit(newInit, newToken.accessToken);
-                return fetch(uri, initAfterCatch);
             }
+
+            const [newToken, _] = await this.refreshToken();
+            auth.setAccessToken(newToken.accessToken);
+            const initAfterCatch = this.makeNewInit(newInit, newToken.accessToken);
+            return fetch(uri, initAfterCatch);
         }
 
         return fetch(uri, newInit);
@@ -53,7 +55,7 @@ class ApiClass {
     async postJson<T>(uri: string, data: Object, { tokenRequired = false, credentialsRequired = false } = {}) {
         const response = await this.makeRequest(uri, {
             init: {
-                body: data.toString(),
+                body: JSON.stringify(data),
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -77,10 +79,10 @@ class ApiClass {
         const endpointsParsed = Array.isArray(endpoints) ? endpoints : [endpoints];
 
         const endpointsString = [API_ENDPOINT, ...endpointsParsed].join('/');
-        const paramString = Object.entries(params).map(([key, value]) => {
+        const paramString = params ? Object.entries(params).map(([key, value]) => {
             const valueParsed = Array.isArray(value) ? value : [value];
             return `${key}=${valueParsed.join(',')}`;
-        }).join('&');
+        }).join('&') : "";
 
         return endpointsString + (paramString.length > 0 ? '?' : '') + paramString;
     }
@@ -128,7 +130,7 @@ class ApiClass {
 
     async login(email: string, password: string) {
         const uri = this.makeUri([AUTH_ENDPOINT, LOGIN_ENDPOINT]);
-        return this.postJson<JwtDto>(uri, { email: email, password: password });
+        return this.postJson<JwtDto>(uri, { email: email, password: password }, { credentialsRequired: true });
     }
 
     async register(user: PostUserDto) {
