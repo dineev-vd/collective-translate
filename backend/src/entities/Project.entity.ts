@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import TranslatePiece from "./TranslatePiece.entity";
 import User from "./User.entity";
-import {GetProjectDto} from "@common/dto/get-project.dto"
+import {GetProjectDto} from "common/dto/project.dto"
 import { TextPiece } from "./TextPiece.entity";
 
 @Entity()
@@ -18,9 +18,6 @@ export default class Project {
     @OneToMany(() => TextPiece, (textPieceEntity => textPieceEntity.project), {cascade: true})
     text: TextPiece[];
 
-    @OneToMany(() => TranslatePiece, (translatePiece => translatePiece.project), {cascade: true})
-    translatePieces: TranslatePiece[];
-
     @Column({default: ""})
     description: string;
 
@@ -28,7 +25,7 @@ export default class Project {
         return {
             id: this.id,
             name: this.name,
-            description: this.description
+            description: this.description,
         }
     }
 }

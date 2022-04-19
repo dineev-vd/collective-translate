@@ -1,19 +1,26 @@
-import { Column, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import Project from "./Project.entity";
 import TranslatePiece from "./TranslatePiece.entity";
 
 @Entity()
 export class TextPiece {
+    @PrimaryGeneratedColumn()
+    id: number;
 
-    @ManyToOne(() => Project, {primary: true})
+    @ManyToOne(() => Project)
     project: Project;
 
-    @PrimaryColumn()
-    sequenceNumber: number;
+    @OneToOne(() => TextPiece, {nullable: true})
+    @JoinColumn()
+    previous?: TextPiece;
+
+    @OneToOne(() => TextPiece, {nullable: true})
+    @JoinColumn()
+    next?: TextPiece;
 
     @Column()
     text: string;
     
-    @ManyToMany(() => TranslatePiece)
+    @OneToMany(() => TranslatePiece, (piece) => piece.textPieces)
     translatePieces: TranslatePiece[];
 }

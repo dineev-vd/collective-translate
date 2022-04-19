@@ -1,21 +1,20 @@
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn, RelationId } from "typeorm";
 import Project from "./Project.entity";
 import { TextPiece } from "./TextPiece.entity";
 
 @Entity()
 class TranslatePiece {
-    
+
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(() => Project, {cascade: false})
-    project: Project;
-
-    @ManyToMany(() => TextPiece, {cascade: true})
-    @JoinTable()
+    @ManyToOne(() => TextPiece, (piece) => piece.translatePieces, { cascade: true })
     textPieces: TextPiece[];
 
-    @Column({default: ""})
+    @RelationId((piece: TranslatePiece) => piece.textPieces)
+    textPiecesIds: number[];
+
+    @Column({ default: "" })
     after: string;
 
     @Column()

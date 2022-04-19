@@ -3,6 +3,7 @@ import { } from "@blueprintjs/core"
 import React, { FormEvent } from "react"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { api } from "api/Api"
 
 const Header: React.FC = () => {
     const [searchValue, setSearchValue] = useState<string>("");
@@ -24,7 +25,9 @@ const Header: React.FC = () => {
                     <input className="header_input" onChange={handleChange} value={searchValue}></input>
                 </form >
             </div>
-            <div className="header_avatar"></div>
+            <div className="header_avatar">
+                
+            </div>
         </header>
     )
 }

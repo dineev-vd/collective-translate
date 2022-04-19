@@ -1,15 +1,17 @@
 import { ChangeEvent, useState } from "react";
-import { GetProjectFullDto } from "@common/dto/get-project-full.dto";
+import { GetProjectDto } from "@common/dto/project.dto";
 import { useEffect } from "react";
 import { api } from "api/Api";
+import { useParams } from "react-router-dom";
 
-const ProjectSummary: React.FC<{ projectId: string }> = ({ projectId }) => {
-    const [summaryResponse, setSummaryResponse] = useState<GetProjectFullDto>();
+const ProjectSummary: React.FC<{  }> = () => {
+    const { projectId } = useParams();
+    const [summaryResponse, setSummaryResponse] = useState<GetProjectDto>();
     const [files, setFiles] = useState<FileList>();
 
     useEffect(() => {
         api.getProjectById(projectId)
-            .then(response => setSummaryResponse(response))
+            .then(([response, _]) => setSummaryResponse(response))
     }, [projectId])
 
     function fileChange(event: ChangeEvent<HTMLInputElement>) {
@@ -17,7 +19,7 @@ const ProjectSummary: React.FC<{ projectId: string }> = ({ projectId }) => {
     }
 
     function onUploadClick() {
-        api.uploadTextFiles(projectId, files);
+        api.postTextFiles(projectId, files);
     }
 
     return <>
@@ -31,7 +33,6 @@ const ProjectSummary: React.FC<{ projectId: string }> = ({ projectId }) => {
                 })}
                 <input multiple type="file" onChange={fileChange} />
                 <button onClick={onUploadClick}>Загрузить</button>
-                <textarea value={summaryResponse.text}></textarea>
             </div>)}
     </>
 }

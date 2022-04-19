@@ -15,4 +15,6 @@ export default class User {
     @Column()
     password: string;
 
+    @Column()
+    refreshToken: string;
 }

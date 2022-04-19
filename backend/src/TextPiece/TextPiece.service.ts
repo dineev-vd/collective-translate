@@ -1,8 +1,9 @@
-import Project from '@entities/Project.entity';
-import { TextPiece } from '@entities/TextPiece.entity';
+import { PostTextPieceDto } from 'common/dto/text-piece.dto';
+import Project from 'entities/Project.entity';
+import { TextPiece } from 'entities/TextPiece.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 @Injectable()
 export class TextpieceService {
@@ -25,18 +26,28 @@ export class TextpieceService {
             return;
         }
 
-        const textPieceArray = splitStringArray.map((chunk, index) => {
+        const textPieceArray = splitStringArray.map((chunk, index, array) => {
             const piece = new TextPiece();
             piece.text = chunk;
             piece.project = project;
-            piece.sequenceNumber = index;
             return piece;
         })
+
+        textPieceArray.forEach((piece, index, array) => {
+            piece.previous = index > 0 ? array[index - 1] : null;
+            piece.next = index < array.length - 1 ? array[index + 1] : null;
+        })
+
+
 
         return textPieceArray;
     }
 
-    async savePieces(pieces: TextPiece[]) {
+    async savePieces(pieces: PostTextPieceDto[]) {
         return this.textPieceRepository.save(pieces);
+    }
+
+    async getPiece(projectId: string, sequenceNumber: string[]) {
+        return this.textPieceRepository.find({where: {project: {id: projectId}, sequenceNumber: In(sequenceNumber)}, relations: ['translatePieces']});
     }
 }

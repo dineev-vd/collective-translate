@@ -2,7 +2,9 @@
   "compilerOptions": {
     "lib": [
       "dom",
+      "es6"
     ],
+    "moduleResolution": "Node",
     "noEmit": true,
     "paths": {
       "@common/*": [
@@ -20,7 +22,9 @@
   "exclude": [
     "node_modules"
   ],
-  "include": ["**/*.ts",
+  "include": [
+    "**/*.ts",
     "**/*.tsx",
-    "../common/**/*"]
+    "../../common"
+  ]
 }

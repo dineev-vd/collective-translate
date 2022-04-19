@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { TextpieceService } from './textpiece.service';
-import { TextpieceController } from './textpiece.controller';
+import { TextpieceService } from './TextPiece.service';
+import { TextpieceController } from './TextPiece.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { TextPiece } from '@entities/TextPiece.entity';
+import { TextPiece } from 'entities/TextPiece.entity';
 
 @Module({
   providers: [TextpieceService],

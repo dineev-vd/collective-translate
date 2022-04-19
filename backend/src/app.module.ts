@@ -5,8 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import Project from './entities/Project.entity';
 import TranslatePiece from './entities/TranslatePiece.entity';
 import User from './entities/User.entity';
-import { PieceModule } from './piece/piece.module';
-import { TextPiece } from '@entities/TextPiece.entity';
+import { PieceModule } from './translate-piece/piece.module';
+import { TextPiece } from 'entities/TextPiece.entity';
+import { TextpieceModule } from './TextPiece/TextPiece.module';
+import { AuthModule } from './auth/auth.module';
 
 const {
   POSTGRES_HOST,
@@ -36,7 +38,9 @@ const {
     }),
     ProjectModule,
     UserModule,
-    PieceModule
+    PieceModule,
+    TextpieceModule,
+    AuthModule
   ],
   controllers: [],
   providers: [],

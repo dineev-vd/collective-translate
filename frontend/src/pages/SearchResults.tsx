@@ -1,5 +1,5 @@
 import "./SearchResults.css"
-import { GetProjectDto } from "@common/dto/get-project.dto";
+import { GetProjectDto } from "@common/dto/project.dto";
 import { useEffect, useState } from "react";
 import { api } from "api/Api";
 import ProjectSmall from "../components/ProjectSmall";
@@ -18,7 +18,7 @@ const SearchResults: React.FC = () => {
         }
         
         api.getProjectsByQuery(query.toString())
-        .then(projectsResponse => {
+        .then(([projectsResponse, _]) => {
             setResults(projectsResponse);
         })
         .catch(error => console.log(error));
