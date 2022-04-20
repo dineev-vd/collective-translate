@@ -13,9 +13,8 @@ export class UserController {
 
     @UseGuards(JwtAuthGuard)
     @Get(MY_PROFILE_ENDPOINT)
-    getProfile(@Request() { user }: any) {
-        console.log(user)
-        return this.userService.findById(user.userId.toString());
+    getProfile(@Request() { user }: ExtendedRequest) {
+        return user;
     }
 
     @Get(":id")

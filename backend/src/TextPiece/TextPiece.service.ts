@@ -44,10 +44,14 @@ export class TextpieceService {
     }
 
     async savePieces(pieces: PostTextPieceDto[]) {
-        return this.textPieceRepository.save(pieces);
+        //return this.textPieceRepository.save(pieces);
     }
 
-    async getPiece(projectId: string, sequenceNumber: string[]) {
-        return this.textPieceRepository.find({where: {project: {id: projectId}, sequenceNumber: In(sequenceNumber)}, relations: ['translatePieces']});
+    async getPiece(id: string) {
+        return this.textPieceRepository.findOne(id);
+    }
+
+    async getPiecesByProject(projectId: string) {
+        return this.textPieceRepository.find({ where: { project: { id: projectId } } });
     }
 }

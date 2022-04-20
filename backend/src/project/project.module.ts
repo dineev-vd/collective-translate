@@ -6,10 +6,12 @@ import { ProjectService } from "./project.service";
 import { TextPiece } from "entities/TextPiece.entity";
 import TranslatePiece from "entities/TranslatePiece.entity";
 import { TextpieceService } from "TextPiece/TextPiece.service";
+import { PieceService } from "translate-piece/piece.service";
+import { TranslatePieceEdit } from "entities/TranslatePieceEdit.entity";
 
 @Module({ 
     controllers: [ProjectController],
-    imports: [TypeOrmModule.forFeature([Project, TextPiece, TranslatePiece])],
-    providers: [ProjectService, TextpieceService] 
+    imports: [TypeOrmModule.forFeature([Project, TextPiece, TranslatePiece, TranslatePieceEdit])],
+    providers: [ProjectService, TextpieceService, PieceService] 
 })
 export class ProjectModule { }

@@ -6,7 +6,9 @@
     flex-direction: row;
     padding: 0 1rem;
     align-items: center;
-    background-color: coral;
+    background-color: #2b2d42;
+    position: sticky;
+    top: 0;
 }
 
 .header_input {

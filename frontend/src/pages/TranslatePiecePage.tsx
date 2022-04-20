@@ -1,85 +1,78 @@
+import { GetTextPieceDto } from "@common/dto/text-piece.dto";
 import { api } from "api/Api";
+import TextDisplay from "components/TextDisplay";
 import TextPiece from "components/TextPiece";
 import TranslatePiece from "components/TranslatePiece";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useParams, useSearchParams } from "react-router-dom";
+import { putTextPieces, selectTextPieces } from "store/textPieceReducer";
+import { changeTranslatePiece, putTranslatePieces, selectTranslatePieces } from "store/translatePieceReducer";
 
 const TranslatePiecePage: React.FC<{}> = () => {
-    const { projectId, pieceId } = useParams();
-    const [translatePiece, setTranslatePiece] = useState<any>();
-    const [textPiece, setTextPiece] = useState<any>();
-    const [text, setText] = useState<JSX.Element[]>([]);
-    const [after, setAfter] = useState<string>();
+    const { pieceId } = useParams<string>();
+    const dispatch = useDispatch();
+    const translatePieces = useSelector(selectTranslatePieces);
+    const textPieces = useSelector(selectTextPieces);
+
 
     useEffect(() => {
-        api.getTranslatePiece(pieceId).then(response => {
-            setTranslatePiece(response);
-        });
-    }, [])
+        // Check if our `TranslatePiece` is already loaded.
+        // If not - fetch it.
+        if (!(pieceId in translatePieces)) {
+            api.getTranslatePiece(pieceId).then(([response, _]) => {
+                dispatch(putTranslatePieces([response]))
+            });
 
-    useEffect(() => {
-        if (!translatePiece) {
             return;
         }
 
-        api.getTextPiece(projectId, translatePiece.textPiecesIds.map(e => e.sequenceNumber)).then(response => {
-            setTextPiece(response);
-        })
-    }, [translatePiece])
+    }, [pieceId, translatePieces])
 
-    useEffect(function kekw() {
-        if (!textPiece) return;
+    // const onSubmit = (e) => {
+    //     e.preventDefault();
+    //     api.putTranslatePiece(pieceId, { after: after }).then((e) => {
+    //         window.location.reload();
+    //     });
+    // }
 
-        const map = new Map();
-        textPiece[0].translatePieces.forEach(piece => {
-            map[piece['id']] = piece;
-        })
-
-        const regexp = /(?<!\\)(\{[^\{\}]+\})(?<!\\\})/;
-        let curText: string = textPiece[0].text;
-        const splitted = curText.split(regexp);
-
-        let start = 0;
-        const jsxArray = splitted.map((value, index) => {
-            let out: JSX.Element;
-            if (index % 2 === 0) {
-                out = <TextPiece value={value} start={start} />;
-            } else {
-                const jsonObj = JSON.parse(value);
-                const translatePiece = map[jsonObj.id];
-                out = <TranslatePiece before={translatePiece.before} after={translatePiece.after} />;
-            }
-
-            start += value.length;
-            return out;
-        })
-
-        setText(jsxArray);
-    }, [textPiece]);
-
-    const onSubmit = (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        api.putTranslatePiece(pieceId, {after: after}).then((e) => {
-            window.location.reload();
-        });
+        api.putTranslatePiece(pieceId, { after: translatePieces[pieceId].after, before: translatePieces[pieceId].before }).then(([response, { ok }]) => {
+            if (ok) {
+                dispatch(putTranslatePieces([response]))
+            }
+        })
     }
 
     return <div style={{ display: "flex", flexDirection: "row", flex: "1 1 auto" }}>
         <div style={{ width: "100%" }}>
-            {translatePiece && <>
-                <h3>Перевод до:</h3>
-                <input disabled value={translatePiece.before} />
+            {translatePieces[pieceId] && <>
+                <form onSubmit={(e) => handleSubmit(e)}>
+                    <h3>Перевод до:</h3>
+                    <textarea onChange={e => dispatch(changeTranslatePiece({ id: pieceId, before: e.target.value }))} value={translatePieces[pieceId].before} />
 
-                <h3>Перевод после:</h3>
-                <form onSubmit={onSubmit}>
-                    <input defaultValue={translatePiece.after} onChange={e => setAfter(e.target.value)} />
+                    <h3>Перевод после:</h3>
+                    <textarea onChange={e => dispatch(changeTranslatePiece({ id: pieceId, after: e.target.value }))} value={translatePieces[pieceId].after} />
+                    <button type="submit">Отправить измеения</button>
                 </form>
+                {translatePieces[pieceId].history && (
+                    <>
+                        <h3>История изменений: </h3>
+                        {translatePieces[pieceId].history.map(edit =>
+                            <div>
+                                <h5>Автор:</h5>
+                                {edit.author.name}
+                                <h5>Изменение:</h5>
+                                {edit.change}
+                            </div>
+                        )}
+                    </>
+                )}
             </>}
         </div>
 
-        <div style={{ width: "100%" }} >
-            {text}
-        </div>
+        <TextDisplay />
     </div>
 }
 

@@ -9,6 +9,7 @@ import { PieceModule } from './translate-piece/piece.module';
 import { TextPiece } from 'entities/TextPiece.entity';
 import { TextpieceModule } from './TextPiece/TextPiece.module';
 import { AuthModule } from './auth/auth.module';
+import { TranslatePieceEdit } from 'entities/TranslatePieceEdit.entity';
 
 const {
   POSTGRES_HOST,
@@ -33,7 +34,8 @@ const {
         Project,
         TranslatePiece,
         User,
-        TextPiece
+        TextPiece,
+        TranslatePieceEdit
       ]
     }),
     ProjectModule,

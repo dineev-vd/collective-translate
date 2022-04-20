@@ -79,21 +79,25 @@ export class ProjectService implements OnApplicationBootstrap {
             const translatePiece = new TranslatePiece();
             translatePiece.before = match[0];
             translatePiece.id = index;
+            translatePiece.project = project;
             
 
             const filtered = textPiecesWithCount.filter(piece => ((left < (piece.start + piece.piece.text.length)) && (piece.start < right)));
-            const filteredLength = filtered.length;
 
             filtered.forEach((filteredPiece, index) => {
                 const leftBound = Math.max(left, filteredPiece.start) - filteredPiece.start;
                 const rightBound = Math.min(right, filteredPiece.start + filteredPiece.piece.text.length) - filteredPiece.start;
-                const replaceTemplate = {id: translatePiece.id, part: index, length: filteredLength};
-                const replaceString = JSON.stringify(replaceTemplate);
+                const replaceTemplate = {id: translatePiece.id};
+                const replaceString = index > 0 ? "" : JSON.stringify(replaceTemplate);
+                
+                if(index === 0) {
+                    translatePiece.textPiece = filteredPiece.piece;
+                }
 
                 filteredPiece.replacings = [...filteredPiece.replacings, {left: leftBound, right: rightBound, replace: replaceString}]
             })
             
-            translatePiece.textPieces = filtered.map(e => e.piece);
+            //translatePiece.textPieces = filtered.map(e => e.piece);
             return translatePiece;
         })
 

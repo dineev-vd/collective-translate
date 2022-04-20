@@ -6,13 +6,15 @@ import * as iconv from "iconv-lite";
 import { TextpieceService } from "TextPiece/TextPiece.service";
 import { FILE_ENDPOINT, PROJECT_ENDPOINT } from "common/constants";
 import { PostProjectDto, GetProjectDto } from "common/dto/project.dto";
+import { PieceService } from "translate-piece/piece.service";
 
 
 @Controller(PROJECT_ENDPOINT)
 export class ProjectController {
   constructor(
     private readonly projectService: ProjectService,
-    private textpieceService: TextpieceService
+    private textpieceService: TextpieceService,
+    private translatePieceService: PieceService
   ) { }
 
   @Get()
@@ -42,5 +44,10 @@ export class ProjectController {
       const fileString = iconv.decode(fileBuf, analyzed[0].name);
       this.textpieceService.splitText(project, fileString);
     })
+  }
+
+  @Get(`:id/translate-pieces`)
+  async getTranslatePieces(@Param('id') id: string) {
+    return this.translatePieceService.getPiecesByProject(id);
   }
 }

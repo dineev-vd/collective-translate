@@ -1,8 +1,10 @@
+import { GetTranslatePieceDto } from "./translate-piece.dto";
+
 export class PostTextPieceDto {
-    sequenceNumber: number;
+    translatePiecesIds: string[];
     text: string;
 }
 
 export class GetTextPieceDto extends PostTextPieceDto {
-    projectId: string;
+    id: string;
 }

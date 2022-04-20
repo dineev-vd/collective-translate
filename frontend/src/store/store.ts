@@ -1,9 +1,13 @@
 import {configureStore} from "@reduxjs/toolkit";
 import userReducer from "./userReducer";
+import translatePieceReducer from "./translatePieceReducer";
+import textPieceReducer from "./textPieceReducer";
 
 export const store = configureStore({
     reducer: {
-        userReducer
+        userReducer,
+        translatePieceReducer,
+        textPieceReducer
     }
 });
 

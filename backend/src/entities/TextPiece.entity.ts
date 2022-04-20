@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, RelationId } from "typeorm";
 import Project from "./Project.entity";
 import TranslatePiece from "./TranslatePiece.entity";
 
@@ -21,6 +21,9 @@ export class TextPiece {
     @Column()
     text: string;
     
-    @OneToMany(() => TranslatePiece, (piece) => piece.textPieces)
+    @OneToMany(() => TranslatePiece, (piece) => piece.textPiece)
     translatePieces: TranslatePiece[];
+
+    @RelationId((piece: TextPiece) => piece.translatePieces)
+    translatePiecesIds: string[];
 }

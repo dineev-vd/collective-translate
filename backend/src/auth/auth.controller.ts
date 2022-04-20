@@ -21,7 +21,7 @@ export class AuthController {
         // set refresh token
         const refreshToken = this.authService.getRefreshToken(user.id);
         await this.userService.setCurrentRefreshToken(refreshToken, user.id);
-        res.cookie("refresh_token", refreshToken, { maxAge: 300000 });
+        res.cookie("refresh_token", refreshToken, { maxAge: 30000000 });
 
 
         return this.authService.login(user);
@@ -38,7 +38,7 @@ export class AuthController {
         // set refresh token
         const refreshToken = this.authService.getRefreshToken(createdUser.id);
         await this.userService.setCurrentRefreshToken(refreshToken, createdUser.id);
-        res.cookie("refresh_token", refreshToken, { maxAge: 30000, secure: false, httpOnly: false });
+        res.cookie("refresh_token", refreshToken, { maxAge: 30000000, secure: false, httpOnly: false });
 
         return this.authService.login(createdUser);
     }
@@ -56,7 +56,7 @@ export class AuthController {
 
         const newRefreshToken = this.authService.getRefreshToken(user.id);
         await this.userService.setCurrentRefreshToken(newRefreshToken, user.id);
-        res.cookie("refresh_token", newRefreshToken, { maxAge: 300000 });
+        res.cookie("refresh_token", newRefreshToken, { maxAge: 30000000 });
 
         return this.authService.login(user);
     }

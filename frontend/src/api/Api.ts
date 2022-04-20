@@ -1,5 +1,5 @@
 import { GetProjectDto } from "@common/dto/project.dto";
-import { PostTextPieceDto } from "@common/dto/text-piece.dto";
+import { GetTextPieceDto, PostTextPieceDto } from "@common/dto/text-piece.dto";
 import { GetTranslatePieceDto, PostTranslatePieceDto } from "@common/dto/translate-piece.dto";
 import { API_ENDPOINT, AUTH_ENDPOINT, FILE_ENDPOINT, LOGIN_ENDPOINT, MY_PROFILE_ENDPOINT, PROJECT_ENDPOINT, REFRESH_ENDPOINT, REGISTER_ENDPOINT, TEXT_PIECES_ENDPOINT, TRANSLATE_PIECES_ENDPOINT, USER_ENDPOINT } from "common/constants";
 import { JwtDto } from "common/dto/jwt.dto";
@@ -84,7 +84,7 @@ class ApiClass {
             return `${key}=${valueParsed.join(',')}`;
         }).join('&') : "";
 
-        return endpointsString + (paramString.length > 0 ? '?' : '') + paramString;
+        return '/' + endpointsString + (paramString.length > 0 ? '?' : '') + paramString;
     }
 
     // search for translation project by user-typed query
@@ -110,12 +110,17 @@ class ApiClass {
 
     async getTranslatePiece(pieceId: string) {
         const uri = this.makeUri([TRANSLATE_PIECES_ENDPOINT, pieceId]);
-        return this.getJson(uri);
+        return this.getJson<GetTranslatePieceDto>(uri);
     }
 
-    async getTextPiece(projectId: string, sequenceNumber: string) {
-        const uri = this.makeUri([PROJECT_ENDPOINT, projectId, TEXT_PIECES_ENDPOINT], { sequenceNumbers: sequenceNumber });
-        return this.getJson(uri);
+    async getTranslatePieces(piecesIds: string[]) {
+        const uri = this.makeUri([TRANSLATE_PIECES_ENDPOINT], { ids: piecesIds });
+        return this.getJson<GetTranslatePieceDto[]>(uri);
+    }
+
+    async getTextPiece(id: string) {
+        const uri = this.makeUri([TEXT_PIECES_ENDPOINT, id]);
+        return this.getJson<GetTextPieceDto>(uri);
     }
 
     async putTextPiece(projectId: string, changesArray: PostTextPieceDto) {
@@ -123,9 +128,9 @@ class ApiClass {
         return this.postJson(uri, changesArray);
     }
 
-    async putTranslatePiece(pieceId: string, updatedPiece: Partial<PostTranslatePieceDto>) {
+    async putTranslatePiece(pieceId: string, updatedPiece: PostTranslatePieceDto) {
         const uri = this.makeUri([TRANSLATE_PIECES_ENDPOINT, pieceId]);
-        return this.postJson(uri, updatedPiece);
+        return this.postJson<GetTranslatePieceDto>(uri, updatedPiece, { tokenRequired: true });
     }
 
     async login(email: string, password: string) {
