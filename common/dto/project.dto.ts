@@ -1,10 +1,13 @@
+import { GetShortUserDto } from "./user.dto";
+
 export class PostProjectDto {
     name: string;
     description: string;
 }
 
-export class GetProjectDto extends PostProjectDto {
+export class GetProjectDto {
     id: number;
+    name: string;
+    description: string;
+    owner: GetShortUserDto;
 }
-
-export const kek = 123;

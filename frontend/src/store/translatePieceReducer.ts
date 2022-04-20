@@ -3,11 +3,11 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "./store";
 
 interface TranslatePieceState {
-    translatePieces: { [key: string]: GetTranslatePieceDto }
+    translatePieces: { [key: string]: GetTranslatePieceDto },
 }
 
 const initialState: TranslatePieceState = {
-    translatePieces: {}
+    translatePieces: {},
 }
 
 export const translatePieceSlice = createSlice({

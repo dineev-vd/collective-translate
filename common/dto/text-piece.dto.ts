@@ -1,10 +1,8 @@
-import { GetTranslatePieceDto } from "./translate-piece.dto";
-
-export class PostTextPieceDto {
-    translatePiecesIds: string[];
+export class PostTextSegment {
     text: string;
 }
 
-export class GetTextPieceDto extends PostTextPieceDto {
+export class GetTextSegmentDto {
     id: string;
+    text: string;
 }

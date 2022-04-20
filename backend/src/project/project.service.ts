@@ -1,18 +1,19 @@
 import { Injectable, OnApplicationBootstrap } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import Project from "entities/Project.entity";
+import Project from "entities/project.entity";
 import { ILike, Repository } from "typeorm";
-import TranslatePiece from "entities/TranslatePiece.entity";
+import SegmentTranslation from "entities/segment-translation.entity";
 import * as fs from "fs/promises";
 import * as iconv from "iconv-lite";
-import { TextPiece } from "entities/TextPiece.entity";
+import { TextSegment } from "entities/text-segment.entity";
 import { TextpieceService } from "TextPiece/TextPiece.service";
 import { PostProjectDto, GetProjectDto } from "common/dto/project.dto";
+import { File } from "entities/file.entity";
 
 @Injectable()
 export class ProjectService implements OnApplicationBootstrap {
     async onApplicationBootstrap() {
-        const reg = /\s+[^.!?]*[.!?]/g;
+        const reg = /(\s+[^.!?]*[.!?])/g;
         let testString = "";
         const data = await fs.readFile("../test.txt");
         testString = iconv.decode(data, "windows-1251");
@@ -23,35 +24,30 @@ export class ProjectService implements OnApplicationBootstrap {
             project.name = `Проект ${i}`;
             project.description = `Это описание проекта с номером ${i}`;
 
-            project.text = await this.textPieceService.makeTextPiecesArray(project, testString);
+            const file = new File();
+            file.textSegments = await this.formTextSegments(reg, testString);
 
-            const projectRes = await this.projectRepository.save(project);
-            const finalArr = await this.formTranslatePieces(project, reg, projectRes.text);
-            await this.translateRepository.save(finalArr);
-        }        
+            project.files = [file];
+
+            await this.projectRepository.save(project);
+            //const finalArr = await this.formTranslatePieces(project, reg, projectRes.text);
+            //await this.translateRepository.save(finalArr);
+        }
     }
 
     constructor(
         @InjectRepository(Project)
         private projectRepository: Repository<Project>,
-        private textPieceService: TextpieceService,
-        @InjectRepository(TranslatePiece)
-        private translateRepository: Repository<TranslatePiece>
     ) { }
 
 
     async findProjectsByQuery(query: string) {
-        return this.projectRepository.find({ where: { name: ILike(`%${query}%`) } });
+        return this.projectRepository.find({ where: { name: ILike(`%${query}%`) }, select: ["id", "name", "description"] });
     }
 
     async findProjectById(id: string) {
-        return this.projectRepository.findOne(id);
+        return this.projectRepository.findOne(id, {relations: ["owner.id", "owner.name", "languages"]});
     }
-
-    // async getPiecesByProject(project: Project) {
-    //     const tempProj = await this.projectRepository.findOne(project.id, {relations: ['text']});
-    //     return tempProj.text;
-    // }
 
     async createProject(project: PostProjectDto) {
         return this.projectRepository.insert(project);
@@ -61,54 +57,25 @@ export class ProjectService implements OnApplicationBootstrap {
         return this.projectRepository.update(projectId, project);
     }
 
-    async formTranslatePieces(project: Project, re: RegExp, textPieces: TextPiece[]) {
-        const textPiecesWithCount = textPieces.map(curPiece => ({ start: 0, piece: curPiece, replacings: [] }));
-        textPiecesWithCount.reduce((prev, pieceWithCount) => {
-            pieceWithCount.start = prev;
-            return prev + pieceWithCount.piece.text.length;
-        }, 0);
+    async formTextSegments(re: RegExp, completeText: string): Promise<TextSegment[]> {
+        const array = completeText.split(re).map((splitPart, index) => {
+            if (splitPart.length === 0)
+                return null
 
-        const completeText = textPieces.reduce((prev, piece) => prev + piece.text, "");
-        
-        const regexpResults = completeText.matchAll(re);
-        const arr = Array.from(regexpResults).slice(0, 100);
-        const finalArr = arr.map((match, index) => {
-            const left = match.index;
-            const right = left + match[0].length;
+            const textSegment = new TextSegment();
+            textSegment.shouldTranslate = index % 2 !== 0;
+            textSegment.text = splitPart;
 
-            const translatePiece = new TranslatePiece();
-            translatePiece.before = match[0];
-            translatePiece.id = index;
-            translatePiece.project = project;
-            
+            return textSegment;
+        }).filter(segment => segment != null);
+        array.forEach((segment, index, array) => {
+            if (index === 0)
+                return;
 
-            const filtered = textPiecesWithCount.filter(piece => ((left < (piece.start + piece.piece.text.length)) && (piece.start < right)));
+            array[index - 1].next = segment;
+            segment.previous = array[index - 1];
+        });
 
-            filtered.forEach((filteredPiece, index) => {
-                const leftBound = Math.max(left, filteredPiece.start) - filteredPiece.start;
-                const rightBound = Math.min(right, filteredPiece.start + filteredPiece.piece.text.length) - filteredPiece.start;
-                const replaceTemplate = {id: translatePiece.id};
-                const replaceString = index > 0 ? "" : JSON.stringify(replaceTemplate);
-                
-                if(index === 0) {
-                    translatePiece.textPiece = filteredPiece.piece;
-                }
-
-                filteredPiece.replacings = [...filteredPiece.replacings, {left: leftBound, right: rightBound, replace: replaceString}]
-            })
-            
-            //translatePiece.textPieces = filtered.map(e => e.piece);
-            return translatePiece;
-        })
-
-        textPiecesWithCount.forEach(piece => {
-            const orderedReplacements = piece.replacings.sort((a, b) => b.right - a.right);
-            orderedReplacements.forEach(replacement => {
-                const originalString = piece.piece.text;
-                piece.piece.text = originalString.substring(0, replacement.left) + replacement.replace + originalString.substring(replacement.right, originalString.length);
-            })
-        })
-
-        return finalArr;
+        return array;
     }
 }

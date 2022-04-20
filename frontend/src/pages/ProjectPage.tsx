@@ -1,6 +1,6 @@
 import ProjectPieces from "components/ProjectPieces";
 import ProjectSummary from "components/ProjectSummary";
-import { Link, Navigate, Route, Routes, useParams } from "react-router-dom";
+import { Link, Navigate, Route, Routes } from "react-router-dom";
 import TranslatePiecePage from "./TranslatePiecePage";
 
 const ProjectPage: React.FC<{}> = (_) => {

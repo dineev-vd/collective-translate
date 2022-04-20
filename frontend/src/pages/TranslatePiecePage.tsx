@@ -5,7 +5,7 @@ import TextPiece from "components/TextPiece";
 import TranslatePiece from "components/TranslatePiece";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams, useSearchParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { putTextPieces, selectTextPieces } from "store/textPieceReducer";
 import { changeTranslatePiece, putTranslatePieces, selectTranslatePieces } from "store/translatePieceReducer";
 
@@ -13,7 +13,6 @@ const TranslatePiecePage: React.FC<{}> = () => {
     const { pieceId } = useParams<string>();
     const dispatch = useDispatch();
     const translatePieces = useSelector(selectTranslatePieces);
-    const textPieces = useSelector(selectTextPieces);
 
 
     useEffect(() => {
@@ -28,13 +27,6 @@ const TranslatePiecePage: React.FC<{}> = () => {
         }
 
     }, [pieceId, translatePieces])
-
-    // const onSubmit = (e) => {
-    //     e.preventDefault();
-    //     api.putTranslatePiece(pieceId, { after: after }).then((e) => {
-    //         window.location.reload();
-    //     });
-    // }
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -62,7 +54,7 @@ const TranslatePiecePage: React.FC<{}> = () => {
                         {translatePieces[pieceId].history.map(edit =>
                             <div>
                                 <h5>Автор:</h5>
-                                {edit.author.name}
+                                <Link to={`/profile/${edit.author.id}`}> {edit.author.name} </Link>
                                 <h5>Изменение:</h5>
                                 {edit.change}
                             </div>

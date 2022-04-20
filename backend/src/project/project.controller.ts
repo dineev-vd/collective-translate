@@ -13,20 +13,17 @@ import { PieceService } from "translate-piece/piece.service";
 export class ProjectController {
   constructor(
     private readonly projectService: ProjectService,
-    private textpieceService: TextpieceService,
     private translatePieceService: PieceService
   ) { }
 
   @Get()
   async getProjectsByQuery(@Query('query') query: string): Promise<GetProjectDto[]> {
-    return (await this.projectService.findProjectsByQuery(query))
-      .map(projectEntity => projectEntity.toDataTransferObject());
+    return this.projectService.findProjectsByQuery(query);
   }
 
   @Get(':id')
   async getProjectById(@Param('id') id: string): Promise<GetProjectDto> {
-    return (await this.projectService.findProjectById(id))
-      .toDataTransferObject();
+    return this.projectService.findProjectById(id);
   }
 
   @Post(':id')
@@ -34,20 +31,20 @@ export class ProjectController {
     return this.projectService.updateProject(id, project);
   }
 
-  @Post(`:id/${FILE_ENDPOINT}`)
-  @UseInterceptors(AnyFilesInterceptor())
-  async uploadFile(@UploadedFiles() files: Array<Express.Multer.File>, @Param('id') id: string) {
-    const project = await this.projectService.findProjectById(id);
-    files.forEach((file) => {
-      const fileBuf = file.buffer;
-      const analyzed = chardet.analyse(fileBuf);
-      const fileString = iconv.decode(fileBuf, analyzed[0].name);
-      this.textpieceService.splitText(project, fileString);
-    })
-  }
+  // @Post(`:id/${FILE_ENDPOINT}`)
+  // @UseInterceptors(AnyFilesInterceptor())
+  // async uploadFile(@UploadedFiles() files: Array<Express.Multer.File>, @Param('id') id: string) {
+  //   const project = await this.projectService.findProjectById(id);
+  //   files.forEach((file) => {
+  //     const fileBuf = file.buffer;
+  //     const analyzed = chardet.analyse(fileBuf);
+  //     const fileString = iconv.decode(fileBuf, analyzed[0].name);
+  //     this.projectService.
+  //   })
+  // }
 
   @Get(`:id/translate-pieces`)
   async getTranslatePieces(@Param('id') id: string) {
-    return this.translatePieceService.getPiecesByProject(id);
+    return this.translatePieceService.getTranslationsByLanguage(id);
   }
 }

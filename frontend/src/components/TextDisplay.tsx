@@ -1,5 +1,5 @@
 import { api } from "api/Api";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { putTextPieces, selectTextPieces } from "store/textPieceReducer";
@@ -13,6 +13,12 @@ const TextDisplay: React.FC = () => {
     const textPieces = useSelector(selectTextPieces);
     const [text, setText] = useState<JSX.Element[]>([]);
     const dispatch = useDispatch();
+    const divRef = useRef<HTMLDivElement>();
+
+    const scroll = (value: number) => {
+        divRef.current.scrollTop = value;
+    }
+
 
     useEffect(() => {
         if (!translatePieces[pieceId])
@@ -31,9 +37,9 @@ const TextDisplay: React.FC = () => {
         }
 
         const textPiece = textPieces[translatePieces[pieceId].textPieceId]
-        const missingTranslatePieces = textPiece.translatePiecesIds.filter(translatePieceId => !(translatePieceId in translatePieces))
+        const missingTranslatePieces = textPiece.GetTextSegmentDto.filter(translatePieceId => !(translatePieceId in translatePieces))
 
-        if(missingTranslatePieces.length > 0) {
+        if (missingTranslatePieces.length > 0) {
             api.getTranslatePieces(missingTranslatePieces).then(([response, _]) => {
                 dispatch(putTranslatePieces(response))
             })
@@ -54,7 +60,7 @@ const TextDisplay: React.FC = () => {
             } else {
                 const jsonObj = JSON.parse(value);
                 const curTranslatePiece = translatePieces[jsonObj.id];
-                out = curTranslatePiece && <TranslatePiece key={index} id={jsonObj.id} before={curTranslatePiece.before} after={curTranslatePiece.after} />;
+                out = curTranslatePiece && <TranslatePiece scroll={scroll} key={index} id={jsonObj.id} before={curTranslatePiece.before} after={curTranslatePiece.after} />;
             }
 
             start += value.length;
@@ -64,7 +70,7 @@ const TextDisplay: React.FC = () => {
         setText(jsxArray);
     }, [pieceId, translatePieces, textPieces]);
 
-    return <div style={{ width: "100%", bottom: 0, height: "100vh", overflow: "scroll", whiteSpace: "pre-wrap" }} >
+    return <div ref={divRef} style={{ width: "100%", bottom: 0, height: "100vh", overflow: "scroll", whiteSpace: "pre-wrap", position: "relative" }} >
         {text}
     </div>
 }

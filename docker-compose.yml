@@ -2,14 +2,14 @@ services:
   frontend:
     build: ./frontend
     volumes:
-      - ./:/app
+      - './:/app/'
     networks:
       - main
   backend:
     env_file: development.env
     build: ./backend
     volumes:
-      - ./:/app
+      - './:/app/'
     networks:
       - main
   db:

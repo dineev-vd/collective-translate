@@ -8,6 +8,7 @@ import LandingPage from './LangingPage';
 import { useDispatch } from 'react-redux';
 import { api } from 'api/Api';
 import { setUser } from 'store/userReducer';
+import ProfilePage from './ProfilePage';
 
 
 const Root = () => {
@@ -29,9 +30,11 @@ const Root = () => {
                     <div className="root">
                         < Header />
                         <Routes>
-                            <Route path='/search' element={<SearchResults />} />
+                            <Route path='profile' element={<ProfilePage self/>} />
+                            <Route path='profile/:profileId' element={<ProfilePage />} />
+                            <Route path='search' element={<SearchResults />} />
                             <Route path='project/:projectId/*' element={<ProjectPage />} />
-                            <Route path='/' element={<LandingPage />} />
+                            <Route index element={<LandingPage />} />
                         </Routes>
                     </div > : <></>}
         </>
