@@ -1,13 +1,13 @@
 import {configureStore} from "@reduxjs/toolkit";
 import userReducer from "./userReducer";
-import translatePieceReducer from "./translatePieceReducer";
-import textPieceReducer from "./textPieceReducer";
+import translationsReducer from "./translate-piece-reducer";
+import textSegmentsReducer from "./text-segment-reducer";
 
 export const store = configureStore({
     reducer: {
         userReducer,
-        translatePieceReducer,
-        textPieceReducer
+        translationsReducer,
+        textSegmentsReducer
     }
 });
 

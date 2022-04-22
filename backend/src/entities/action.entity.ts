@@ -1,22 +1,25 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import SegmentTranslation from "./segment-translation.entity";
-import User from "./user.entity";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import SegmentTranslation from './segment-translation.entity';
+import User from './user.entity';
 
 export enum ChangeType {
-    COMMENT = "comment"
+  COMMENT = 'comment',
 }
 
 @Entity()
 export class Action {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @ManyToOne(() => User)
-    author: User;
+  @ManyToOne(() => User)
+  author: User;
 
-    @Column()
-    change: string;
+  @Column()
+  change?: string;
 
-    @ManyToOne(() => SegmentTranslation)
-    segment: SegmentTranslation;
+  @ManyToOne(() => SegmentTranslation)
+  segment: SegmentTranslation;
+
+  @Column()
+  comment: string;
 }

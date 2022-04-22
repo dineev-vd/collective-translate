@@ -1,23 +1,20 @@
-import { Body, Controller, Get, Param, Post, Query, UploadedFiles, UseInterceptors } from "@nestjs/common";
-import { ProjectService } from "./project.service";
-import { AnyFilesInterceptor } from "@nestjs/platform-express";
-import chardet from "chardet";
-import * as iconv from "iconv-lite";
-import { TextpieceService } from "TextPiece/TextPiece.service";
-import { FILE_ENDPOINT, PROJECT_ENDPOINT } from "common/constants";
-import { PostProjectDto, GetProjectDto } from "common/dto/project.dto";
-import { PieceService } from "translate-piece/piece.service";
-
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { ProjectService } from './project.service';
+import { FILE_ENDPOINT, PROJECT_ENDPOINT } from 'common/constants';
+import { PostProjectDto, GetProjectDto } from 'common/dto/project.dto';
+import { TranslationService } from 'translation/translation.service';
 
 @Controller(PROJECT_ENDPOINT)
 export class ProjectController {
   constructor(
     private readonly projectService: ProjectService,
-    private translatePieceService: PieceService
-  ) { }
+    private translatePieceService: TranslationService,
+  ) {}
 
   @Get()
-  async getProjectsByQuery(@Query('query') query: string): Promise<GetProjectDto[]> {
+  async getProjectsByQuery(
+    @Query('query') query: string,
+  ): Promise<GetProjectDto[]> {
     return this.projectService.findProjectsByQuery(query);
   }
 
@@ -27,7 +24,10 @@ export class ProjectController {
   }
 
   @Post(':id')
-  async postProjectById(@Param('id') id: string, @Body() project: PostProjectDto) {
+  async postProjectById(
+    @Param('id') id: string,
+    @Body() project: PostProjectDto,
+  ) {
     return this.projectService.updateProject(id, project);
   }
 

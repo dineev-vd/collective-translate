@@ -1,28 +1,31 @@
-import { GetShortUserDto } from "common/dto/user.dto";
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { GetShortUserDto } from 'common/dto/user.dto';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import Project from './project.entity';
 
 @Entity()
 export default class User {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @PrimaryGeneratedColumn()
-    id: number;
+  @Column()
+  name: string;
 
-    @Column()
-    name: string;
+  @Column()
+  email: string;
 
-    @Column()
-    email: string;
-    
-    @Column()
-    password: string;
+  @Column()
+  password: string;
 
-    @Column()
-    refreshToken: string;
+  @Column()
+  refreshToken: string;
 
-    toGetShortUserDto(): GetShortUserDto {
-        return {
-            id: this.id,
-            name: this.name
-        }
-    }
+  @OneToMany(() => Project, (project) => project.owner)
+  projects: Project[];
+
+  toGetShortUserDto(): GetShortUserDto {
+    return {
+      id: this.id,
+      name: this.name,
+    };
+  }
 }

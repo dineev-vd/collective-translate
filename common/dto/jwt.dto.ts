@@ -1,3 +1,3 @@
 export class JwtDto {
-    accessToken: string;
+  accessToken: string;
 }

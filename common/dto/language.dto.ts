@@ -1,7 +1,8 @@
-import { Language } from "../enums";
-import { GetTranslatePieceDto } from "./translate-piece.dto"
+import { Language } from '../enums';
+import { GetTranslationDto } from './translate-piece.dto';
 
 export class GetTranslateLanguage {
-    id: number;
-    language: Language;
+  id: number;
+  language: Language;
+  translationSegments: GetTranslationDto[];
 }

@@ -6,20 +6,16 @@ import { UserService } from './user.service';
 
 @Controller(USER_ENDPOINT)
 export class UserController {
-    constructor(
-        private readonly userService: UserService
-    ) { }
+  constructor(private readonly userService: UserService) {}
 
+  @UseGuards(JwtAuthGuard)
+  @Get(MY_PROFILE_ENDPOINT)
+  getProfile(@Request() { user }: ExtendedRequest) {
+    return user;
+  }
 
-    @UseGuards(JwtAuthGuard)
-    @Get(MY_PROFILE_ENDPOINT)
-    getProfile(@Request() { user }: ExtendedRequest) {
-        return user;
-    }
-
-    @Get(":id")
-    getUserById(@Param("id") id: string) {
-        return this.userService.findById(id);
-    }
-
+  @Get(':id')
+  getUserById(@Param('id') id: string) {
+    return this.userService.findById(id);
+  }
 }

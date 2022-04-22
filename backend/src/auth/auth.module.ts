@@ -12,11 +12,21 @@ import { JwtStrategy } from './jwt.strategy';
 import { JwtRefreshTokenStrategy } from './refresh.strategy';
 
 @Module({
-  providers: [AuthService, UserService, LocalStrategy, JwtStrategy, JwtRefreshTokenStrategy],
-  imports: [TypeOrmModule.forFeature([User]), PassportModule, JwtModule.register({
-    secret: jwtConstants.secret,
-    signOptions: { expiresIn: '10s' },
-  }),],
+  providers: [
+    AuthService,
+    UserService,
+    LocalStrategy,
+    JwtStrategy,
+    JwtRefreshTokenStrategy,
+  ],
+  imports: [
+    TypeOrmModule.forFeature([User]),
+    PassportModule,
+    JwtModule.register({
+      secret: jwtConstants.secret,
+      signOptions: { expiresIn: '10s' },
+    }),
+  ],
   controllers: [AuthController],
 })
-export class AuthModule { }
+export class AuthModule {}

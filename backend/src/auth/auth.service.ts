@@ -5,37 +5,37 @@ import { UserService } from 'user/user.service';
 
 @Injectable()
 export class AuthService {
-    constructor(
-        private usersService: UserService,
-        private jwtService: JwtService
-    ) { }
+  constructor(
+    private usersService: UserService,
+    private jwtService: JwtService,
+  ) {}
 
-    async validateUser(email: string, pass: string) {
-        const user = await this.usersService.findOne(email);
-        if (user && user.password === pass) {
-            const { password, ...result } = user;
-            return result;
-        }
-        return null;
+  async validateUser(email: string, pass: string) {
+    const user = await this.usersService.findOne(email);
+    if (user && user.password === pass) {
+      const { password, ...result } = user;
+      return result;
     }
+    return null;
+  }
 
-    async login(user: User) {
-        const payload = { email: user.email, sub: user.id };
-        return {
-            accessToken: this.jwtService.sign(payload),
-        };
-    }
+  async login(user: User) {
+    const payload = { email: user.email, sub: user.id };
+    return {
+      accessToken: this.jwtService.sign(payload),
+    };
+  }
 
-    async register(user) {
-        return this.usersService.createUser(user);
-    }
+  async register(user) {
+    return this.usersService.createUser(user);
+  }
 
-    getRefreshToken(userId: number) {
-        const payload = { sub: userId };
-        const token = this.jwtService.sign(payload, {
-            expiresIn: `300s`
-        });
+  getRefreshToken(userId: number) {
+    const payload = { sub: userId };
+    const token = this.jwtService.sign(payload, {
+      expiresIn: `300s`,
+    });
 
-        return token;
-    }
+    return token;
+  }
 }

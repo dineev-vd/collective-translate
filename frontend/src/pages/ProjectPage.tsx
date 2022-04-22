@@ -1,15 +1,18 @@
-import ProjectPieces from "components/ProjectPieces";
+import Languages from "components/Languages";
+import LanguageTranslations from "components/LanguageTranslations";
 import ProjectSummary from "components/ProjectSummary";
 import { Link, Navigate, Route, Routes } from "react-router-dom";
-import TranslatePiecePage from "./TranslatePiecePage";
+import TranslationPage from "./TranslatePiecePage";
 
 const ProjectPage: React.FC<{}> = (_) => {
     return <div>
         <Link to={'details'}>Детали</Link>
-        <Link to={'pieces'}>Перевод</Link>
+        <Link to={'languages'}>Перевод</Link>
         <Routes>
-            <Route path="pieces" element={<ProjectPieces />} />
-            <Route path='pieces/:pieceId' element={<TranslatePiecePage />} />
+            <Route path="languages" element={<Languages />} />
+            <Route path="languages/:languageId" element={<Navigate to={'pieces'} />} />
+            <Route path="languages/:languageId/pieces" element={<LanguageTranslations />} />
+            <Route path='languages/:languageId/pieces/:translationId' element={<TranslationPage />} />
             <Route path="details" element={<ProjectSummary />} />
             <Route index element={<Navigate to={"details"} replace />} />
         </Routes>

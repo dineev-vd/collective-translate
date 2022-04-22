@@ -3,12 +3,14 @@ import { api } from "api/Api";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-const ProfilePage: React.FC<{ self?: boolean }> = ({ self = false }) => {
+const ProfilePage: React.FC = () => {
     const { profileId } = useParams();
     const [user, setUser] = useState<GetUserDto>();
 
     useEffect(() => {
-        if (!self) {
+        console.log(profileId);
+        
+        if (profileId) {
             api.getUserById(profileId).then(([response, _]) => {
                 setUser(response);
             })
@@ -24,8 +26,6 @@ const ProfilePage: React.FC<{ self?: boolean }> = ({ self = false }) => {
             <h2>Профиль</h2>
             <h4>Имя:</h4>
             <h5>{user.name}</h5>
-            <h4>Email:</h4>
-            <h5>{user.email}</h5>
         </>
     ) : null
 }

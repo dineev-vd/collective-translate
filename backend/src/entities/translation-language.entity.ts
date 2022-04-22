@@ -1,22 +1,36 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Language } from "common/enums";
-import SegmentTranslation from "./segment-translation.entity";
-import Project from "./project.entity";
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  RelationId,
+} from 'typeorm';
+import { Language } from 'common/enums';
+import SegmentTranslation from './segment-translation.entity';
+import Project from './project.entity';
 
 @Entity()
 export class TranslationLanguage {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column({
-        type: "enum",
-        enum: Language,
-    })
-    language: Language;
+  @Column({
+    type: 'enum',
+    enum: Language,
+  })
+  language: Language;
 
-    @OneToMany(() => SegmentTranslation, segment => segment.translationLanguage)
-    translationSegments: SegmentTranslation[];
+  @OneToMany(
+    () => SegmentTranslation,
+    (segment) => segment.translationLanguage,
+    { cascade: true },
+  )
+  translationSegments: SegmentTranslation[];
 
-    @ManyToOne(() => Project)
-    project: Project;
+  @RelationId((language: TranslationLanguage) => language.translationSegments)
+  translationSegmentsIds: number[];
+
+  @ManyToOne(() => Project)
+  project: Project;
 }

@@ -1,5 +1,21 @@
-import { Controller, Post, UseGuards, Body, BadRequestException, Get, Req, Res, Request, UnauthorizedException } from '@nestjs/common';
-import { AUTH_ENDPOINT, LOGIN_ENDPOINT, REFRESH_ENDPOINT, REGISTER_ENDPOINT } from 'common/constants';
+import {
+  Controller,
+  Post,
+  UseGuards,
+  Body,
+  BadRequestException,
+  Get,
+  Req,
+  Res,
+  Request,
+  UnauthorizedException,
+} from '@nestjs/common';
+import {
+  AUTH_ENDPOINT,
+  LOGIN_ENDPOINT,
+  REFRESH_ENDPOINT,
+  REGISTER_ENDPOINT,
+} from 'common/constants';
 import { JwtDto } from 'common/dto/jwt.dto';
 import { PostUserDto } from 'common/dto/user.dto';
 import { Request as RequestExpress, Response } from 'express';
@@ -10,54 +26,64 @@ import { AuthService } from './auth.service';
 
 @Controller(AUTH_ENDPOINT)
 export class AuthController {
-    constructor(
-        private authService: AuthService,
-        private userService: UserService
-    ) { }
+  constructor(
+    private authService: AuthService,
+    private userService: UserService,
+  ) {}
 
-    @UseGuards(LocalAuthGuard)
-    @Post(LOGIN_ENDPOINT)
-    async login(@Request() { user }: ExtendedRequest, @Res({ passthrough: true }) res: Response): Promise<JwtDto> {
-        // set refresh token
-        const refreshToken = this.authService.getRefreshToken(user.id);
-        await this.userService.setCurrentRefreshToken(refreshToken, user.id);
-        res.cookie("refresh_token", refreshToken, { maxAge: 30000000 });
+  @UseGuards(LocalAuthGuard)
+  @Post(LOGIN_ENDPOINT)
+  async login(
+    @Request() { user }: ExtendedRequest,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<JwtDto> {
+    // set refresh token
+    const refreshToken = this.authService.getRefreshToken(user.id);
+    await this.userService.setCurrentRefreshToken(refreshToken, user.id);
+    res.cookie('refresh_token', refreshToken, { maxAge: 30000000 });
 
+    return this.authService.login(user);
+  }
 
-        return this.authService.login(user);
+  @Post(REGISTER_ENDPOINT)
+  async register(
+    @Body() user: PostUserDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<JwtDto> {
+    const createdUser = await this.authService.register(user);
+    if (!createdUser) {
+      throw new BadRequestException('User with that email already exists.');
     }
 
+    // set refresh token
+    const refreshToken = this.authService.getRefreshToken(createdUser.id);
+    await this.userService.setCurrentRefreshToken(refreshToken, createdUser.id);
+    res.cookie('refresh_token', refreshToken, {
+      maxAge: 30000000,
+      secure: false,
+      httpOnly: false,
+    });
 
-    @Post(REGISTER_ENDPOINT)
-    async register(@Body() user: PostUserDto, @Res({ passthrough: true }) res: Response): Promise<JwtDto> {
-        const createdUser = await this.authService.register(user);
-        if (!createdUser) {
-            throw new BadRequestException("User with that email already exists.");
-        }
+    return this.authService.login(createdUser);
+  }
 
-        // set refresh token
-        const refreshToken = this.authService.getRefreshToken(createdUser.id);
-        await this.userService.setCurrentRefreshToken(refreshToken, createdUser.id);
-        res.cookie("refresh_token", refreshToken, { maxAge: 30000000, secure: false, httpOnly: false });
+  @UseGuards(RefreshAuthGuard)
+  @Get(REFRESH_ENDPOINT)
+  async refresh(
+    @Req() request: RequestExpress,
+    @Request() { user }: ExtendedRequest,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    console.log(user);
 
-        return this.authService.login(createdUser);
+    if (!user) {
+      throw new UnauthorizedException();
     }
 
-    @UseGuards(RefreshAuthGuard)
-    @Get(REFRESH_ENDPOINT)
-    async refresh(@Req() request: RequestExpress, @Request() { user }: ExtendedRequest, @Res({ passthrough: true }) res: Response) {
-        console.log(user);
-        
-        if(!user) {
-            throw new UnauthorizedException();
-        }
+    const newRefreshToken = this.authService.getRefreshToken(user.id);
+    await this.userService.setCurrentRefreshToken(newRefreshToken, user.id);
+    res.cookie('refresh_token', newRefreshToken, { maxAge: 30000000 });
 
-        
-
-        const newRefreshToken = this.authService.getRefreshToken(user.id);
-        await this.userService.setCurrentRefreshToken(newRefreshToken, user.id);
-        res.cookie("refresh_token", newRefreshToken, { maxAge: 30000000 });
-
-        return this.authService.login(user);
-    }
+    return this.authService.login(user);
+  }
 }

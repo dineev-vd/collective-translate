@@ -1,57 +1,56 @@
-import { GetTextPieceDto } from "@common/dto/text-piece.dto";
 import { api } from "api/Api";
 import TextDisplay from "components/TextDisplay";
-import TextPiece from "components/TextPiece";
-import TranslatePiece from "components/TranslatePiece";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useParams, useSearchParams } from "react-router-dom";
-import { putTextPieces, selectTextPieces } from "store/textPieceReducer";
-import { changeTranslatePiece, putTranslatePieces, selectTranslatePieces } from "store/translatePieceReducer";
+import { useParams } from "react-router-dom";
+import { putTextChanges, selectTextChanges, selectTextSegments } from "store/text-segment-reducer";
+import { putTranslationChanges, putTranslations, selectTranslationChanges, selectTranslations } from "store/translate-piece-reducer";
 
-const TranslatePiecePage: React.FC<{}> = () => {
-    const { pieceId } = useParams<string>();
+const TranslationPage: React.FC<{}> = () => {
+    const params = useParams<string>();
+    const translationId = Number(params.translationId);
     const dispatch = useDispatch();
-    const translatePieces = useSelector(selectTranslatePieces);
+    const translations = useSelector(selectTranslations);
+    const translationChanges = useSelector(selectTranslationChanges);
+    const textChanges = useSelector(selectTextChanges);
+    const textSegments = useSelector(selectTextSegments);
 
 
     useEffect(() => {
         // Check if our `TranslatePiece` is already loaded.
         // If not - fetch it.
-        if (!(pieceId in translatePieces)) {
-            api.getTranslatePiece(pieceId).then(([response, _]) => {
-                dispatch(putTranslatePieces([response]))
+        if (!(translationId in translations)) {
+            api.getTranslation(translationId.toString()).then(([response, _]) => {
+                dispatch(putTranslations([{ id: response.id, translation: { id: response.id, translationText: response.translationText, textSegmentId: response.textSegmentId } }]));
+                //dispatch(putTextSegments([{...response.textSegment, translationId: response.id}]))
             });
 
             return;
         }
 
-    }, [pieceId, translatePieces])
+    }, [translationId, translations])
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        api.putTranslatePiece(pieceId, { after: translatePieces[pieceId].after, before: translatePieces[pieceId].before }).then(([response, { ok }]) => {
-            if (ok) {
-                dispatch(putTranslatePieces([response]))
-            }
-        })
     }
 
     return <div style={{ display: "flex", flexDirection: "row", flex: "1 1 auto" }}>
         <div style={{ width: "100%" }}>
-            {translatePieces[pieceId] && <>
+            {translations[translationId] && textSegments[translations[translationId].textSegmentId] && <>
                 <form onSubmit={(e) => handleSubmit(e)}>
                     <h3>Перевод до:</h3>
-                    <textarea onChange={e => dispatch(changeTranslatePiece({ id: pieceId, before: e.target.value }))} value={translatePieces[pieceId].before} />
+                    <textarea onChange={e => dispatch(putTextChanges([{ id: translations[translationId].textSegmentId, textSegment: { comment: "", text: e.target.value } }]))}
+                        value={translations[translationId].textSegmentId in textChanges ? textChanges[translations[translationId].textSegmentId].text : textSegments[translations[translationId].textSegmentId].text} />
 
                     <h3>Перевод после:</h3>
-                    <textarea onChange={e => dispatch(changeTranslatePiece({ id: pieceId, after: e.target.value }))} value={translatePieces[pieceId].after} />
+                    <textarea onChange={e => dispatch(putTranslationChanges([{ id: translationId, translation: { translationText: e.target.value, comment: "" } }]))}
+                        value={translationId in translationChanges ? translationChanges[translationId].translationText : translations[translationId].translationText} />
                     <button type="submit">Отправить измеения</button>
                 </form>
-                {translatePieces[pieceId].history && (
+                {/* {translations[translationId] && (
                     <>
                         <h3>История изменений: </h3>
-                        {translatePieces[pieceId].history.map(edit =>
+                        {translations[pieceId].history.map(edit =>
                             <div>
                                 <h5>Автор:</h5>
                                 <Link to={`/profile/${edit.author.id}`}> {edit.author.name} </Link>
@@ -60,12 +59,12 @@ const TranslatePiecePage: React.FC<{}> = () => {
                             </div>
                         )}
                     </>
-                )}
+                )} */}
             </>}
         </div>
 
-        <TextDisplay />
+        {translations[translationId] && <TextDisplay />}
     </div>
 }
 
-export default TranslatePiecePage;
+export default TranslationPage;

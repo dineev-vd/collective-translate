@@ -22,7 +22,7 @@ const TopMenuProfile: React.FC = () => {
 
     return <div style={{
         "position": "absolute",
-        "display": "flex",
+        "display": !curUser ? "flex" : "none",
         "flexDirection": "column",
         "width": "auto",
         "direction": "ltr",
@@ -31,7 +31,6 @@ const TopMenuProfile: React.FC = () => {
         "right": 0,
         "backgroundColor": "lightgray",
         "padding": "5px",
-        "opacity": curUser ? 0 : 1
     }}>
         email:
         <input onChange={e => setEmail(e.target.value)}></input>

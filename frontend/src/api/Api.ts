@@ -1,16 +1,30 @@
+import { GetTranslateLanguage } from "@common/dto/language.dto";
 import { GetProjectDto } from "@common/dto/project.dto";
-import { GetTextPieceDto, PostTextPieceDto } from "@common/dto/text-piece.dto";
-import { GetTranslatePieceDto, PostTranslatePieceDto } from "@common/dto/translate-piece.dto";
-import { API_ENDPOINT, AUTH_ENDPOINT, FILE_ENDPOINT, LOGIN_ENDPOINT, MY_PROFILE_ENDPOINT, PROJECT_ENDPOINT, REFRESH_ENDPOINT, REGISTER_ENDPOINT, TEXT_PIECES_ENDPOINT, TRANSLATE_PIECES_ENDPOINT, USER_ENDPOINT } from "common/constants";
+import { GetTextSegmentDto, PostTextSegmentDto } from "@common/dto/text-piece.dto";
+import { GetTranslationDto } from "@common/dto/translate-piece.dto";
+import { AnyAction, Dispatch } from "@reduxjs/toolkit";
+import { API_ENDPOINT, AUTH_ENDPOINT, FILE_ENDPOINT, LANGUAGE_ENDPOINT, LOGIN_ENDPOINT, MY_PROFILE_ENDPOINT, PROJECT_ENDPOINT, REFRESH_ENDPOINT, REGISTER_ENDPOINT, TEXT_SEGMENT_ENDPOINT, TRANSLATION_ENDPOINT, USER_ENDPOINT } from "common/constants";
 import { JwtDto } from "common/dto/jwt.dto";
 import { GetUserDto, PostUserDto } from "common/dto/user.dto";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { setShouldLogin } from "store/userReducer";
 import { auth } from "./Auth";
 
 class ApiClass {
+    private dispatch: Dispatch<AnyAction>;
 
+    setDispatch(dispatch: Dispatch<AnyAction>) {
+        this.dispatch = dispatch;
+    }
 
 
     async parseResponse<T>(response: Response): Promise<[T, Response]> {
+        if (response.status === 401) {
+            if (this.dispatch)
+                this.dispatch(setShouldLogin(true));
+        }
+
         if (!response.ok) {
             throw new Error("Response was not ok: " + response.statusText);
         }
@@ -71,9 +85,9 @@ class ApiClass {
         return this.makeRequest(uri, { init: { method: "POST", body: formData }, tokenRequired: tokenRequired, credentialsRequired: credentialsRequired });
     }
 
-    makeUri(endpoints: string[] | string,
+    makeUri(endpoints: Object[] | Object,
         params?: {
-            [key: string]: string[] | string
+            [key: string]: Object[] | Object
         }): string {
 
         const endpointsParsed = Array.isArray(endpoints) ? endpoints : [endpoints];
@@ -98,39 +112,29 @@ class ApiClass {
         return this.getJson<GetProjectDto>(uri);
     }
 
-    async getProjectPieces(id: string) {
-        const uri = this.makeUri([PROJECT_ENDPOINT, id, TRANSLATE_PIECES_ENDPOINT]);
-        return this.getJson<GetTranslatePieceDto[]>(uri);
-    }
-
     async postTextFiles(id: string, files: FileList) {
         const uri = this.makeUri([PROJECT_ENDPOINT, id, FILE_ENDPOINT]);
         return this.postFile(uri, files);
     }
 
-    async getTranslatePiece(pieceId: string) {
-        const uri = this.makeUri([TRANSLATE_PIECES_ENDPOINT, pieceId]);
-        return this.getJson<GetTranslatePieceDto>(uri);
+    async getTranslation(pieceId: string) {
+        const uri = this.makeUri([TRANSLATION_ENDPOINT, pieceId]);
+        return this.getJson<GetTranslationDto>(uri);
     }
 
-    async getTranslatePieces(piecesIds: string[]) {
-        const uri = this.makeUri([TRANSLATE_PIECES_ENDPOINT], { ids: piecesIds });
-        return this.getJson<GetTranslatePieceDto[]>(uri);
+    async getTranslations(params: { piecesIds?: number[], languageId?: number, textSegmentsIds?: number[] }) {
+        const uri = this.makeUri([TRANSLATION_ENDPOINT], params);
+        return this.getJson<GetTranslationDto[]>(uri);
     }
 
-    async getTextPiece(id: string) {
-        const uri = this.makeUri([TEXT_PIECES_ENDPOINT, id]);
-        return this.getJson<GetTextPieceDto>(uri);
+    async getTextSegment(id: number, params: { nextMinLength?: number, prevMinLength?: number }) {
+        const uri = this.makeUri([TEXT_SEGMENT_ENDPOINT, id], params);
+        return this.getJson<GetTextSegmentDto[]>(uri);
     }
 
-    async putTextPiece(projectId: string, changesArray: PostTextPieceDto) {
-        const uri = this.makeUri([PROJECT_ENDPOINT, projectId, TEXT_PIECES_ENDPOINT]);
+    async putTextPiece(projectId: string, changesArray: PostTextSegmentDto) {
+        const uri = this.makeUri([PROJECT_ENDPOINT, projectId, TEXT_SEGMENT_ENDPOINT]);
         return this.postJson(uri, changesArray);
-    }
-
-    async putTranslatePiece(pieceId: string, updatedPiece: PostTranslatePieceDto) {
-        const uri = this.makeUri([TRANSLATE_PIECES_ENDPOINT, pieceId]);
-        return this.postJson<GetTranslatePieceDto>(uri, updatedPiece, { tokenRequired: true });
     }
 
     async login(email: string, password: string) {
@@ -156,6 +160,16 @@ class ApiClass {
     async refreshToken() {
         const uri = this.makeUri([AUTH_ENDPOINT, REFRESH_ENDPOINT]);
         return this.getJson<JwtDto>(uri, { credentialsRequired: true });
+    }
+
+    async getLanguage(id: number) {
+        const uri = this.makeUri([LANGUAGE_ENDPOINT, id.toString()]);
+        return this.getJson<GetTranslateLanguage>(uri);
+    }
+
+    async getLanguagesBtProjectId(projectId: number) {
+        const uri = this.makeUri([LANGUAGE_ENDPOINT], { projectId: projectId.toString() });
+        return this.getJson<GetTranslateLanguage[]>(uri);
     }
 }
 
