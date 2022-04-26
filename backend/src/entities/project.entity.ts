@@ -5,10 +5,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import SegmentTranslation from './segment-translation.entity';
 import User from './user.entity';
-import { GetProjectDto } from 'common/dto/project.dto';
-import { TextSegment } from './text-segment.entity';
 import { TranslationLanguage } from './translation-language.entity';
 import { File } from './file.entity';
 

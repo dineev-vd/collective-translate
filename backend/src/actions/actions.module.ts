@@ -1,16 +1,19 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ActionsService } from './actions.service';
 import { ActionsController } from './actions.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Action } from 'entities/action.entity';
-import { TextSegmentService } from 'text-segment/text-segment.service';
-import { TranslationService } from 'translation/translation.service';
 import { TextSegment } from 'entities/text-segment.entity';
 import SegmentTranslation from 'entities/segment-translation.entity';
+import { TranslationModule } from 'translation/translation.module';
 
 @Module({
-  providers: [ActionsService, TextSegmentService, TranslationService],
+  providers: [ActionsService],
   controllers: [ActionsController],
-  imports: [TypeOrmModule.forFeature([Action, TextSegment, SegmentTranslation])]
+  imports: [
+    TypeOrmModule.forFeature([Action, TextSegment, SegmentTranslation]),
+    forwardRef(() => TranslationModule)
+  ],
+  exports: [ActionsService]
 })
 export class ActionsModule {}

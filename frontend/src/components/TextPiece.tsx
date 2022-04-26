@@ -5,7 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { putTextChanges, selectTextChanges, selectTextSegments, TextSegmentState } from "store/text-segment-reducer";
 import { putTranslationChanges, selectTranslationChanges, selectTranslations, TranslationState } from "store/translate-piece-reducer";
 
-const TextPiece: React.FC<{ value: TextSegmentState, setScroll: Function, scroll: boolean }> = ({ value, setScroll, scroll }) => {
+const TextPiece: React.FC<{ id: number, setScroll: Function, scroll: boolean }> = ({ id, setScroll, scroll }) => {
 
     const [showTranslation, changeTranslation] = useState<boolean>(false);
     const { translationId, languageId } = useParams();
@@ -15,6 +15,7 @@ const TextPiece: React.FC<{ value: TextSegmentState, setScroll: Function, scroll
     const navigate = useNavigate();
     const textSegments = useSelector(selectTextSegments);
     const translations = useSelector(selectTranslations);
+    const value = useMemo(() => textSegments[id], [textSegments, id])
     const translation = useMemo(() => translations[value.translationIds[Number(languageId)]], [translations, value])
     const translationChanges = useSelector(selectTranslationChanges);
     const textChanges = useSelector(selectTextChanges);
@@ -30,7 +31,7 @@ const TextPiece: React.FC<{ value: TextSegmentState, setScroll: Function, scroll
 
 
     function update() {
-        console.log(spanRef.current.innerText);
+        //console.log(spanRef.current.innerText);
 
         if (showTranslation) {
             dispatch(putTranslationChanges([{ id: translation.id, translation: { translationText: spanRef.current.innerText, comment: "" } }]))
@@ -71,8 +72,8 @@ const TextPiece: React.FC<{ value: TextSegmentState, setScroll: Function, scroll
     }, [scroll])
 
     useEffect(() => {
-        console.log(translation?.id)
-        console.log(translationId)
+        //console.log(translation?.id)
+        //console.log(translationId)
     }, [translations, translation?.id])
 
     return <span>

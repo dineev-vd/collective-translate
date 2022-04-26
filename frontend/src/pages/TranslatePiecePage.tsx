@@ -1,3 +1,4 @@
+import { GetActionDto, PostActionDto } from "@common/dto/action.dto";
 import { api } from "api/Api";
 import TextDisplay from "components/TextDisplay";
 import { useEffect, useMemo, useState } from "react";
@@ -14,6 +15,8 @@ const TranslationPage: React.FC<{}> = () => {
     const translationChanges = useSelector(selectTranslationChanges);
     const textChanges = useSelector(selectTextChanges);
     const textSegments = useSelector(selectTextSegments);
+    const [actions, setActions] = useState<GetActionDto[]>([]);
+    const languageId = Number(params.languageId);
 
 
     useEffect(() => {
@@ -30,8 +33,32 @@ const TranslationPage: React.FC<{}> = () => {
 
     }, [translationId, translations])
 
+    useEffect(() => {
+        if (!translations[translationId])
+            return
+
+        api.getActions(translations[translationId].textSegmentId).then(([response, _]) => {
+            setActions(response);
+        })
+    }, [translationId, textSegments, translations])
+
     const handleSubmit = (e) => {
         e.preventDefault();
+        const textChange = textChanges[translations[translationId].textSegmentId];
+        const translationChange = translationChanges[translationId];
+
+        let arr: PostActionDto[] = [];
+        if (textChange) {
+            arr.push({ change: textChange.text, textSegmentId: translations[translationId].textSegmentId, comment: '' })
+        }
+
+        if (translationChange) {
+            arr.push({ languageId: languageId, textSegmentId: translations[translationId].textSegmentId, change: translationChange.translationText, comment: '' })
+        }
+
+        api.postActions(arr).then(() => {
+            window.location.reload();
+        })
     }
 
     return <div style={{ display: "flex", flexDirection: "row", flex: "1 1 auto" }}>
@@ -47,19 +74,21 @@ const TranslationPage: React.FC<{}> = () => {
                         value={translationId in translationChanges ? translationChanges[translationId].translationText : translations[translationId].translationText} />
                     <button type="submit">Отправить измеения</button>
                 </form>
-                {/* {translations[translationId] && (
+                {actions && (
                     <>
                         <h3>История изменений: </h3>
-                        {translations[pieceId].history.map(edit =>
+                        {actions.map(edit =>
                             <div>
-                                <h5>Автор:</h5>
-                                <Link to={`/profile/${edit.author.id}`}> {edit.author.name} </Link>
+                                {/* <h5>Автор:</h5>
+                                <Link to={`/profile/${edit.author.id}`}> {edit.author.name} </Link> */}
                                 <h5>Изменение:</h5>
                                 {edit.change}
+                                <h5>Заметка:</h5>
+                                {edit.comment}
                             </div>
                         )}
                     </>
-                )} */}
+                )}
             </>}
         </div>
 

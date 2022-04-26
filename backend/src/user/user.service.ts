@@ -1,17 +1,16 @@
 import User from 'entities/user.entity';
-import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PostUserDto } from 'common/dto/user.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class UserService implements OnApplicationBootstrap {
+export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
-  onApplicationBootstrap() {}
 
   async findOne(email: string): Promise<User | undefined> {
     return this.userRepository.findOne({ where: { email: email } });

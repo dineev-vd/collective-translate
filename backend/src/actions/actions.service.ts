@@ -1,55 +1,57 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PostTextSegmentDto } from 'common/dto/text-piece.dto';
-import { PostTranslationDto } from 'common/dto/translate-piece.dto';
+import { PostActionDto } from 'common/dto/action.dto';
 import { Action } from 'entities/action.entity';
 import User from 'entities/user.entity';
-import { TextSegmentService } from 'text-segment/text-segment.service';
 import { TranslationService } from 'translation/translation.service';
-import { Repository } from 'typeorm';
+import { Repository, DeepPartial, ObjectLiteral } from 'typeorm';
 
 @Injectable()
 export class ActionsService {
-    constructor(
-        @InjectRepository(Action)
-        private readonly actionsRepository: Repository<Action>,
-        private readonly translationService: TranslationService,
-        private readonly textSegmentService: TextSegmentService
-    ) { }
+  constructor(
+    @InjectRepository(Action)
+    private readonly actionsRepository: Repository<Action>,
+    private readonly translationsService: TranslationService
+  ) { }
 
-    async updateTranslationActions(user: User, changes: PostTranslationDto[]) {
-        return changes.map(async change => {
-            const piece = await this.translationService.getPiece(change.id.toString());
+  async processAction(change: PostActionDto, user: User) {
+    const action: DeepPartial<Action> = {};
+    action.author = user;
+    action.change = change.change;
+    action.language = change.languageId ? { id: change.languageId } : null;
+    action.segment = change.languageId ? { id: change.textSegmentId } : { id: change.textSegmentId, text: change.change };
 
-            if(!piece) {
-                return null;
-            }
-
-            const action = new Action();
-            action.author = user;
-            action.change = change.translationText;
-            action.comment = change.comment;
-            action.segment = piece;
-
-            return this.actionsRepository.save(action);
-        })
+    if (change.comment) {
+      action.comment = change.comment;
     }
 
-    // async updateTextSegmentsActions(user: User, changes: PostTextSegmentDto[]) {
-    //     return changes.map(async change => {
-    //         const piece = await this.textSegmentService.getPiece(change.id);
+    if (change.languageId) {
+      const [translation] = await this.translationsService.getTranslationsByTextSegmentsAndLanguage([change.textSegmentId.toString()], change.languageId.toString());
+      translation.translationText = change.change;
+      await this.translationsService.savePiece(translation);
+    }
 
-    //         if(!piece) {
-    //             return null;
-    //         }
+    return this.actionsRepository.save(action);
+  }
 
-    //         const action = new Action();
-    //         action.author = user;
-    //         action.change = change.text;
-    //         action.comment = change.comment;
-    //         action. = piece;
+  async getActionsBySegment(textSegmentId: string, languageId?: string) {
+    if (languageId) {
+      return this.actionsRepository.find({ where: { segment: { id: textSegmentId }, language: { id: languageId } } });
+    }
 
-    //         return this.actionsRepository.save(action);
-    //     })
-    // }
+    return this.actionsRepository.find({ where: { segment: { id: textSegmentId } } })
+  }
+
+  async insertActions(actions: Action[]) {
+    return this.actionsRepository.insert(actions);
+  }
+
+  async setSegmentRelations(actionIds: ObjectLiteral[], segmentsIds: ObjectLiteral[]) {
+    return Promise.all(actionIds.map((id, i) => {
+        return this.actionsRepository.createQueryBuilder()
+        .relation('segment')
+        .of(id)
+        .set(segmentsIds[i])
+    }))
+  }
 }

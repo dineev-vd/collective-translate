@@ -1,14 +1,24 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { FILE_ENDPOINT, PROJECT_ENDPOINT } from 'common/constants';
 import { PostProjectDto, GetProjectDto } from 'common/dto/project.dto';
-import { TranslationService } from 'translation/translation.service';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
+import { FilesService } from 'files/files.service';
 
 @Controller(PROJECT_ENDPOINT)
 export class ProjectController {
   constructor(
     private readonly projectService: ProjectService,
-    private translatePieceService: TranslationService,
+    private readonly filesService: FilesService,
   ) {}
 
   @Get()
@@ -31,20 +41,29 @@ export class ProjectController {
     return this.projectService.updateProject(id, project);
   }
 
-  // @Post(`:id/${FILE_ENDPOINT}`)
-  // @UseInterceptors(AnyFilesInterceptor())
-  // async uploadFile(@UploadedFiles() files: Array<Express.Multer.File>, @Param('id') id: string) {
-  //   const project = await this.projectService.findProjectById(id);
-  //   files.forEach((file) => {
-  //     const fileBuf = file.buffer;
-  //     const analyzed = chardet.analyse(fileBuf);
-  //     const fileString = iconv.decode(fileBuf, analyzed[0].name);
-  //     this.projectService.
-  //   })
-  // }
+  @Get(`:id/${FILE_ENDPOINT}`)
+  async getFiles(@Param('id') id: string) {
+    return this.filesService.getFilesByProject(id);
+  }
 
-  @Get(`:id/translate-pieces`)
-  async getTranslatePieces(@Param('id') id: string) {
-    return this.translatePieceService.getTranslationsByLanguage(id);
+  @Post(`:id/${FILE_ENDPOINT}`)
+  @UseInterceptors(AnyFilesInterceptor())
+  async uploadFile(
+    @UploadedFiles() files: Array<Express.Multer.File>,
+    @Param('id') id: string,
+  ) {
+    console.log(files);
+
+    const filesSaved = await Promise.all(
+      files.map(async (file) => {
+        const fileBuf = file.buffer;
+        return {
+          name: file.fieldname ?? file.originalname,
+          path: await this.filesService.saveFileToStorage(fileBuf),
+        };
+      }),
+    );
+
+    return this.filesService.insertFiles(id, filesSaved);
   }
 }

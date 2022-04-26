@@ -1,17 +1,12 @@
-import { Language } from 'common/enums';
 import {
   Column,
   Entity,
   JoinColumn,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
   OneToMany,
-  PrimaryColumn,
   PrimaryGeneratedColumn,
   RelationId,
 } from 'typeorm';
-import Project from './project.entity';
 import { TextSegment } from './text-segment.entity';
 import { Action } from './action.entity';
 import { TranslationLanguage } from './translation-language.entity';
@@ -22,7 +17,7 @@ class SegmentTranslation {
   id: number;
 
   @ManyToOne(() => TextSegment, (piece) => piece.translations, {
-    cascade: ['update'],
+    cascade: ['insert', 'update'],
   })
   @JoinColumn()
   textSegment: TextSegment;

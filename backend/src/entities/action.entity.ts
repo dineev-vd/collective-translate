@@ -1,10 +1,14 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import SegmentTranslation from './segment-translation.entity';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Comment } from './comment.entity';
+import { TextSegment } from './text-segment.entity';
+import { TranslationLanguage } from './translation-language.entity';
 import User from './user.entity';
-
-export enum ChangeType {
-  COMMENT = 'comment',
-}
 
 @Entity()
 export class Action {
@@ -15,11 +19,14 @@ export class Action {
   author: User;
 
   @Column()
-  change?: string;
+  change: string;
 
-  @ManyToOne(() => SegmentTranslation)
-  segment: SegmentTranslation;
+  @ManyToOne(() => TextSegment, { cascade: ['update'] })
+  segment: TextSegment;
 
-  @Column()
+  @Column({nullable: true})
   comment: string;
+
+  @ManyToOne(() => TranslationLanguage, { nullable: true })
+  language: TranslationLanguage;
 }

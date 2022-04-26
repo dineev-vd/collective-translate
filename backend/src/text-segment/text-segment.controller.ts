@@ -1,63 +1,43 @@
-import { GetTextSegmentDto, PostTextSegmentDto } from 'common/dto/text-piece.dto';
-import { PROJECT_ENDPOINT, TEXT_SEGMENT_ENDPOINT } from 'common/constants';
+import { PostTextSegmentDto } from 'common/dto/text-piece.dto';
+import { TEXT_SEGMENT_ENDPOINT } from 'common/constants';
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { TextSegmentService } from './text-segment.service';
-import { TranslationService } from 'translation/translation.service';
-import { LanguageService } from 'language/language.service';
-import { TextSegment } from 'entities/text-segment.entity';
+import { ActionsService } from 'actions/actions.service';
 
 @Controller(TEXT_SEGMENT_ENDPOINT)
 export class TextSegmentController {
   constructor(
     private readonly textSegmentService: TextSegmentService,
-    private readonly languageService: LanguageService,
-  ) { }
+    private readonly actionsService: ActionsService
+    ) {}
 
   @Get(':id')
   async getTextPieceById(
     @Param('id') id: number,
     @Query('nextMinLength') nextMinLength?: number,
     @Query('prevMinLength') prevMinLength?: number,
-    @Query('languageId') languageId?: number
   ) {
     const mainSegment = await this.textSegmentService.getPiece(id);
+    let arr = [mainSegment];
 
-    let nextArray: TextSegment[] = [];
     if (nextMinLength) {
-      let currentLength = 0;
-      let currentSegment = mainSegment;
-      while (currentLength < nextMinLength && currentSegment.nextId != null) {
-        currentSegment = await this.textSegmentService.getPiece(
-          currentSegment.nextId
-        );
-
-        currentLength += currentSegment.text.length;
-        nextArray = [...nextArray, currentSegment];
-      }
+      const nextArray = await this.textSegmentService.getNext(mainSegment, 20);
+      arr = [...arr, ...nextArray];
     }
 
-    let prevArray: TextSegment[] = [];
     if (prevMinLength) {
-      let currentLength = 0;
-      let currentSegment = mainSegment;
-      while (
-        currentLength < prevMinLength &&
-        currentSegment.previousId != null
-      ) {
-        currentSegment = await this.textSegmentService.getPiece(
-          currentSegment.previousId,
-        );
-
-        currentLength += currentSegment.text.length;
-        prevArray = [currentSegment, ...prevArray];
-      }
+      const prevArray = await this.textSegmentService.getPrev(mainSegment, 20);
+      arr = [...prevArray, ...arr];
     }
 
-    return [...prevArray, mainSegment, ...nextArray];
+    return arr;
   }
 
-  @Post(':id')
-  async postTextPieceById(@Body() pieces: PostTextSegmentDto[]) {
-    return this.textSegmentService.savePieces(pieces);
+  @Get(':id/actions')
+  async getActions(
+    @Param('id') segmentId: string,
+    @Query('languageId') languageId?: string
+  ) {
+    return this.actionsService.getActionsBySegment(segmentId, languageId);
   }
 }

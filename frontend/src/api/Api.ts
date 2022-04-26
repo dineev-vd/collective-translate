@@ -1,3 +1,5 @@
+import { GetActionDto, PostActionDto } from "@common/dto/action.dto";
+import { PeekFileDto, ShortFileDto } from "@common/dto/file.dto";
 import { GetTranslateLanguage } from "@common/dto/language.dto";
 import { GetProjectDto } from "@common/dto/project.dto";
 import { GetTextSegmentDto, PostTextSegmentDto } from "@common/dto/text-piece.dto";
@@ -66,7 +68,7 @@ class ApiClass {
         return this.parseResponse<T>(response);
     }
 
-    async postJson<T>(uri: string, data: Object, { tokenRequired = false, credentialsRequired = false } = {}) {
+    async postJson<T>(uri: string, data?: Object, { tokenRequired = false, credentialsRequired = false } = {}) {
         const response = await this.makeRequest(uri, {
             init: {
                 body: JSON.stringify(data),
@@ -162,14 +164,44 @@ class ApiClass {
         return this.getJson<JwtDto>(uri, { credentialsRequired: true });
     }
 
-    async getLanguage(id: number) {
-        const uri = this.makeUri([LANGUAGE_ENDPOINT, id.toString()]);
-        return this.getJson<GetTranslateLanguage>(uri);
+    // async getLanguage(id: number) {
+    //     const uri = this.makeUri([LANGUAGE_ENDPOINT, id.toString()]);
+    //     return this.getJson<GetTranslateLanguage>(uri);
+    // }
+
+    async getTranslationsByLanguage(translationId: number, fileId?: number) {
+        const uri = this.makeUri([LANGUAGE_ENDPOINT, translationId, 'translations'], { fileId: fileId });
+        return this.getJson<GetTranslationDto[]>(uri);
     }
 
     async getLanguagesBtProjectId(projectId: number) {
         const uri = this.makeUri([LANGUAGE_ENDPOINT], { projectId: projectId.toString() });
         return this.getJson<GetTranslateLanguage[]>(uri);
+    }
+
+    async getFilesByProject(projectId: number) {
+        const uri = this.makeUri([PROJECT_ENDPOINT, projectId, FILE_ENDPOINT]);
+        return this.getJson<ShortFileDto[]>(uri);
+    }
+
+    async getFilePeek(id: number) {
+        const uri = this.makeUri([FILE_ENDPOINT, id]);
+        return this.getJson<PeekFileDto>(uri);
+    }
+
+    async splitFile(id: number) {
+        const uri = this.makeUri([FILE_ENDPOINT, id, 'split']);
+        return this.postJson(uri);
+    }
+
+    async getActions(segmentId: number, languageId?: number) {
+        const uri = this.makeUri([TEXT_SEGMENT_ENDPOINT, segmentId, 'actions'], { languageId: languageId });
+        return this.getJson<GetActionDto[]>(uri);
+    }
+
+    async postActions(actions: PostActionDto[]) {
+        const uri = this.makeUri('actions');
+        return this.postJson(uri, actions, {tokenRequired: true});
     }
 }
 

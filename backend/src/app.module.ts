@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import Project from './entities/project.entity';
 import SegmentTranslation from './entities/segment-translation.entity';
 import User from './entities/user.entity';
-import { PieceModule } from './translation/translation.module';
+import { TranslationModule } from './translation/translation.module';
 import { TextSegment } from 'entities/text-segment.entity';
 import { TextpieceModule } from './text-segment/text-segment.module';
 import { AuthModule } from './auth/auth.module';
@@ -14,6 +14,11 @@ import { File } from 'entities/file.entity';
 import { TranslationLanguage } from 'entities/translation-language.entity';
 import { LanguageModule } from './language/language.module';
 import { ActionsModule } from './actions/actions.module';
+import { FilesModule } from './files/files.module';
+import { Comment } from 'entities/comment.entity';
+import { CommentModule } from './comment/comment.module';
+import { Assembly } from 'entities/assembly.entity';
+import { AssemblyModule } from './assembly/assembly.module';
 
 const {
   POSTGRES_HOST,
@@ -32,7 +37,7 @@ const {
       database: POSTGRES_DB,
       username: POSTGRES_USER,
       password: POSTGRES_PASSWORD,
-      dropSchema: false,
+      dropSchema: true,
       synchronize: true,
       entities: [
         Project,
@@ -41,16 +46,21 @@ const {
         TextSegment,
         Action,
         File,
+        Comment,
         TranslationLanguage,
+        Assembly,
       ],
     }),
     ProjectModule,
     UserModule,
-    PieceModule,
+    TranslationModule,
     TextpieceModule,
     AuthModule,
     LanguageModule,
     ActionsModule,
+    FilesModule,
+    CommentModule,
+    AssemblyModule,
   ],
   controllers: [],
   providers: [],

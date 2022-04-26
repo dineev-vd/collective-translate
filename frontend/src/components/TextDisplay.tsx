@@ -14,7 +14,6 @@ const TextDisplay: React.FC = () => {
     const languageId = Number(params.languageId)
     const translations = useSelector(selectTranslations);
     const textSegments = useSelector(selectTextSegments);
-    const [text, setText] = useState<TextSegmentState[]>([]);
     const dispatch = useDispatch();
     const divRef = useRef<HTMLDivElement>();
     const updating = useRef<boolean>(false)
@@ -23,19 +22,21 @@ const TextDisplay: React.FC = () => {
     const pos = useRef<number>(0);
     const canGoUp = useRef<boolean>(true);
 
+    const [text, setText] = useState<{ id: number, order: number }[]>([]);
+
 
     function expandDown() {
         if (updating.current) return;
         updating.current = true;
 
-        const startIndex = text[text.length - 1].nextId;
+        const startIndex = text[text.length - 1].id;
 
         if (!startIndex) {
             updating.current = false
             return;
         }
 
-        api.getTextSegment(startIndex, { nextMinLength: 3000 }).then(([response, _]) => {
+        api.getTextSegment(startIndex, { nextMinLength: 50 }).then(([response, _]) => {
             dispatch(putTextSegments(response.map(segment => ({ ...segment, translationIds: {} }))))
         }).catch(() => updating.current = false)
 
@@ -45,7 +46,7 @@ const TextDisplay: React.FC = () => {
         if (updating.current) return;
         updating.current = true;
 
-        const startIndex = text[0].previousId;
+        const startIndex = text[0].id;
 
         if (!startIndex) {
             updating.current = false
@@ -53,38 +54,11 @@ const TextDisplay: React.FC = () => {
             return;
         }
 
-        api.getTextSegment(startIndex, { prevMinLength: 3000 }).then(([response, _]) => {
+        api.getTextSegment(startIndex, { prevMinLength: 50 }).then(([response, _]) => {
             dispatch(putTextSegments(response.map(segment => ({ ...segment, translationIds: {} }))))
         }).catch(() => updating.current = false)
     }
 
-    useEffect(() => {
-        const { textSegmentId } = translations[translationId];
-        const centerPiece = textSegments[textSegmentId];
-
-        if (!centerPiece)
-            return;
-
-        let arr = [centerPiece];
-
-        let prevPiece = textSegments[centerPiece.previousId];
-        let prevArr = [];
-        while (prevPiece) {
-            prevArr = [...prevArr, prevPiece]
-            prevPiece = textSegments[prevPiece.previousId]
-        }
-        arr = prevArr.reverse().concat(arr);
-
-        let nextPiece = textSegments[centerPiece.nextId];
-        while (nextPiece) {
-            arr = [...arr, nextPiece]
-            nextPiece = textSegments[nextPiece.nextId]
-        }
-
-
-
-        setText(arr);
-    }, [textSegments])
 
     useEffect(() => {
         const { textSegmentId } = translations[translationId];
@@ -92,22 +66,20 @@ const TextDisplay: React.FC = () => {
         // Check if our `TextPiece` is already loaded.
         // If not - fetch it.
         if (!(textSegmentId in textSegments)) {
-            api.getTextSegment(textSegmentId, { nextMinLength: 5000, prevMinLength: 5000 }).then(([response, _]) => {
+            api.getTextSegment(textSegmentId, { nextMinLength: 50, prevMinLength: 50 }).then(([response, _]) => {
                 dispatch(putTextSegments(response.map(segment => ({ ...segment, translationIds: {} }))));
             })
 
             return;
         }
 
-
-
-
-
     }, [translationId]);
 
     useEffect(() => {
-        const missingTranslations = Object.values(textSegments).filter(segment => segment.shouldTranslate && !segment.translationIds[languageId]).map(segment => Number(segment.id));
+        setText(Object.values(textSegments).map(segment => ({ id: segment.id, order: segment.order })).sort((a, b) => a.order - b.order));
 
+
+        const missingTranslations = Object.values(textSegments).filter(segment => segment.shouldTranslate && !segment.translationIds[languageId]).map(segment => Number(segment.id));
         if (missingTranslations.length > 0) {
             api.getTranslations({ languageId: languageId, textSegmentsIds: missingTranslations }).then(([response, _]) => {
                 dispatch(putTranslations(response.map(translation => ({ id: translation.id, translation: translation }))));
@@ -120,8 +92,8 @@ const TextDisplay: React.FC = () => {
 
     function handleScroll(event) {
         const e = divRef.current;
-        console.log(e.scrollTop);
-        
+        //console.log(e.scrollTop);
+
 
         const toTop = e.scrollHeight - e.scrollTop - e.clientHeight
 
@@ -153,7 +125,7 @@ const TextDisplay: React.FC = () => {
         {text && text.map((value, index) => {
             return <TextPiece scroll={scroll} setScroll={index < text.length - 1 ? () => { } : () => {
                 setScroll(true);
-            }} key={value.id.toString()} value={value} />;
+            }} key={value.id.toString()} id={value.id} />;
         })}
     </div>
 }

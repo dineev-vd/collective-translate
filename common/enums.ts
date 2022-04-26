@@ -3,3 +3,9 @@ export enum Language {
   ENGLISH = 'english',
   GERMAN = 'german',
 }
+
+export enum FileStatus {
+  PROCESSING = 'processing',
+  SPLITTED = 'splitted',
+  NEW = 'new',
+}

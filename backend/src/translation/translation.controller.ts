@@ -1,23 +1,7 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  Param,
-  Post,
-  Put,
-  Query,
-  Request,
-  UploadedFiles,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { TranslationService } from './translation.service';
 import SegmentTranslation from 'entities/segment-translation.entity';
-import { PostTranslationDto } from 'common/dto/translate-piece.dto';
 import { TRANSLATION_ENDPOINT } from 'common/constants';
-import { JwtAuthGuard } from 'guards/simple-guards.guard';
-import { ExtendedRequest } from 'util/ExtendedRequest';
 
 @Controller(TRANSLATION_ENDPOINT)
 export class PiecesController {
@@ -33,19 +17,30 @@ export class PiecesController {
     @Query('languageId') languageId: string,
     @Query('textSegmentsIds') textSegmentsIdsString: string,
     @Query('ids') idsString: string,
+    @Query('file') fileId: string,
   ): Promise<SegmentTranslation[]> {
-    if(languageId && textSegmentsIdsString) {
+    if (languageId && textSegmentsIdsString) {
       const textSegmentsIds = textSegmentsIdsString.split(',');
-      return this.translationsService.getTranslationsByTextSegmentsAndLanguage(textSegmentsIds, languageId);
-    }
-
-    if (languageId) {
-      return this.translationsService.getTranslationsByLanguage(languageId);
+      return this.translationsService.getTranslationsByTextSegmentsAndLanguage(
+        textSegmentsIds,
+        languageId,
+      );
     }
 
     if (idsString) {
       const ids = idsString.split(',');
       return this.translationsService.getPieces(ids);
+    }
+
+    if (languageId && fileId) {
+      return this.translationsService.getTranslationsByLanguage(
+        languageId,
+        fileId,
+      );
+    }
+
+    if (languageId) {
+      return this.translationsService.getTranslationsByLanguage(languageId);
     }
   }
 

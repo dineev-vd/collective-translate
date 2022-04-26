@@ -5,14 +5,13 @@ import { RootState } from "./store";
 export interface TextSegmentState {
     id: number;
     text: string;
-    nextId: number;
-    previousId: number;
+    order: number;
     shouldTranslate: Boolean;
     translationIds: { [key: number]: number };
 }
 
 export interface TextSegment {
-    textSegments: { [key: string]: TextSegmentState },
+    textSegments: { [key: number]: TextSegmentState },
     changes: { [key: string]: PostTextSegmentDto }
 }
 
@@ -26,21 +25,21 @@ export const textSegmentSlice = createSlice({
     initialState,
     reducers: {
         putTextSegments: (state, action: PayloadAction<TextSegmentState[]>) => {
-            action.payload.forEach(piece => {
-                state.textSegments[piece.id] = piece;
+            action.payload.forEach(segment => {
+                state.textSegments[segment.id] = segment;
             })
         },
         clearTextSegments: (state) => {
-            state.textSegments = {};
+            state.textSegments = [];
         },
         putTextChanges: (state, action: PayloadAction<{ textSegment: PostTextSegmentDto, id: number }[]>) => {
             action.payload.forEach(piece => {
                 state.changes[piece.id] = piece.textSegment;
             })
         },
-        addTranslations: (state, action: PayloadAction<{textSegmentId: number, languageId: number, translationId: number}[]>) => {
+        addTranslations: (state, action: PayloadAction<{ textSegmentId: number, languageId: number, translationId: number }[]>) => {
             action.payload.forEach(info => {
-                console.log(info.textSegmentId)
+                //console.log(info.textSegmentId)
                 state.textSegments[info.textSegmentId].translationIds[info.languageId] = info.translationId;
             })
         }

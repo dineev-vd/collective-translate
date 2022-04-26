@@ -2,22 +2,20 @@ import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import Project from 'entities/project.entity';
 import { ILike, Repository } from 'typeorm';
-import SegmentTranslation from 'entities/segment-translation.entity';
 import * as fs from 'fs/promises';
 import * as iconv from 'iconv-lite';
-import { TextSegment } from 'entities/text-segment.entity';
-import { TextSegmentService } from 'text-segment/text-segment.service';
-import { PostProjectDto, GetProjectDto } from 'common/dto/project.dto';
+import { PostProjectDto } from 'common/dto/project.dto';
 import { File } from 'entities/file.entity';
 import User from 'entities/user.entity';
 import { TranslationLanguage } from 'entities/translation-language.entity';
 import { Language } from 'common/enums';
+import { FilesService } from 'files/files.service';
+import { TranslationService } from 'translation/translation.service';
 
 @Injectable()
 export class ProjectService implements OnApplicationBootstrap {
   async onApplicationBootstrap() {
-    if(await this.projectRepository.findOne(1) != null)
-      return;
+    if ((await this.projectRepository.findOne(1)) != null) return;
 
     const reg = /(\s+[^.!?]*[.!?])/g;
     let testString = '';
@@ -35,34 +33,30 @@ export class ProjectService implements OnApplicationBootstrap {
       project.description = `Это описание проекта с номером ${i}`;
 
       const file = new File();
-      file.textSegments = await this.formTextSegments(reg, testString);
       file.name = 'Война и Мир.txt';
-
+      file.path = '../test.txt';
+      file.encoding = 'windows-1251';
       project.files = [file];
       project.owner = user;
 
       const translateLanguage = new TranslationLanguage();
       translateLanguage.language = Language.ENGLISH;
-
       project.translateLanguage = [translateLanguage];
+      const insertedProject = await this.projectRepository.save(project);
 
-      translateLanguage.translationSegments = file.textSegments
-        .filter((segment) => segment.shouldTranslate)
-        .map((segment) => {
-          const translation = new SegmentTranslation();
-          translation.textSegment = segment;
-          return translation;
-        });
-
-      await this.projectRepository.save(project);
-      // const finalArr = await this.formTranslatePieces(project, reg, projectRes.text);
-      // await this.translateRepository.save(finalArr);
+      await this.fileService.splitFile(insertedProject.files[0].id.toString());
+      await this.translationService.generateTranslationForFile(
+        insertedProject.translateLanguage[0].id.toString(),
+        insertedProject.files[0].id.toString(),
+      );
     }
   }
 
   constructor(
     @InjectRepository(Project)
     private projectRepository: Repository<Project>,
+    private fileService: FilesService,
+    private translationService: TranslationService,
   ) {}
 
   async findProjectsByQuery(query: string) {
@@ -84,31 +78,5 @@ export class ProjectService implements OnApplicationBootstrap {
 
   async updateProject(projectId: string, project: PostProjectDto) {
     return this.projectRepository.update(projectId, project);
-  }
-
-  async formTextSegments(
-    re: RegExp,
-    completeText: string,
-  ): Promise<TextSegment[]> {
-    const array = completeText
-      .split(re)
-      .map((splitPart, index) => {
-        if (splitPart.length === 0) return null;
-
-        const textSegment = new TextSegment();
-        textSegment.shouldTranslate = index % 2 !== 0;
-        textSegment.text = splitPart;
-
-        return textSegment;
-      })
-      .filter((segment) => segment != null);
-    array.forEach((segment, index, array) => {
-      if (index === 0) return;
-
-      array[index - 1].next = segment;
-      segment.previous = array[index - 1];
-    });
-
-    return array;
   }
 }
