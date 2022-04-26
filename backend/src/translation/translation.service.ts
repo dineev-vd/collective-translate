@@ -54,8 +54,12 @@ export class TranslationService {
   getTranslationsByTextSegmentsAndLanguage(
     textSegmentsIds: string[],
     languageId: string,
+    take?: number,
+    page?: number
   ) {
     return this.pieceRepository.find({
+      take: take || 10,
+      skip: (page - 1) * take || 0,
       where: {
         textSegment: { id: In(textSegmentsIds) },
         translationLanguage: { id: languageId },
@@ -125,8 +129,9 @@ export class TranslationService {
     const { identifiers: actionIds } = await this.actionsRepository.insert(actions);
     console.log('actions inserted');
     
-    await this.landuageService.setActionsRelations(language.id.toString(), identifiers)
+    await this.landuageService.setActionsRelations(language.id.toString(), actionIds)
     console.log('actions language set');
+
 
     await Promise.all(actionIds.map((i, index) => {
       return this.actionsRepository.createQueryBuilder()

@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -13,6 +14,7 @@ import { Assembly } from './assembly.entity';
 
 @Entity()
 export class File {
+  @Index()
   @PrimaryGeneratedColumn()
   id: number;
 

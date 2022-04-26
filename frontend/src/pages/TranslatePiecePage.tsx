@@ -3,20 +3,26 @@ import { api } from "api/Api";
 import TextDisplay from "components/TextDisplay";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { putTextChanges, selectTextChanges, selectTextSegments } from "store/text-segment-reducer";
 import { putTranslationChanges, putTranslations, selectTranslationChanges, selectTranslations } from "store/translate-piece-reducer";
 
 const TranslationPage: React.FC<{}> = () => {
     const params = useParams<string>();
-    const translationId = Number(params.translationId);
+    const segmentId = Number(params.segmentId);
+    const [query, setQuery] = useSearchParams();
+    const languageId = useMemo(() => query.get('languageId'), [query]);
+
     const dispatch = useDispatch();
     const translations = useSelector(selectTranslations);
     const translationChanges = useSelector(selectTranslationChanges);
     const textChanges = useSelector(selectTextChanges);
     const textSegments = useSelector(selectTextSegments);
     const [actions, setActions] = useState<GetActionDto[]>([]);
-    const languageId = Number(params.languageId);
+    //const languageId = Number(params.languageId);
+    const translationId = useMemo(() => textSegments[segmentId].translationIds[languageId], [textSegments, segmentId, languageId]);
+
+
 
 
     useEffect(() => {
@@ -53,7 +59,7 @@ const TranslationPage: React.FC<{}> = () => {
         }
 
         if (translationChange) {
-            arr.push({ languageId: languageId, textSegmentId: translations[translationId].textSegmentId, change: translationChange.translationText, comment: '' })
+            arr.push({ languageId: Number(languageId), textSegmentId: translations[translationId].textSegmentId, change: translationChange.translationText, comment: '' })
         }
 
         api.postActions(arr).then(() => {
@@ -62,12 +68,12 @@ const TranslationPage: React.FC<{}> = () => {
     }
 
     return <div style={{ display: "flex", flexDirection: "row", flex: "1 1 auto" }}>
-        <div style={{ width: "100%" }}>
-            {translations[translationId] && textSegments[translations[translationId].textSegmentId] && <>
+        {/* <div style={{ width: "100%" }}>
+            {translations[translationId] && textSegments[segmentId] && <>
                 <form onSubmit={(e) => handleSubmit(e)}>
                     <h3>Перевод до:</h3>
                     <textarea onChange={e => dispatch(putTextChanges([{ id: translations[translationId].textSegmentId, textSegment: { comment: "", text: e.target.value } }]))}
-                        value={translations[translationId].textSegmentId in textChanges ? textChanges[translations[translationId].textSegmentId].text : textSegments[translations[translationId].textSegmentId].text} />
+                        value={segmentId in textChanges ? textChanges[segmentId].text : textSegments[segmentId].text} />
 
                     <h3>Перевод после:</h3>
                     <textarea onChange={e => dispatch(putTranslationChanges([{ id: translationId, translation: { translationText: e.target.value, comment: "" } }]))}
@@ -79,8 +85,8 @@ const TranslationPage: React.FC<{}> = () => {
                         <h3>История изменений: </h3>
                         {actions.map(edit =>
                             <div>
-                                {/* <h5>Автор:</h5>
-                                <Link to={`/profile/${edit.author.id}`}> {edit.author.name} </Link> */}
+                                <h5>Автор:</h5>
+                                <Link to={`/profile/${edit.author.id}`}> {edit.author.name} </Link>
                                 <h5>Изменение:</h5>
                                 {edit.change}
                                 <h5>Заметка:</h5>
@@ -90,7 +96,7 @@ const TranslationPage: React.FC<{}> = () => {
                     </>
                 )}
             </>}
-        </div>
+        </div> */}
 
         {translations[translationId] && <TextDisplay />}
     </div>

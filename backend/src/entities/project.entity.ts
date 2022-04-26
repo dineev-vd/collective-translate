@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -11,6 +12,7 @@ import { File } from './file.entity';
 
 @Entity()
 export default class Project {
+  @Index()
   @PrimaryGeneratedColumn()
   id: number;
 

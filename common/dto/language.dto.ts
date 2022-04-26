@@ -6,3 +6,7 @@ export class GetTranslateLanguage {
   language: Language;
   translationSegments: GetTranslationDto[];
 }
+
+export class PostTranslateLanguage {
+  language: Language;
+}

@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -13,11 +14,9 @@ import SegmentTranslation from './segment-translation.entity';
 
 @Entity()
 export class TextSegment {
+  @Index()
   @PrimaryGeneratedColumn()
   id: number;
-
-  @ManyToOne(() => Project)
-  project: Project;
 
   // @OneToOne(() => TextSegment, { nullable: true })
   // @JoinColumn()
@@ -56,6 +55,6 @@ export class TextSegment {
   @Column()
   shouldTranslate: boolean;
 
-  @OneToMany(() => Action, action => action.segment)
+  @OneToMany(() => Action, action => action.segment, {cascade: true})
   actions: Action[];
 }

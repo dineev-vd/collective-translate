@@ -1,0 +1,13 @@
+.root {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    bottom: 0;
+    background-color: #edf2f4;
+}
+
+.content-wrapper {
+    height: 100%;
+}

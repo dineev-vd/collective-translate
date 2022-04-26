@@ -15,9 +15,18 @@ export class FilesController {
     private readonly translationsService: TranslationService,
     private readonly languageService: LanguageService,
     private readonly textSegmentService: TextSegmentService,
-  ) {}
+  ) { }
 
   @Get(`:id`)
+  async getTextSegments(
+    @Param('id') id: string,
+    @Query('take') take: number,
+    @Query('page') page: number
+  ) {
+    return this.textSegmentService.getPiecesByFile(id, take, page);
+  }
+
+  @Get(`:id/peek`)
   async getPeek(@Param('id') id: string) {
     return this.filesService.peekFileById(id, 5000);
   }

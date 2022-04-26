@@ -1,7 +1,7 @@
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import Project from 'entities/project.entity';
-import { ILike, Repository } from 'typeorm';
+import { DeepPartial, ILike, Repository } from 'typeorm';
 import * as fs from 'fs/promises';
 import * as iconv from 'iconv-lite';
 import { PostProjectDto } from 'common/dto/project.dto';
@@ -72,11 +72,11 @@ export class ProjectService implements OnApplicationBootstrap {
     });
   }
 
-  async createProject(project: PostProjectDto) {
-    return this.projectRepository.insert(project);
+  async createProject(project: DeepPartial<Project>) {
+    return this.projectRepository.save(project);
   }
 
   async updateProject(projectId: string, project: PostProjectDto) {
-    return this.projectRepository.update(projectId, project);
+    return this.projectRepository.save(project);
   }
 }

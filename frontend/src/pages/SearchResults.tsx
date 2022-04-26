@@ -25,7 +25,7 @@ const SearchResults: React.FC = () => {
     }, [query])
 
     return (
-        <div>
+        <div className="search-results">
             {results.map(e =>
                 <ProjectSmall key={e.id} project={e} />
             )}

@@ -9,12 +9,16 @@ import { Action } from 'entities/action.entity';
 import { File } from 'entities/file.entity';
 import { FilesModule } from 'files/files.module';
 import { TranslationModule } from 'translation/translation.module';
+import { TextpieceModule } from 'text-segment/text-segment.module';
+import { LanguageModule } from 'language/language.module';
 
 @Module({
   controllers: [ProjectController],
   imports: [
     TranslationModule,
     FilesModule,
+    TextpieceModule,
+    LanguageModule,
     TypeOrmModule.forFeature([
       Project,
       TextSegment,

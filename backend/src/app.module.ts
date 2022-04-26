@@ -31,6 +31,9 @@ const {
 @Module({
   imports: [
     TypeOrmModule.forRoot({
+        
+      logging: ['warn'],
+      maxQueryExecutionTime: 1000,
       type: 'postgres',
       host: POSTGRES_HOST,
       port: +(POSTGRES_PORT ?? 5432),

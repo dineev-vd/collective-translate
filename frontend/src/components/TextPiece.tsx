@@ -1,14 +1,13 @@
 import { GetTextSegmentDto } from "@common/dto/text-piece.dto";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { putTextChanges, selectTextChanges, selectTextSegments, TextSegmentState } from "store/text-segment-reducer";
 import { putTranslationChanges, selectTranslationChanges, selectTranslations, TranslationState } from "store/translate-piece-reducer";
 
 const TextPiece: React.FC<{ id: number, setScroll: Function, scroll: boolean }> = ({ id, setScroll, scroll }) => {
 
     const [showTranslation, changeTranslation] = useState<boolean>(false);
-    const { translationId, languageId } = useParams();
     const spanRef = useRef<HTMLDivElement>();
     const dispatch = useDispatch();
     const prevUpdateInside = useRef<boolean>(false);
@@ -16,9 +15,17 @@ const TextPiece: React.FC<{ id: number, setScroll: Function, scroll: boolean }> 
     const textSegments = useSelector(selectTextSegments);
     const translations = useSelector(selectTranslations);
     const value = useMemo(() => textSegments[id], [textSegments, id])
-    const translation = useMemo(() => translations[value.translationIds[Number(languageId)]], [translations, value])
     const translationChanges = useSelector(selectTranslationChanges);
     const textChanges = useSelector(selectTextChanges);
+    
+    const params = useParams();
+    const textSegmentId = Number(params.textSegmentId);
+    
+    const [query, setQuery] = useSearchParams();
+    const languageId = useMemo(() => Number(query.get('languageId')), [query]);
+    const translationId = useMemo(() => textSegments[textSegmentId]?.translationIds[languageId], [textSegmentId, textSegments, languageId])
+    const translation = useMemo(() => translations[value.translationIds[Number(languageId)]], [translations, value])
+
 
     const backgroundColor = useMemo(() => {
         if (value.shouldTranslate && translation) {
@@ -77,7 +84,7 @@ const TextPiece: React.FC<{ id: number, setScroll: Function, scroll: boolean }> 
     }, [translations, translation?.id])
 
     return <span>
-        {value.shouldTranslate && <button onClick={() => navigate(`../languages/${languageId}/pieces/${translation.id}`)} style={{ height: "1rem" }}></button>}
+        {value.shouldTranslate && <button onClick={() => navigate(`/translate/${id}?languageId=${languageId}`)} style={{ height: "1rem" }}></button>}
         {value.shouldTranslate && translation && <button onClick={() => changeTranslation(!showTranslation)}>#</button>}
         <span
             defaultValue={showTranslation ? (translation.translationText.length > 0 ? translation.translationText : "Пока не переведено") : value.text}

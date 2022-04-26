@@ -142,6 +142,9 @@ export class FilesService {
       const { identifiers } = await this.textSegmentService.insertTextSegments(
         segments,
       );
+
+      await this.textSegmentService.removeSegmentsFromFile(file.id);
+
       await this.fileRepository
         .createQueryBuilder()
         .relation('textSegments')

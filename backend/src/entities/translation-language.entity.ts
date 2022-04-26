@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -13,6 +14,7 @@ import { Action } from './action.entity';
 
 @Entity()
 export class TranslationLanguage {
+  @Index()
   @PrimaryGeneratedColumn()
   id: number;
 

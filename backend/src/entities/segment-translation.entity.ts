@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -13,11 +14,12 @@ import { TranslationLanguage } from './translation-language.entity';
 
 @Entity()
 class SegmentTranslation {
+  @Index()
   @PrimaryGeneratedColumn()
   id: number;
 
   @ManyToOne(() => TextSegment, (piece) => piece.translations, {
-    cascade: ['insert', 'update'],
+    cascade: ['insert', 'update'], onDelete: 'CASCADE'
   })
   @JoinColumn()
   textSegment: TextSegment;
@@ -27,9 +29,6 @@ class SegmentTranslation {
 
   @Column({ default: '' })
   translationText: string;
-
-  @OneToMany(() => Action, (action) => action.segment)
-  actions: Action[];
 
   @ManyToOne(
     () => TranslationLanguage,

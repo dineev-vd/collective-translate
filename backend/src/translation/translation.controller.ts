@@ -16,32 +16,22 @@ export class PiecesController {
   async getPieceByLanguage(
     @Query('languageId') languageId: string,
     @Query('textSegmentsIds') textSegmentsIdsString: string,
-    @Query('ids') idsString: string,
-    @Query('file') fileId: string,
+    @Query('take') take?: number, 
+    @Query('page') page?: number
   ): Promise<SegmentTranslation[]> {
     if (languageId && textSegmentsIdsString) {
       const textSegmentsIds = textSegmentsIdsString.split(',');
       return this.translationsService.getTranslationsByTextSegmentsAndLanguage(
         textSegmentsIds,
         languageId,
+        take,
+        page
       );
     }
 
-    if (idsString) {
-      const ids = idsString.split(',');
-      return this.translationsService.getPieces(ids);
-    }
-
-    if (languageId && fileId) {
-      return this.translationsService.getTranslationsByLanguage(
-        languageId,
-        fileId,
-      );
-    }
-
-    if (languageId) {
-      return this.translationsService.getTranslationsByLanguage(languageId);
-    }
+    // if (languageId) {
+    //   return this.translationsService.getTranslationsByLanguage(languageId);
+    // }
   }
 
   // @Post('/')

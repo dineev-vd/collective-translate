@@ -2,7 +2,7 @@ import "./Header.css"
 import { } from "@blueprintjs/core"
 import React, { FormEvent } from "react"
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { api } from "api/Api"
 import { useSelector } from "react-redux"
 import { selectUser } from "store/userReducer"
@@ -24,12 +24,13 @@ const Header: React.FC = () => {
 
     return (
         <header className="header">
+            <Link to={'/'}>Главная</Link>
             <div className="header_input_wrapper">
                 <form onSubmit={handleSubmit}>
-                    <input className="header_input" onChange={handleChange} value={searchValue}></input>
+                    <input placeholder="Поиск..." className="header_input" onChange={handleChange} value={searchValue}></input>
                 </form >
             </div>
-            {curUser && <div>
+            {curUser && <div className="header_profile_name">
                 {curUser.name}
             </div>}
             <TopMenuProfile />

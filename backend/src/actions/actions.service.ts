@@ -4,7 +4,7 @@ import { PostActionDto } from 'common/dto/action.dto';
 import { Action } from 'entities/action.entity';
 import User from 'entities/user.entity';
 import { TranslationService } from 'translation/translation.service';
-import { Repository, DeepPartial, ObjectLiteral } from 'typeorm';
+import { Repository, DeepPartial, ObjectLiteral, IsNull } from 'typeorm';
 
 @Injectable()
 export class ActionsService {
@@ -13,6 +13,10 @@ export class ActionsService {
     private readonly actionsRepository: Repository<Action>,
     private readonly translationsService: TranslationService
   ) { }
+
+  async removeByFileId() {
+    
+  }
 
   async processAction(change: PostActionDto, user: User) {
     const action: DeepPartial<Action> = {};
@@ -35,11 +39,7 @@ export class ActionsService {
   }
 
   async getActionsBySegment(textSegmentId: string, languageId?: string) {
-    if (languageId) {
-      return this.actionsRepository.find({ where: { segment: { id: textSegmentId }, language: { id: languageId } } });
-    }
-
-    return this.actionsRepository.find({ where: { segment: { id: textSegmentId } } })
+    return this.actionsRepository.find({ where: { segment: { id: textSegmentId }, language: { id: Number(languageId) ? languageId : IsNull() } } });
   }
 
   async insertActions(actions: Action[]) {
@@ -48,7 +48,7 @@ export class ActionsService {
 
   async setSegmentRelations(actionIds: ObjectLiteral[], segmentsIds: ObjectLiteral[]) {
     return Promise.all(actionIds.map((id, i) => {
-        return this.actionsRepository.createQueryBuilder()
+      return this.actionsRepository.createQueryBuilder()
         .relation('segment')
         .of(id)
         .set(segmentsIds[i])

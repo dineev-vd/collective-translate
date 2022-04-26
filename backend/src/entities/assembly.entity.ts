@@ -1,8 +1,9 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { File } from './file.entity';
 
 @Entity()
 export class Assembly {
+  @Index()
   @PrimaryGeneratedColumn()
   id: number;
 

@@ -9,7 +9,11 @@ export class TextSegmentService {
   constructor(
     @InjectRepository(TextSegment)
     private testSegmentRepository: Repository<TextSegment>,
-  ) {}
+  ) { }
+
+  async removeSegmentsFromFile(fileId: number) {
+    return this.testSegmentRepository.delete({ file: { id: fileId } });
+  }
 
   async savePieces(pieces: PostTextSegmentDto[]) {
     return this.testSegmentRepository.save(pieces);
@@ -19,9 +23,20 @@ export class TextSegmentService {
     return this.testSegmentRepository.findOne({ where: { id: id } });
   }
 
-  async getPiecesByFile(fileId: string) {
+  async getSegmentsByProject(projectId: string, take?: number, page?: number, shouldTranslate = true) {
     return this.testSegmentRepository.find({
-      where: { file: { id: fileId } },
+      where: { file: { project: { id: projectId } }, shouldTranslate: shouldTranslate },
+      take: take || 10,
+      skip: (page - 1) * take || 0,
+      relations: ['file'],
+    })
+  }
+
+  async getPiecesByFile(fileId: string, take?: number, page?: number, shouldTranslate = true) {
+    return this.testSegmentRepository.find({
+      take: take || 10,
+      skip: (page - 1) * take || 0,
+      where: { file: { id: fileId }, shouldTranslate: shouldTranslate },
     });
   }
 

@@ -1,8 +1,9 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Action } from './action.entity';
 
 @Entity()
 export class Comment {
+  @Index()
   @PrimaryGeneratedColumn()
   id: number;
 

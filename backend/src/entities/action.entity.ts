@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -12,6 +13,7 @@ import User from './user.entity';
 
 @Entity()
 export class Action {
+  @Index()
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -21,7 +23,7 @@ export class Action {
   @Column()
   change: string;
 
-  @ManyToOne(() => TextSegment, { cascade: ['update'] })
+  @ManyToOne(() => TextSegment, { cascade: ['update'], onDelete: 'CASCADE' })
   segment: TextSegment;
 
   @Column({nullable: true})

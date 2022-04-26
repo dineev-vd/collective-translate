@@ -1,16 +1,16 @@
 import { GetActionDto, PostActionDto } from "@common/dto/action.dto";
 import { PeekFileDto, ShortFileDto } from "@common/dto/file.dto";
-import { GetTranslateLanguage } from "@common/dto/language.dto";
-import { GetProjectDto } from "@common/dto/project.dto";
+import { GetTranslateLanguage, PostTranslateLanguage } from "@common/dto/language.dto";
+import { GetProjectDto, PostProjectDto } from "@common/dto/project.dto";
 import { GetTextSegmentDto, PostTextSegmentDto } from "@common/dto/text-piece.dto";
-import { GetTranslationDto } from "@common/dto/translate-piece.dto";
+import { GetTranslationDto, PostTranslationDto } from "@common/dto/translate-piece.dto";
 import { AnyAction, Dispatch } from "@reduxjs/toolkit";
 import { API_ENDPOINT, AUTH_ENDPOINT, FILE_ENDPOINT, LANGUAGE_ENDPOINT, LOGIN_ENDPOINT, MY_PROFILE_ENDPOINT, PROJECT_ENDPOINT, REFRESH_ENDPOINT, REGISTER_ENDPOINT, TEXT_SEGMENT_ENDPOINT, TRANSLATION_ENDPOINT, USER_ENDPOINT } from "common/constants";
 import { JwtDto } from "common/dto/jwt.dto";
 import { GetUserDto, PostUserDto } from "common/dto/user.dto";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { setShouldLogin } from "store/userReducer";
+import { setShouldLogin, setUser } from "store/userReducer";
 import { auth } from "./Auth";
 
 class ApiClass {
@@ -24,7 +24,7 @@ class ApiClass {
     async parseResponse<T>(response: Response): Promise<[T, Response]> {
         if (response.status === 401) {
             if (this.dispatch)
-                this.dispatch(setShouldLogin(true));
+                this.dispatch(setUser(null));
         }
 
         if (!response.ok) {
@@ -124,7 +124,7 @@ class ApiClass {
         return this.getJson<GetTranslationDto>(uri);
     }
 
-    async getTranslations(params: { piecesIds?: number[], languageId?: number, textSegmentsIds?: number[] }) {
+    async getTranslations(params: { languageId?: string, textSegmentsIds?: number[] }) {
         const uri = this.makeUri([TRANSLATION_ENDPOINT], params);
         return this.getJson<GetTranslationDto[]>(uri);
     }
@@ -185,7 +185,7 @@ class ApiClass {
     }
 
     async getFilePeek(id: number) {
-        const uri = this.makeUri([FILE_ENDPOINT, id]);
+        const uri = this.makeUri([FILE_ENDPOINT, id, 'peek']);
         return this.getJson<PeekFileDto>(uri);
     }
 
@@ -201,7 +201,27 @@ class ApiClass {
 
     async postActions(actions: PostActionDto[]) {
         const uri = this.makeUri('actions');
-        return this.postJson(uri, actions, {tokenRequired: true});
+        return this.postJson(uri, actions, { tokenRequired: true });
+    }
+
+    async getTextSegmentsByProject(projectId: string) {
+        const uri = this.makeUri([PROJECT_ENDPOINT, projectId, TEXT_SEGMENT_ENDPOINT]);
+        return this.getJson<GetTextSegmentDto[]>(uri);
+    }
+
+    async getTextSegmentsByFile(fileId: string) {
+        const uri = this.makeUri([FILE_ENDPOINT, fileId]);
+        return this.getJson<GetTextSegmentDto[]>(uri);
+    }
+
+    async postProject(project: PostProjectDto) {
+        const uri = this.makeUri(PROJECT_ENDPOINT);
+        return this.postJson<GetProjectDto>(uri, project, { tokenRequired: true });
+    }
+
+    async postLanguage(projectId: string, language: PostTranslateLanguage) {
+        const uri = this.makeUri([PROJECT_ENDPOINT, projectId, LANGUAGE_ENDPOINT]);
+        return this.postJson(uri, language, { tokenRequired: true });
     }
 }
 
