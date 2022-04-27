@@ -22,7 +22,7 @@ export class AuthService {
   async login(user: User) {
     const payload = { email: user.email, sub: user.id };
     return {
-      accessToken: this.jwtService.sign(payload),
+      accessToken: this.jwtService.sign(payload, { expiresIn: `10m` }),
     };
   }
 
@@ -33,7 +33,7 @@ export class AuthService {
   getRefreshToken(userId: number) {
     const payload = { sub: userId };
     const token = this.jwtService.sign(payload, {
-      expiresIn: `300s`,
+      expiresIn: `7d`,
     });
 
     return token;

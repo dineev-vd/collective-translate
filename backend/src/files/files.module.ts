@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { FilesService } from './files.service';
 import { FilesController } from './files.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -15,9 +15,9 @@ import { ActionsModule } from 'actions/actions.module';
   imports: [
     TypeOrmModule.forFeature([File, Assembly]),
     TranslationModule,
-    LanguageModule,
+    forwardRef(() => LanguageModule),
     TextpieceModule,
-    ActionsModule
+    ActionsModule,
   ],
   exports: [FilesService],
 })

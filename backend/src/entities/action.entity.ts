@@ -3,10 +3,8 @@ import {
   Entity,
   Index,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Comment } from './comment.entity';
 import { TextSegment } from './text-segment.entity';
 import { TranslationLanguage } from './translation-language.entity';
 import User from './user.entity';
@@ -26,7 +24,7 @@ export class Action {
   @ManyToOne(() => TextSegment, { cascade: ['update'], onDelete: 'CASCADE' })
   segment: TextSegment;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   comment: string;
 
   @ManyToOne(() => TranslationLanguage, { nullable: true })

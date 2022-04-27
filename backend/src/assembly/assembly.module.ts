@@ -8,5 +8,6 @@ import { AssemblyService } from './assembly.service';
   controllers: [AssemblyController],
   providers: [AssemblyService],
   imports: [TypeOrmModule.forFeature([Assembly])],
+  exports: [AssemblyService]
 })
 export class AssemblyModule {}

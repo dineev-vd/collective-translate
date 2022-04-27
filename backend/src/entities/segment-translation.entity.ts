@@ -4,12 +4,10 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
   RelationId,
 } from 'typeorm';
 import { TextSegment } from './text-segment.entity';
-import { Action } from './action.entity';
 import { TranslationLanguage } from './translation-language.entity';
 
 @Entity()
@@ -19,7 +17,8 @@ class SegmentTranslation {
   id: number;
 
   @ManyToOne(() => TextSegment, (piece) => piece.translations, {
-    cascade: ['insert', 'update'], onDelete: 'CASCADE'
+    cascade: ['insert', 'update'],
+    onDelete: 'CASCADE',
   })
   @JoinColumn()
   textSegment: TextSegment;
@@ -27,8 +26,8 @@ class SegmentTranslation {
   @RelationId((piece: SegmentTranslation) => piece.textSegment)
   textSegmentId: number;
 
-  @Column({ default: '' })
-  translationText: string;
+  @Column({ nullable: true })
+  translationText?: string;
 
   @ManyToOne(
     () => TranslationLanguage,

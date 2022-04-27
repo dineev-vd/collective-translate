@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TextSegmentService } from './text-segment.service';
 import { TextSegmentController } from './text-segment.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -12,7 +12,7 @@ import { ActionsModule } from 'actions/actions.module';
   providers: [TextSegmentService],
   controllers: [TextSegmentController],
   imports: [
-    ActionsModule,
+    forwardRef(() => ActionsModule),
     TypeOrmModule.forFeature([
       TextSegment,
       SegmentTranslation,

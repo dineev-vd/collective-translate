@@ -1,6 +1,5 @@
-import { PostTextSegmentDto } from 'common/dto/text-piece.dto';
 import { TEXT_SEGMENT_ENDPOINT } from 'common/constants';
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { TextSegmentService } from './text-segment.service';
 import { ActionsService } from 'actions/actions.service';
 
@@ -8,8 +7,8 @@ import { ActionsService } from 'actions/actions.service';
 export class TextSegmentController {
   constructor(
     private readonly textSegmentService: TextSegmentService,
-    private readonly actionsService: ActionsService
-    ) {}
+    private readonly actionsService: ActionsService,
+  ) {}
 
   @Get(':id')
   async getTextPieceById(
@@ -36,7 +35,7 @@ export class TextSegmentController {
   @Get(':id/actions')
   async getActions(
     @Param('id') segmentId: string,
-    @Query('languageId') languageId?: string
+    @Query('languageId') languageId?: string,
   ) {
     return this.actionsService.getActionsBySegment(segmentId, languageId);
   }

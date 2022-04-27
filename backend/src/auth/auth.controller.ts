@@ -23,6 +23,7 @@ import { LocalAuthGuard, RefreshAuthGuard } from 'guards/simple-guards.guard';
 import { UserService } from 'user/user.service';
 import { ExtendedRequest } from 'util/ExtendedRequest';
 import { AuthService } from './auth.service';
+import ms from 'ms';
 
 @Controller(AUTH_ENDPOINT)
 export class AuthController {
@@ -40,7 +41,7 @@ export class AuthController {
     // set refresh token
     const refreshToken = this.authService.getRefreshToken(user.id);
     await this.userService.setCurrentRefreshToken(refreshToken, user.id);
-    res.cookie('refresh_token', refreshToken, { maxAge: 30000000 });
+    res.cookie('refresh_token', refreshToken, { maxAge: ms('7d') });
 
     return this.authService.login(user);
   }
@@ -59,7 +60,7 @@ export class AuthController {
     const refreshToken = this.authService.getRefreshToken(createdUser.id);
     await this.userService.setCurrentRefreshToken(refreshToken, createdUser.id);
     res.cookie('refresh_token', refreshToken, {
-      maxAge: 30000000,
+      maxAge: ms('7d'),
       secure: false,
       httpOnly: false,
     });
@@ -82,7 +83,7 @@ export class AuthController {
 
     const newRefreshToken = this.authService.getRefreshToken(user.id);
     await this.userService.setCurrentRefreshToken(newRefreshToken, user.id);
-    res.cookie('refresh_token', newRefreshToken, { maxAge: 30000000 });
+    res.cookie('refresh_token', newRefreshToken, { maxAge: ms('7d') });
 
     return this.authService.login(user);
   }

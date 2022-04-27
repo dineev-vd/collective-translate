@@ -1,5 +1,11 @@
-import { Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { File } from './file.entity';
+import {
+  Column,
+  Entity,
+  Index,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { TranslationLanguage } from './translation-language.entity';
 
 @Entity()
 export class Assembly {
@@ -13,6 +19,6 @@ export class Assembly {
   @Column()
   name: string;
 
-  @ManyToOne(() => File)
-  file: File;
+  @ManyToOne(() => TranslationLanguage, { cascade: ['update'] })
+  language: TranslationLanguage;
 }

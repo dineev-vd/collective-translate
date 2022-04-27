@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TranslationLanguage } from 'entities/translation-language.entity';
+import { FilesService } from 'files/files.service';
 import { DeepPartial, ObjectLiteral, Repository } from 'typeorm';
 
 @Injectable()
@@ -8,12 +9,10 @@ export class LanguageService {
   constructor(
     @InjectRepository(TranslationLanguage)
     private readonly languageRepository: Repository<TranslationLanguage>,
-  ) { }
+  ) {}
 
   async getTranslationLanguageById(id: string) {
-    return this.languageRepository.findOne(id, {
-      relations: ['translationSegments', 'translationSegments.textSegment'],
-    });
+    return this.languageRepository.findOne(id);
   }
 
   async getTranslationLanguagesByProjectId(projectId: number) {
@@ -23,10 +22,11 @@ export class LanguageService {
   }
 
   async setActionsRelations(languageId: string, actionIds: ObjectLiteral[]) {
-    return this.languageRepository.createQueryBuilder()
+    return this.languageRepository
+      .createQueryBuilder()
       .relation('actions')
       .of(languageId)
-      .add(actionIds)
+      .add(actionIds);
   }
 
   async createLanguage(language: DeepPartial<TranslationLanguage>) {

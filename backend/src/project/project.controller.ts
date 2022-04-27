@@ -11,7 +11,12 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ProjectService } from './project.service';
-import { FILE_ENDPOINT, LANGUAGE_ENDPOINT, PROJECT_ENDPOINT, TEXT_SEGMENT_ENDPOINT, TRANSLATION_ENDPOINT } from 'common/constants';
+import {
+  FILE_ENDPOINT,
+  LANGUAGE_ENDPOINT,
+  PROJECT_ENDPOINT,
+  TEXT_SEGMENT_ENDPOINT,
+} from 'common/constants';
 import { PostProjectDto, GetProjectDto } from 'common/dto/project.dto';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { FilesService } from 'files/files.service';
@@ -29,8 +34,8 @@ export class ProjectController {
     private readonly filesService: FilesService,
     private readonly textSegmentsService: TextSegmentService,
     private readonly languageService: LanguageService,
-    private readonly translationsService: TranslationService
-  ) { }
+    private readonly translationsService: TranslationService,
+  ) {}
 
   @Get()
   async getProjectsByQuery(
@@ -54,7 +59,10 @@ export class ProjectController {
 
   @UseGuards(JwtAuthGuard)
   @Post('/')
-  async insertProject(@Body() project: PostProjectDto, @Req() { user }: ExtendedRequest) {
+  async insertProject(
+    @Body() project: PostProjectDto,
+    @Req() { user }: ExtendedRequest,
+  ) {
     return this.projectService.createProject({ ...project, owner: user });
   }
 
@@ -85,23 +93,35 @@ export class ProjectController {
   }
 
   @Post(`:id/${LANGUAGE_ENDPOINT}`)
-  async createTranslation(@Param('id') id: string, @Body() language: PostTranslateLanguage) {
+  async createTranslation(
+    @Param('id') id: string,
+    @Body() language: PostTranslateLanguage,
+  ) {
     const process = async () => {
-    const createdLanguage = await this.languageService.createLanguage({ ...language, project: { id: Number(id) } });
-    const files = await this.filesService.getFilesByProject(id);
-    await Promise.all(files.map(file =>
-      this.translationsService.generateTranslationForFile(createdLanguage.id.toString(), file.id.toString())));
-    }
-    
+      const createdLanguage = await this.languageService.createLanguage({
+        ...language,
+        project: { id: Number(id) },
+      });
+      const files = await this.filesService.getFilesByProject(id);
+      await Promise.all(
+        files.map((file) =>
+          this.translationsService.generateTranslationForFile(
+            createdLanguage.id.toString(),
+            file.id.toString(),
+          ),
+        ),
+      );
+    };
+
     process();
-    return "OK";
+    return 'OK';
   }
 
   @Get(`:id/${TEXT_SEGMENT_ENDPOINT}`)
   async getTextSegments(
     @Param('id') projectId: string,
     @Query('take') take: number,
-    @Query('page') page: number
+    @Query('page') page: number,
   ) {
     return this.textSegmentsService.getSegmentsByProject(projectId, take, page);
   }

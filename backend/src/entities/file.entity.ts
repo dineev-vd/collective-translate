@@ -10,7 +10,6 @@ import {
 import Project from './project.entity';
 import { TextSegment } from './text-segment.entity';
 import { FileStatus } from 'common/enums';
-import { Assembly } from './assembly.entity';
 
 @Entity()
 export class File {
@@ -44,7 +43,4 @@ export class File {
     default: FileStatus.NEW,
   })
   status: FileStatus;
-
-  @OneToMany(() => Assembly, (assembly) => assembly.file)
-  assemblies: Assembly[];
 }

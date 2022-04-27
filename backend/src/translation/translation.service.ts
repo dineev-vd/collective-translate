@@ -5,7 +5,6 @@ import SegmentTranslation from 'entities/segment-translation.entity';
 import { PostTranslationDto } from 'common/dto/translate-piece.dto';
 import { TextSegmentService } from 'text-segment/text-segment.service';
 import { LanguageService } from 'language/language.service';
-import { ActionsService } from 'actions/actions.service';
 import { Action } from 'entities/action.entity';
 
 @Injectable()
@@ -16,7 +15,7 @@ export class TranslationService {
     private readonly textSegmentService: TextSegmentService,
     private readonly landuageService: LanguageService,
     @InjectRepository(Action)
-    private readonly actionsRepository: Repository<Action>
+    private readonly actionsRepository: Repository<Action>,
   ) { }
 
   getPiece(id: string): Promise<SegmentTranslation> {
@@ -54,12 +53,8 @@ export class TranslationService {
   getTranslationsByTextSegmentsAndLanguage(
     textSegmentsIds: string[],
     languageId: string,
-    take?: number,
-    page?: number
   ) {
     return this.pieceRepository.find({
-      take: take || 10,
-      skip: (page - 1) * take || 0,
       where: {
         textSegment: { id: In(textSegmentsIds) },
         translationLanguage: { id: languageId },
@@ -90,63 +85,76 @@ export class TranslationService {
     const translations = textPieces.map((piece) => {
       const translation = new SegmentTranslation();
       translation.textSegment = piece;
-      // translation.translationLanguage = language;
+      translation.translationLanguage = language;
 
       return translation;
     });
     console.log(`saving translations for ${language.language}`);
 
-    const { identifiers } = await this.pieceRepository.insert(translations);
+    await this.pieceRepository.createQueryBuilder().insert().values(translations).execute();
+
+
+    //const { identifiers } = await this.pieceRepository.insert(translations);
     console.log('inserted');
 
-    await this.pieceRepository
-      .createQueryBuilder()
-      .relation('translationLanguage')
-      .of(identifiers)
-      .set(language);
-    console.log('language set');
+    // await this.pieceRepository
+    //   .createQueryBuilder()
+    //   .relation('translationLanguage')
+    //   .of(identifiers)
+    //   .set(language);
+    // console.log('language set');
 
-    await Promise.all(
-      identifiers.map(async (i, index) => {
-        return this.pieceRepository
-          .createQueryBuilder()
-          .relation('textSegment')
-          .of(i)
-          .set(translations[index].textSegment)
-      }),
-    );
+    // await Promise.all(
+    //   identifiers.map(async (i, index) => {
+    //     return this.pieceRepository
+    //       .createQueryBuilder()
+    //       .relation('textSegment')
+    //       .of(i)
+    //       .set(translations[index].textSegment);
+    //   }),
+    // );
 
     console.log('relations set');
-    
 
-    const actions = identifiers.map(i => {
+    const actions = textPieces.map((i, index) => {
       const action = new Action();
       action.comment = 'Перевод создан';
       action.change = '';
+      action.segment = textPieces[index];
+      action.language = language;
       return action;
-    })
+    });
 
-    const { identifiers: actionIds } = await this.actionsRepository.insert(actions);
+    // const { identifiers: actionIds } = await this.actionsRepository.insert(
+    //   actions,
+    // );
+
+
+    const chunkSize = 1000;
+    for (let i = 0; i < actions.length; i += chunkSize) {
+      const chunk = actions.slice(i, i + chunkSize);
+      await this.actionsRepository.createQueryBuilder().insert().values(chunk).execute()
+    }
+
     console.log('actions inserted');
-    
-    await this.landuageService.setActionsRelations(language.id.toString(), actionIds)
+
+    // await this.landuageService.setActionsRelations(
+    //   language.id.toString(),
+    //   actionIds,
+    // );
     console.log('actions language set');
 
-
-    await Promise.all(actionIds.map((i, index) => {
-      return this.actionsRepository.createQueryBuilder()
-      .relation('segment')
-      .of(i)
-      .set(textPieces[index].id)
-    }))
+    // await Promise.all(
+    //   actionIds.map((i, index) => {
+    //     return this.actionsRepository
+    //       .createQueryBuilder()
+    //       .relation('segment')
+    //       .of(i)
+    //       .set(textPieces[index].id);
+    //   }),
+    // );
 
     console.log('translations actions set');
-    
-    
-    
-
-
-
 
     //await this.pieceRepository.save(identifiers.map((id, i) => ({ id: id, ...(translations[i]) })));
 

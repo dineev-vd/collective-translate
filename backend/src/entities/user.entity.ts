@@ -1,5 +1,11 @@
 import { GetShortUserDto } from 'common/dto/user.dto';
-import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import Project from './project.entity';
 
 @Entity()

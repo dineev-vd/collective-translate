@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { File } from 'entities/file.entity';
 import { DeepPartial, Repository } from 'typeorm';
@@ -13,6 +13,9 @@ import { Assembly } from 'entities/assembly.entity';
 import { TextSegmentService } from 'text-segment/text-segment.service';
 import { ActionsService } from 'actions/actions.service';
 import { Action } from 'entities/action.entity';
+import { TranslationService } from 'translation/translation.service';
+import { TranslationLanguage } from 'entities/translation-language.entity';
+import { LanguageService } from 'language/language.service';
 
 @Injectable()
 export class FilesService {
@@ -22,7 +25,9 @@ export class FilesService {
     @InjectRepository(Assembly)
     private readonly assemblyRepository: Repository<Assembly>,
     private readonly textSegmentService: TextSegmentService,
-    private readonly actionsService: ActionsService
+    private readonly actionsService: ActionsService,
+    private readonly translationsService: TranslationService,
+    private readonly languageService: LanguageService,
   ) { }
 
   async getFileById(id: string) {
@@ -77,6 +82,7 @@ export class FilesService {
   async formTextSegments(
     re: RegExp,
     completeText: string,
+    file: File
   ): Promise<TextSegment[]> {
     let count = 0;
     const array = completeText
@@ -88,6 +94,7 @@ export class FilesService {
         textSegment.shouldTranslate = index % 2 !== 0;
         textSegment.text = splitPart;
         textSegment.order = count++;
+        textSegment.file = file;
 
         return [...previous, textSegment];
       }, []);
@@ -101,10 +108,74 @@ export class FilesService {
     });
   }
 
-  async createAssembly(file: File, filePath: string) {
+  async assembleFile(id: string, languageId: string) {
+    const file = await this.getFileById(id);
+    const bulkSize = 1000;
+    let offset = 0;
+    let currentBulk = await this.textSegmentService.getBatch(
+      id,
+      offset,
+      bulkSize,
+    );
+
+    let translations =
+      await this.translationsService.getTranslationsByTextSegmentsAndLanguage(
+        currentBulk.map((s) => s.id.toString()),
+        languageId,
+      );
+
+    const fileName = crypto.randomUUID();
+    const fileWrite = await fs.open(fileName, 'a+');
+
+    while (currentBulk.length > 0) {
+      offset += bulkSize;
+
+      const stringToWrite = currentBulk
+        .map((segment) => {
+          if (segment.shouldTranslate) {
+            const translation = translations.find((t) => t.textSegmentId == segment.id);
+
+            if (translation)
+              return translation.translationText ?? segment.text;
+
+            console.log(translation);
+          }
+
+          return segment.text;
+        })
+        .join('');
+
+      await fileWrite.appendFile(iconv.encode(stringToWrite, file.encoding));
+
+      currentBulk = await this.textSegmentService.getBatch(
+        id,
+        offset,
+        bulkSize,
+      );
+
+      translations =
+        await this.translationsService.getTranslationsByTextSegmentsAndLanguage(
+          currentBulk.map((s) => s.id.toString()),
+          languageId,
+        );
+    }
+
+    await fileWrite.close();
+
+    const language = await this.languageService.getTranslationLanguageById(
+      languageId,
+    );
+    return this.createAssembly(file, fileName, language);
+  }
+
+  async createAssembly(
+    file: File,
+    filePath: string,
+    language: TranslationLanguage,
+  ) {
     const assembly = new Assembly();
     assembly.path = filePath;
-    assembly.file = file;
+    assembly.language = language;
     assembly.name = file.name + ' assembly';
     return this.assemblyRepository.save(assembly);
   }
@@ -124,39 +195,37 @@ export class FilesService {
       console.log('fileDecoded');
 
       const reg = /(\s+[^.!?]*[.!?])/g;
-      const segments = await this.formTextSegments(reg, decoded);
-      const actions = segments.map(s => {
-        const action = new Action();
+      await this.textSegmentService.removeSegmentsFromFile(file.id);
+      const segments = await this.formTextSegments(reg, decoded, file);
+      // this should be fast as fuck
+      const identifiers = await this.textSegmentService.insertTextSegments(segments);
+
+      const actions = identifiers.map((i) => {
+        const action: DeepPartial<Action> = {};
         action.change = '';
         action.comment = 'Сегмент создан';
+        action.segment = { id: Number(i.id) };
 
         return action;
       });
 
       console.log('fileSplit');
-      const { identifiers: actionIds } = await this.actionsService.insertActions(actions);
+      await this.actionsService.insertActions(actions);
       console.log('actions inserted');
 
 
-      // this should be fast as fuck
-      const { identifiers } = await this.textSegmentService.insertTextSegments(
-        segments,
-      );
 
-      await this.textSegmentService.removeSegmentsFromFile(file.id);
-
-      await this.fileRepository
-        .createQueryBuilder()
-        .relation('textSegments')
-        .of(file)
-        .add(identifiers);
+      // await this.fileRepository
+      //   .createQueryBuilder()
+      //   .relation('textSegments')
+      //   .of(file)
+      //   .add(identifiers);
 
       console.log('file relations set');
-      await this.actionsService.setSegmentRelations(actionIds, identifiers);
+      // await this.actionsService.setSegmentRelations(actionIds, identifiers);
       console.log('actions relations set');
-      
 
-      // await this.fileRepository.save({ id: Number(id), textSegments: segments, status: FileStatus.SPLITTED }, { chunk: 100 });
+      await this.fileRepository.update(Number(id), { status: FileStatus.SPLITTED });
       console.log('text segments saved');
     } catch (e) {
       console.log(e);

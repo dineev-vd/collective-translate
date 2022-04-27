@@ -9,7 +9,6 @@ import {
 } from 'typeorm';
 import { Action } from './action.entity';
 import { File } from './file.entity';
-import Project from './project.entity';
 import SegmentTranslation from './segment-translation.entity';
 
 @Entity()
@@ -55,6 +54,6 @@ export class TextSegment {
   @Column()
   shouldTranslate: boolean;
 
-  @OneToMany(() => Action, action => action.segment, {cascade: true})
+  @OneToMany(() => Action, (action) => action.segment, { cascade: true })
   actions: Action[];
 }

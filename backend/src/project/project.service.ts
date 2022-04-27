@@ -27,7 +27,7 @@ export class ProjectService implements OnApplicationBootstrap {
     user.name = 'Владислав Динеев';
     user.refreshToken = '';
 
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < 2; i++) {
       const project = new Project();
       project.name = `Проект ${i}`;
       project.description = `Это описание проекта с номером ${i}`;
@@ -57,7 +57,7 @@ export class ProjectService implements OnApplicationBootstrap {
     private projectRepository: Repository<Project>,
     private fileService: FilesService,
     private translationService: TranslationService,
-  ) {}
+  ) { }
 
   async findProjectsByQuery(query: string) {
     return this.projectRepository.find({
@@ -78,5 +78,9 @@ export class ProjectService implements OnApplicationBootstrap {
 
   async updateProject(projectId: string, project: PostProjectDto) {
     return this.projectRepository.save(project);
+  }
+
+  async findProjectByLanguage(languageId: string) {
+    return this.projectRepository.findOne({ where: { translateLanguage: { id: languageId } } })
   }
 }

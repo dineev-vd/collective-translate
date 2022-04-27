@@ -50,7 +50,7 @@ const Root = () => {
                                 <Route path='search' element={<SearchResults />} />
                                 <Route path='project/create' element={<CreateProject />} />
                                 <Route path='project/:projectId/*' element={<ProjectPage />} />
-                                <Route path='*' element={<Navigate to={'/'} />} />
+                                <Route path='*' element={<div>404</div>} />
                                 <Route index element={<LandingPage />} />
                             </Routes>}
                     </div>

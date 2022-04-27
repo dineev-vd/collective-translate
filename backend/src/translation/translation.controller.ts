@@ -16,16 +16,12 @@ export class PiecesController {
   async getPieceByLanguage(
     @Query('languageId') languageId: string,
     @Query('textSegmentsIds') textSegmentsIdsString: string,
-    @Query('take') take?: number, 
-    @Query('page') page?: number
   ): Promise<SegmentTranslation[]> {
     if (languageId && textSegmentsIdsString) {
       const textSegmentsIds = textSegmentsIdsString.split(',');
       return this.translationsService.getTranslationsByTextSegmentsAndLanguage(
         textSegmentsIds,
-        languageId,
-        take,
-        page
+        languageId
       );
     }
 

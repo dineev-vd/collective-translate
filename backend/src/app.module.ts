@@ -31,7 +31,6 @@ const {
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-        
       logging: ['warn'],
       maxQueryExecutionTime: 1000,
       type: 'postgres',

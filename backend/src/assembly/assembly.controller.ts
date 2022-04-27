@@ -9,8 +9,9 @@ export class AssemblyController {
 
   @Get(':id')
   async getAssemblyById(@Param('id') assemblyId: string, @Res() res: Response) {
-    const path = await this.assemblyService.getAssemblyPathById(assemblyId);
-    const file = createReadStream(path);
+    const assembly = await this.assemblyService.getAssemblyById(assemblyId);
+    res.setHeader('Content-Disposition', `attachment; filename=${encodeURI(assembly.name + '.txt')}`);
+    const file = createReadStream(assembly.path);
     file.pipe(res);
   }
 }

@@ -12,6 +12,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setShouldLogin, setUser } from "store/userReducer";
 import { auth } from "./Auth";
+import {GetAssemblyDto} from '@common/dto/assembly.dto';
 
 class ApiClass {
     private dispatch: Dispatch<AnyAction>;
@@ -222,6 +223,21 @@ class ApiClass {
     async postLanguage(projectId: string, language: PostTranslateLanguage) {
         const uri = this.makeUri([PROJECT_ENDPOINT, projectId, LANGUAGE_ENDPOINT]);
         return this.postJson(uri, language, { tokenRequired: true });
+    }
+
+    async getLanguage(languageId: string) {
+        const uri = this.makeUri([LANGUAGE_ENDPOINT, languageId]);
+        return this.getJson<GetTranslateLanguage>(uri);
+    }
+
+    async assembleLanguage(languageId: string) {
+        const uri = this.makeUri([LANGUAGE_ENDPOINT, languageId, 'assemble']);
+        return this.postJson(uri, undefined, { tokenRequired: true })
+    }
+
+    async getAssembliesByLanguage(languageId: string) {
+        const uri = this.makeUri([LANGUAGE_ENDPOINT, languageId, 'assemblies']);
+        return this.getJson<GetAssemblyDto[]>(uri);
     }
 }
 

@@ -1,18 +1,19 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TranslationLanguage } from 'entities/translation-language.entity';
 import { LanguageService } from './language.service';
 import { LanguageController } from './language.controller';
-import SegmentTranslation from 'entities/segment-translation.entity';
-import { TranslationService } from 'translation/translation.service';
-import { Action } from 'entities/action.entity';
-import { TextpieceModule } from 'text-segment/text-segment.module';
+import { FilesModule } from 'files/files.module';
+import { TranslationModule } from 'translation/translation.module';
+import { AssemblyModule } from 'assembly/assembly.module';
 
 @Module({
-  providers: [LanguageService, TranslationService],
+  providers: [LanguageService],
   imports: [
-    TypeOrmModule.forFeature([TranslationLanguage, SegmentTranslation, Action]),
-    TextpieceModule,
+    TypeOrmModule.forFeature([TranslationLanguage]),
+    forwardRef(() => TranslationModule),
+    forwardRef(() => FilesModule),
+    AssemblyModule
   ],
   controllers: [LanguageController],
   exports: [LanguageService],

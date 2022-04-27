@@ -12,8 +12,8 @@ import { TranslationModule } from 'translation/translation.module';
   controllers: [ActionsController],
   imports: [
     TypeOrmModule.forFeature([Action, TextSegment, SegmentTranslation]),
-    forwardRef(() => TranslationModule)
+    forwardRef(() => TranslationModule),
   ],
-  exports: [ActionsService]
+  exports: [ActionsService],
 })
 export class ActionsModule {}

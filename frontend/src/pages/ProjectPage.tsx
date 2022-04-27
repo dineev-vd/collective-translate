@@ -13,9 +13,7 @@ const ProjectPage: React.FC<{}> = (_) => {
         <Link to={'files'}>Файлы</Link>
         <Link to={'text-segments'}>Все сегменты</Link>
         <Routes>
-            <Route path="languages" element={<Languages />} />
-            {/* <Route path="languages/:languageId/pieces" element={<LanguageTranslations />} /> */}
-            {/* <Route path='languages/:languageId/pieces/:translationId' element={<TranslationPage />} /> */}
+            <Route path="languages/*" element={<Languages />} />
             <Route path='files' element={<FileList />} >
                 <Route path=':fileId' element={<FilePeek />} />
             </Route>

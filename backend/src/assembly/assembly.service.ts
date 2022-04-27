@@ -8,11 +8,13 @@ export class AssemblyService {
   constructor(
     @InjectRepository(Assembly)
     private readonly assemblyRepository: Repository<Assembly>,
-  ) {}
+  ) { }
 
-  async getAssemblyPathById(id: string) {
-    const assembly = await this.assemblyRepository.findOne(id);
-    console.log(assembly);
-    return assembly.path;
+  async getAssemblyById(id: string) {
+    return this.assemblyRepository.findOne(id);
+  }
+
+  async getAssembliesByLanguageId(id: string) {
+    return this.assemblyRepository.find({ where: { language: { id: id } } })
   }
 }

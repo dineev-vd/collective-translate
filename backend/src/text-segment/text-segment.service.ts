@@ -2,7 +2,7 @@ import { PostTextSegmentDto } from 'common/dto/text-piece.dto';
 import { TextSegment } from 'entities/text-segment.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, LessThan, MoreThan, Repository } from 'typeorm';
+import { IsNull, LessThan, MoreThan, ObjectLiteral, Repository } from 'typeorm';
 
 @Injectable()
 export class TextSegmentService {
@@ -23,16 +23,29 @@ export class TextSegmentService {
     return this.testSegmentRepository.findOne({ where: { id: id } });
   }
 
-  async getSegmentsByProject(projectId: string, take?: number, page?: number, shouldTranslate = true) {
+  async getSegmentsByProject(
+    projectId: string,
+    take?: number,
+    page?: number,
+    shouldTranslate = true,
+  ) {
     return this.testSegmentRepository.find({
-      where: { file: { project: { id: projectId } }, shouldTranslate: shouldTranslate },
+      where: {
+        file: { project: { id: projectId } },
+        shouldTranslate: shouldTranslate,
+      },
       take: take || 10,
       skip: (page - 1) * take || 0,
       relations: ['file'],
-    })
+    });
   }
 
-  async getPiecesByFile(fileId: string, take?: number, page?: number, shouldTranslate = true) {
+  async getPiecesByFile(
+    fileId: string,
+    take?: number,
+    page?: number,
+    shouldTranslate = true,
+  ) {
     return this.testSegmentRepository.find({
       take: take || 10,
       skip: (page - 1) * take || 0,
@@ -64,7 +77,6 @@ export class TextSegmentService {
       skip: skip,
       order: { order: 'ASC' },
       where: { file: { id: fileId } },
-      relations: ['translations'],
     });
   }
 
@@ -81,6 +93,15 @@ export class TextSegmentService {
   }
 
   async insertTextSegments(segments: TextSegment[]) {
-    return this.testSegmentRepository.insert(segments);
+
+    const chunkSize = 1000;
+    let arr: ObjectLiteral[] = [];
+    for (let i = 0; i < segments.length; i += chunkSize) {
+      const chunk = segments.slice(i, i + chunkSize);
+      const { identifiers } = await this.testSegmentRepository.createQueryBuilder().insert().values(chunk).execute()
+      arr = arr.concat(identifiers);
+    }
+
+    return arr;
   }
 }

@@ -24,7 +24,7 @@ import { JwtRefreshTokenStrategy } from './refresh.strategy';
     PassportModule,
     JwtModule.register({
       secret: jwtConstants.secret,
-      signOptions: { expiresIn: '10s' },
+      signOptions: { expiresIn: '10m' },
     }),
   ],
   controllers: [AuthController],
