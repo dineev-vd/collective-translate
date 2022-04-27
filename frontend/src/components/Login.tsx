@@ -1,17 +1,24 @@
 import { api } from "api/Api";
+import { auth } from "api/Auth";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { setShouldLogin } from "store/userReducer";
+import { useNavigate } from "react-router-dom";
+import { setShouldLogin, setUser } from "store/userReducer";
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const handleLogin = (e) => {
         e.preventDefault();
-        api.login(email, password).then(() => {
-            dispatch(setShouldLogin(false));
+        api.login(email, password).then(([response, _]) => {
+            auth.setAccessToken(response.accessToken);
+            api.getProfile().then(([user, _]) => {
+                dispatch(setUser(user));
+                navigate(-1);
+            })
         })
     }
 

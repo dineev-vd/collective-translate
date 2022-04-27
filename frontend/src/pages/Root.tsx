@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import { Navigate, Outlet, Route, Routes, useNavigate } from 'react-router-dom';
 import Header from 'components/Header';
 import ProjectPage from './ProjectPage';
 import "./Root.css";
@@ -14,15 +14,23 @@ import TextSegments from 'components/LanguageTranslations';
 import TranslationPage from './TranslatePiecePage';
 import TextDisplay from 'components/TextDisplay';
 import CreateProject from 'components/CreateProject';
+import { auth } from 'api/Auth';
 
 
 const Root = () => {
     const dispatch = useDispatch();
     const [ready, setReady] = useState(false);
     const shuoldLogin = useSelector(selectShouldLogin);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        api.setDispatch(dispatch);
+        api.setDispatch(dispatch, () => navigate('/login'));
+
+        if (!auth.getAccessToken()) {
+            setReady(true);
+            return;
+        }
+
         api.getProfile().then(([user, _]) => {
             dispatch(setUser(user))
         }).finally(() => {
@@ -36,23 +44,20 @@ const Root = () => {
                 <div className="root">
                     <Header />
                     <div className='content-wrapper'>
-                        {shuoldLogin ?
-                            <Routes>
-                                <Route path='*' element={<Navigate to={'/login'} />} />
-                                <Route path='/login' element={<Login />} />
-                            </Routes>
-                            :
-                            <Routes>
-                                <Route path='profile' element={<Outlet />} >
-                                    <Route path=':profileId' element={<ProfilePage />} />
-                                </Route>
-                                <Route path='translate/:textSegmentId' element={<TextDisplay />} />
-                                <Route path='search' element={<SearchResults />} />
-                                <Route path='project/create' element={<CreateProject />} />
-                                <Route path='project/:projectId/*' element={<ProjectPage />} />
-                                <Route path='*' element={<div>404</div>} />
-                                <Route index element={<LandingPage />} />
-                            </Routes>}
+
+                        <Routes>
+                            <Route path='profile' element={<Outlet />} >
+                                <Route path=':profileId' element={<ProfilePage />} />
+                            </Route>
+                            <Route path='translate/:textSegmentId' element={<TextDisplay />} />
+                            <Route path='search' element={<SearchResults />} />
+                            <Route path='project/create' element={<CreateProject />} />
+                            <Route path='project/:projectId/*' element={<ProjectPage />} />
+                            <Route path='/login' element={<Login />} />
+
+                            <Route path='*' element={<div>404</div>} />
+                            <Route index element={<LandingPage />} />
+                        </Routes>
                     </div>
                 </div>
                 :

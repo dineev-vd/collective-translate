@@ -1,0 +1,20 @@
+.project-page {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
+.project-page_content, .project-page_nav {
+    padding: 10px;
+}
+
+.project-page_nav > :not(:first-child){
+    margin-left: 5px;
+}
+
+.project-page_content {
+    border: 1px solid gray;
+    border-radius: 10px;
+    height: 100%;
+}

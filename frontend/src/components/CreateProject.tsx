@@ -8,9 +8,10 @@ const CreateProject: React.FC = () => {
     const [description, setDescription] = useState<string>('');
     const navigate = useNavigate();
 
-    function handleSubmit() {
-        api.postProject({ name: projectName, description: description }).then(([response, _]) => {
-            navigate(response.id);
+    function handleSubmit(e) {
+        e.preventDefault();
+        api.postProject({ name: projectName, description: description }).then(([response, _]) => {            
+            navigate(`/project/${response.id}`);
         })
     }
 

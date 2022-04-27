@@ -12,20 +12,25 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setShouldLogin, setUser } from "store/userReducer";
 import { auth } from "./Auth";
-import {GetAssemblyDto} from '@common/dto/assembly.dto';
+import { GetAssemblyDto } from '@common/dto/assembly.dto';
 
 class ApiClass {
     private dispatch: Dispatch<AnyAction>;
+    private onUnauthorized: () => void;
 
-    setDispatch(dispatch: Dispatch<AnyAction>) {
+    setDispatch(dispatch: Dispatch<AnyAction>, onUnauthorized: () => void) {
         this.dispatch = dispatch;
+        this.onUnauthorized = onUnauthorized;
     }
 
 
     async parseResponse<T>(response: Response): Promise<[T, Response]> {
         if (response.status === 401) {
-            if (this.dispatch)
+            if (this.dispatch) {
                 this.dispatch(setUser(null));
+                this.onUnauthorized();
+            }
+
         }
 
         if (!response.ok) {
@@ -82,10 +87,11 @@ class ApiClass {
         return this.parseResponse<T>(response);
     }
 
-    async postFile(uri: string, files: FileList, { tokenRequired = false, credentialsRequired = false } = {}) {
+    async postFile<T>(uri: string, files: FileList, { tokenRequired = false, credentialsRequired = false } = {}) {
         const formData = new FormData();
         Array.from(files).forEach(f => formData.append(f.name, f));
-        return this.makeRequest(uri, { init: { method: "POST", body: formData }, tokenRequired: tokenRequired, credentialsRequired: credentialsRequired });
+        const response = await this.makeRequest(uri, { init: { method: "POST", body: formData }, tokenRequired: tokenRequired, credentialsRequired: credentialsRequired });
+        return this.parseResponse<T>(response);
     }
 
     makeUri(endpoints: Object[] | Object,
@@ -97,6 +103,9 @@ class ApiClass {
 
         const endpointsString = [API_ENDPOINT, ...endpointsParsed].join('/');
         const paramString = params ? Object.entries(params).map(([key, value]) => {
+            if (value === null || value === undefined)
+                return;
+
             const valueParsed = Array.isArray(value) ? value : [value];
             return `${key}=${valueParsed.join(',')}`;
         }).join('&') : "";
@@ -117,7 +126,7 @@ class ApiClass {
 
     async postTextFiles(id: string, files: FileList) {
         const uri = this.makeUri([PROJECT_ENDPOINT, id, FILE_ENDPOINT]);
-        return this.postFile(uri, files);
+        return this.postFile<ShortFileDto[]>(uri, files);
     }
 
     async getTranslation(pieceId: string) {

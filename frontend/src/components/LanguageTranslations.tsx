@@ -3,7 +3,7 @@ import { GetTranslateLanguage } from "@common/dto/language.dto";
 import { GetTextSegmentDto } from "@common/dto/text-piece.dto";
 import { GetTranslationDto } from "@common/dto/translate-piece.dto";
 import { api } from "api/Api";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 
 const TextSegments: React.FC<{}> = () => {
@@ -50,6 +50,8 @@ const TextSegments: React.FC<{}> = () => {
             return;
         }
 
+        console.log(languageId)
+
         api.getTranslations({ languageId: languageId, textSegmentsIds: textSegments.map(segment => segment.id) }).then(([response, _]) => {
             let obj = {};
             response.forEach(trans => obj[trans.textSegmentId] = trans);
@@ -57,30 +59,46 @@ const TextSegments: React.FC<{}> = () => {
         })
     }, [languageId, textSegments])
 
-    function handleSelect(e) {
-        setSearchParams({ languageId: languageId, fileId: e.currentTarget.value != -1 ? e.currentTarget.value : '' });
-    }
+    const handleSelect = useCallback((e) => {
+        const params = new URLSearchParams(searchParams);
+        if(e.currentTarget.value == -1) {
+            params.delete('fileId');
+        } else {
+            params.set('fileId', e.currentTarget.value);
+        } 
 
-    function handleLanguageSelect(e) {
-        setSearchParams({ fileId: fileId, languageId: e.currentTarget.value != -1 ? e.currentTarget.value : '' });
-    }
+
+        setSearchParams(params);
+    }, [searchParams])
+
+    const handleLanguageSelect = useCallback((e) => {
+        const params = new URLSearchParams(searchParams);
+        if(e.currentTarget.value == -1) {
+            params.delete('languageId');
+        } else {
+            params.set('languageId', e.currentTarget.value);
+        } 
+
+
+        setSearchParams(params);
+    }, [searchParams])
 
     return <>
-        <select onChange={handleSelect}>
-            <option selected={!fileId} value={-1}>Все</option>
+        <select value={fileId ?? -1} onChange={handleSelect}>
+            <option value={-1}>Все</option>
             {files && files.map(file => (
-                <option selected={fileId == file.id.toString()} value={file.id}>{file.name}</option>
+                <option key={file.id} value={file.id}>{file.name}</option>
             ))}
         </select>
-        <select onChange={handleLanguageSelect}>
-            <option selected={!languageId} value={-1}>Все</option>
+        <select value={languageId ?? -1} onChange={handleLanguageSelect}>
+            <option value={-1}>Все</option>
             {languages && languages.map(language => (
-                <option selected={languageId == language.id.toString()} value={language.id}>{language.language}</option>
+                <option key={language.id} value={language.id}>{language.language}</option>
             ))}
         </select>
 
         {textSegments && textSegments.map((segment, index) => (
-            <div style={{ display: "flex", flex: "1 1 auto", flexDirection: "column", border: "1px solid black", borderRadius: "10px" }}>
+            <div key={segment.id} style={{ display: "flex", flex: "1 1 auto", flexDirection: "column", border: "1px solid black", borderRadius: "10px" }}>
 
                 <Link to={`/translate/${segment.id.toString()}?languageId=${languageId}`}><h4>Перейти</h4></Link>
                 <div style={{ width: "100%" }}>
