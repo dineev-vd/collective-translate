@@ -1,7 +1,6 @@
 import { Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { FILE_ENDPOINT } from 'common/constants';
 import { LanguageService } from 'language/language.service';
-import { TextSegmentService } from 'text-segment/text-segment.service';
 import { TranslationService } from 'translation/translation.service';
 import { FilesService } from './files.service';
 
@@ -11,7 +10,6 @@ export class FilesController {
     private readonly filesService: FilesService,
     private readonly translationsService: TranslationService,
     private readonly languageService: LanguageService,
-    private readonly textSegmentService: TextSegmentService,
   ) {}
 
   @Get(`:id`)

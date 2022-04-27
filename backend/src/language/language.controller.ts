@@ -1,7 +1,6 @@
 import { Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { AssemblyService } from 'assembly/assembly.service';
 import { FilesService } from 'files/files.service';
-import { ProjectService } from 'project/project.service';
 import { TranslationService } from 'translation/translation.service';
 import { LanguageService } from './language.service';
 
@@ -29,7 +28,7 @@ export class LanguageController {
     @Param('id') languageId: string,
     @Query('fileId') fileId?: string,
   ) {
-    return this.translationsService.getTranslationsByLanguage(
+    return this.translationsService.getTranslationsByProject(
       languageId,
       fileId,
     );

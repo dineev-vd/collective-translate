@@ -41,4 +41,34 @@ export class PiecesController {
   //     await this.translationsService.updatePiece(id, user, piece)
   //     return this.translationsService.getPiece(id);
   // }
+
+  @Get(':id')
+  async getTextPieceById(
+    @Param('id') id: number,
+    @Query('nextMinLength') nextMinLength?: number,
+    @Query('prevMinLength') prevMinLength?: number,
+  ) {
+    const mainSegment = await this.textSegmentService.getPiece(id);
+    let arr = [mainSegment];
+
+    if (nextMinLength) {
+      const nextArray = await this.textSegmentService.getNext(mainSegment, 20);
+      arr = [...arr, ...nextArray];
+    }
+
+    if (prevMinLength) {
+      const prevArray = await this.textSegmentService.getPrev(mainSegment, 20);
+      arr = [...prevArray, ...arr];
+    }
+
+    return arr;
+  }
+
+  @Get(':id/actions')
+  async getActions(
+    @Param('id') segmentId: string,
+    @Query('languageId') languageId?: string,
+  ) {
+    return this.actionsService.getActionsBySegment(segmentId, languageId);
+  }
 }

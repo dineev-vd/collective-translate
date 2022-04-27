@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TranslationLanguage } from 'entities/translation-language.entity';
-import { FilesService } from 'files/files.service';
 import { DeepPartial, ObjectLiteral, Repository } from 'typeorm';
 
 @Injectable()

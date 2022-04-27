@@ -20,7 +20,6 @@ import {
 import { PostProjectDto, GetProjectDto } from 'common/dto/project.dto';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { FilesService } from 'files/files.service';
-import { TextSegmentService } from 'text-segment/text-segment.service';
 import { JwtAuthGuard } from 'guards/simple-guards.guard';
 import { ExtendedRequest } from 'util/ExtendedRequest';
 import { LanguageService } from 'language/language.service';
@@ -32,7 +31,6 @@ export class ProjectController {
   constructor(
     private readonly projectService: ProjectService,
     private readonly filesService: FilesService,
-    private readonly textSegmentsService: TextSegmentService,
     private readonly languageService: LanguageService,
     private readonly translationsService: TranslationService,
   ) {}

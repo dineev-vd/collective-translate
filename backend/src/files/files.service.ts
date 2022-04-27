@@ -5,12 +5,10 @@ import { DeepPartial, Repository } from 'typeorm';
 import { createReadStream } from 'fs';
 import * as chardet from 'chardet';
 import * as iconv from 'iconv-lite';
-import { TextSegment } from 'entities/text-segment.entity';
 import * as fs from 'fs/promises';
 import { FileStatus } from 'common/enums';
 import * as crypto from 'crypto';
 import { Assembly } from 'entities/assembly.entity';
-import { TextSegmentService } from 'text-segment/text-segment.service';
 import { ActionsService } from 'actions/actions.service';
 import { Action } from 'entities/action.entity';
 import { TranslationService } from 'translation/translation.service';
@@ -24,7 +22,6 @@ export class FilesService {
     private readonly fileRepository: Repository<File>,
     @InjectRepository(Assembly)
     private readonly assemblyRepository: Repository<Assembly>,
-    private readonly textSegmentService: TextSegmentService,
     private readonly actionsService: ActionsService,
     private readonly translationsService: TranslationService,
     private readonly languageService: LanguageService,
