@@ -8,8 +8,8 @@ import {
   RelationId,
 } from 'typeorm';
 import Project from './project.entity';
-import { TextSegment } from './text-segment.entity';
 import { FileStatus } from 'common/enums';
+import SegmentTranslation from './segment-translation.entity';
 
 @Entity()
 export class File {
@@ -20,10 +20,10 @@ export class File {
   @Column()
   name: string;
 
-  @OneToMany(() => TextSegment, (textSegment) => textSegment.file, {
+  @OneToMany(() => SegmentTranslation, (textSegment) => textSegment.file, {
     cascade: ['insert'],
   })
-  textSegments: TextSegment[];
+  textSegments: SegmentTranslation[];
 
   @ManyToOne(() => Project)
   project: Project;

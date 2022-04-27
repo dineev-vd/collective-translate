@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   RelationId,
 } from 'typeorm';
-import { TextSegment } from './text-segment.entity';
+import { File } from './file.entity';
 import { TranslationLanguage } from './translation-language.entity';
 
 @Entity()
@@ -15,16 +15,6 @@ class SegmentTranslation {
   @Index()
   @PrimaryGeneratedColumn()
   id: number;
-
-  @ManyToOne(() => TextSegment, (piece) => piece.translations, {
-    cascade: ['insert', 'update'],
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn()
-  textSegment: TextSegment;
-
-  @RelationId((piece: SegmentTranslation) => piece.textSegment)
-  textSegmentId: number;
 
   @Column({ nullable: true })
   translationText?: string;
@@ -37,6 +27,12 @@ class SegmentTranslation {
 
   @RelationId((segment: SegmentTranslation) => segment.translationLanguage)
   translationLanguageId: number;
+
+  @ManyToOne(
+    () => File,
+    (file) => file.textSegments
+  )
+  file: File;
 }
 
 export default SegmentTranslation;
