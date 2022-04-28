@@ -75,8 +75,6 @@ export class ProjectController {
     @UploadedFiles() files: Array<Express.Multer.File>,
     @Param('id') id: string,
   ) {
-    console.log(files);
-
     const filesSaved = await Promise.all(
       files.map(async (file) => {
         const fileBuf = file.buffer;
@@ -90,13 +88,19 @@ export class ProjectController {
     return this.filesService.insertFiles(id, filesSaved);
   }
 
+  @Get(`:id/${LANGUAGE_ENDPOINT}`)
+  async getProjectLanguages(@Param('id') projectId: string) {
+    return this.languageService.getTranslationLanguagesByProjectId(projectId);
+  }
+
   @Post(`:id/${LANGUAGE_ENDPOINT}`)
   async createTranslation(
     @Param('id') id: string,
     @Body() language: PostTranslateLanguage,
   ) {
     const process = async () => {
-      const createdLanguage = await this.languageService.createLanguage({
+      const originalLanguage = await this.languageService.getOriginalLanguage(id);
+      const createdLanguage = await this.languageService.saveLanguage({
         ...language,
         project: { id: Number(id) },
       });
@@ -106,6 +110,7 @@ export class ProjectController {
           this.translationsService.generateTranslationForFile(
             createdLanguage.id.toString(),
             file.id.toString(),
+            originalLanguage.id.toString()
           ),
         ),
       );
@@ -113,14 +118,5 @@ export class ProjectController {
 
     process();
     return 'OK';
-  }
-
-  @Get(`:id/${TEXT_SEGMENT_ENDPOINT}`)
-  async getTextSegments(
-    @Param('id') projectId: string,
-    @Query('take') take: number,
-    @Query('page') page: number,
-  ) {
-    return this.textSegmentsService.getSegmentsByProject(projectId, take, page);
   }
 }

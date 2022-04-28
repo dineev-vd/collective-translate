@@ -45,10 +45,6 @@ export class ProjectService implements OnApplicationBootstrap {
       const insertedProject = await this.projectRepository.save(project);
 
       await this.fileService.splitFile(insertedProject.files[0].id.toString());
-      await this.translationService.generateTranslationForFile(
-        insertedProject.translateLanguage[0].id.toString(),
-        insertedProject.files[0].id.toString(),
-      );
     }
   }
 

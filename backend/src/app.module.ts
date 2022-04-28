@@ -6,8 +6,6 @@ import Project from './entities/project.entity';
 import SegmentTranslation from './entities/segment-translation.entity';
 import User from './entities/user.entity';
 import { TranslationModule } from './translation/translation.module';
-import { TextSegment } from 'entities/text-segment.entity';
-import { TextpieceModule } from './text-segment/text-segment.module';
 import { AuthModule } from './auth/auth.module';
 import { Action } from 'entities/action.entity';
 import { File } from 'entities/file.entity';
@@ -45,7 +43,6 @@ const {
         Project,
         SegmentTranslation,
         User,
-        TextSegment,
         Action,
         File,
         Comment,
@@ -56,7 +53,6 @@ const {
     ProjectModule,
     UserModule,
     TranslationModule,
-    TextpieceModule,
     AuthModule,
     LanguageModule,
     ActionsModule,

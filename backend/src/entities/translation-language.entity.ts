@@ -32,18 +32,15 @@ export class TranslationLanguage {
   )
   translationSegments: SegmentTranslation[];
 
-  // @RelationId((language: TranslationLanguage) => language.translationSegments)
-  // translationSegmentsIds: number[];
-
   @ManyToOne(() => Project)
   project: Project;
 
   @RelationId((languge: TranslationLanguage) => languge.project)
   projectId: number;
 
-  @OneToMany(() => Action, (action) => action.language)
-  actions: Action[];
-
   @OneToMany(() => Assembly, (assembly) => assembly.language)
   assemblies: Assembly[];
+
+  @Column({ default: false })
+  original: Boolean;
 }

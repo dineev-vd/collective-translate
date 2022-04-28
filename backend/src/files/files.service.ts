@@ -14,6 +14,8 @@ import { Action } from 'entities/action.entity';
 import { TranslationService } from 'translation/translation.service';
 import { TranslationLanguage } from 'entities/translation-language.entity';
 import { LanguageService } from 'language/language.service';
+import SegmentTranslation from 'entities/segment-translation.entity';
+import { Language } from 'entities/language.entity';
 
 @Injectable()
 export class FilesService {
@@ -79,19 +81,21 @@ export class FilesService {
   async formTextSegments(
     re: RegExp,
     completeText: string,
-    file: File
-  ): Promise<TextSegment[]> {
+    file: File,
+    original: TranslationLanguage
+  ): Promise<SegmentTranslation[]> {
     let count = 0;
     const array = completeText
       .split(re)
       .reduce((previous, splitPart, index) => {
         if (splitPart.length === 0) return previous;
 
-        const textSegment = new TextSegment();
+        const textSegment = new SegmentTranslation();
         textSegment.shouldTranslate = index % 2 !== 0;
-        textSegment.text = splitPart;
+        textSegment.translationText = splitPart;
         textSegment.order = count++;
         textSegment.file = file;
+        textSegment.translationLanguage = original;
 
         return [...previous, textSegment];
       }, []);
@@ -109,52 +113,23 @@ export class FilesService {
     const file = await this.getFileById(id);
     const bulkSize = 1000;
     let offset = 0;
-    let currentBulk = await this.textSegmentService.getBatch(
-      id,
-      offset,
-      bulkSize,
-    );
+    const params = { languageId: languageId, fileId: id, take: bulkSize };
 
-    let translations =
-      await this.translationsService.getTranslationsByTextSegmentsAndLanguage(
-        currentBulk.map((s) => s.id.toString()),
-        languageId,
-      );
+    let currentBulk = await this.translationsService.getTranslationsByProject({ ...params, page: offset++ })
 
     const fileName = crypto.randomUUID();
     const fileWrite = await fs.open(fileName, 'a+');
 
     while (currentBulk.length > 0) {
-      offset += bulkSize;
-
       const stringToWrite = currentBulk
         .map((segment) => {
-          if (segment.shouldTranslate) {
-            const translation = translations.find((t) => t.textSegmentId == segment.id);
-
-            if (translation)
-              return translation.translationText ?? segment.text;
-
-            console.log(translation);
-          }
-
-          return segment.text;
+          segment.translationText;
         })
         .join('');
 
       await fileWrite.appendFile(iconv.encode(stringToWrite, file.encoding));
 
-      currentBulk = await this.textSegmentService.getBatch(
-        id,
-        offset,
-        bulkSize,
-      );
-
-      translations =
-        await this.translationsService.getTranslationsByTextSegmentsAndLanguage(
-          currentBulk.map((s) => s.id.toString()),
-          languageId,
-        );
+      currentBulk = await this.translationsService.getTranslationsByProject({ ...params, page: offset++ })
     }
 
     await fileWrite.close();
@@ -192,10 +167,14 @@ export class FilesService {
       console.log('fileDecoded');
 
       const reg = /(\s+[^.!?]*[.!?])/g;
-      await this.textSegmentService.removeSegmentsFromFile(file.id);
-      const segments = await this.formTextSegments(reg, decoded, file);
+      await this.translationsService.removeSegmentsFromFile(file.id);
+
+      const original = (await this.languageService.getOriginalLanguage(file.projectId.toString()));
+
+      const segments = await this.formTextSegments(reg, decoded, file, original);
       // this should be fast as fuck
-      const identifiers = await this.textSegmentService.insertTextSegments(segments);
+      const identifiers = await this.translationsService.insertTextSegments(segments);
+      //console.log(identifiers)
 
       const actions = identifiers.map((i) => {
         const action: DeepPartial<Action> = {};
@@ -209,18 +188,6 @@ export class FilesService {
       console.log('fileSplit');
       await this.actionsService.insertActions(actions);
       console.log('actions inserted');
-
-
-
-      // await this.fileRepository
-      //   .createQueryBuilder()
-      //   .relation('textSegments')
-      //   .of(file)
-      //   .add(identifiers);
-
-      console.log('file relations set');
-      // await this.actionsService.setSegmentRelations(actionIds, identifiers);
-      console.log('actions relations set');
 
       await this.fileRepository.update(Number(id), { status: FileStatus.SPLITTED });
       console.log('text segments saved');

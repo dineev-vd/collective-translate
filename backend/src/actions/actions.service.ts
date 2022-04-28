@@ -12,61 +12,34 @@ export class ActionsService {
     @InjectRepository(Action)
     private readonly actionsRepository: Repository<Action>,
     private readonly translationsService: TranslationService,
-  ) {}
+  ) { }
 
-  async removeByFileId() {}
+  async removeByFileId() { }
+
+  // TODO
 
   async processAction(change: PostActionDto, user: User) {
     const action: DeepPartial<Action> = {};
     action.author = user;
     action.change = change.change;
-    action.language = change.languageId ? { id: change.languageId } : null;
-    action.segment = change.languageId
-      ? { id: change.textSegmentId }
-      : { id: change.textSegmentId, text: change.change };
+    action.segment = { id: change.textSegmentId }
 
     if (change.comment) {
       action.comment = change.comment;
     }
 
-    if (change.languageId) {
-      const [translation] =
-        await this.translationsService.getTranslationsByTextSegmentsAndLanguage(
-          [change.textSegmentId.toString()],
-          change.languageId.toString(),
-        );
-      translation.translationText = change.change;
-      await this.translationsService.savePiece(translation);
-    }
-
     return this.actionsRepository.save(action);
   }
 
-  async getActionsBySegment(textSegmentId: string, languageId?: string) {
+  async getActionsBySegment(textSegmentId: string) {
     return this.actionsRepository.find({
       where: {
         segment: { id: textSegmentId },
-        language: { id: Number(languageId) ? languageId : IsNull() },
       },
     });
   }
 
   async insertActions(actions: DeepPartial<Action>[]) {
     return this.actionsRepository.createQueryBuilder().insert().values(actions).execute();
-  }
-
-  async setSegmentRelations(
-    actionIds: ObjectLiteral[],
-    segmentsIds: ObjectLiteral[],
-  ) {
-    return Promise.all(
-      actionIds.map((id, i) => {
-        return this.actionsRepository
-          .createQueryBuilder()
-          .relation('segment')
-          .of(id)
-          .set(segmentsIds[i]);
-      }),
-    );
   }
 }

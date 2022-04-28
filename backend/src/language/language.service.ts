@@ -14,21 +14,19 @@ export class LanguageService {
     return this.languageRepository.findOne(id);
   }
 
-  async getTranslationLanguagesByProjectId(projectId: number) {
+  async getTranslationLanguagesByProjectId(projectId: string) {
     return this.languageRepository.find({
       where: { project: { id: projectId } },
     });
   }
 
-  async setActionsRelations(languageId: string, actionIds: ObjectLiteral[]) {
-    return this.languageRepository
-      .createQueryBuilder()
-      .relation('actions')
-      .of(languageId)
-      .add(actionIds);
+  async saveLanguage(language: DeepPartial<TranslationLanguage>) {
+    return this.languageRepository.save(language);
   }
 
-  async createLanguage(language: DeepPartial<TranslationLanguage>) {
-    return this.languageRepository.save(language);
+  async getOriginalLanguage(projectId: string) {
+    return this.languageRepository.findOne({
+      where: { project: { id: projectId }, original: true },
+    });
   }
 }

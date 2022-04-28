@@ -18,20 +18,14 @@ export class LanguageController {
     return this.languageService.getTranslationLanguageById(id);
   }
 
-  @Get('/')
-  async getLanguagesByProjectId(@Query('projectId') projectId: number) {
-    return this.languageService.getTranslationLanguagesByProjectId(projectId);
-  }
-
   @Get(':id/translations')
   async getTranslationsByLanguage(
     @Param('id') languageId: string,
     @Query('fileId') fileId?: string,
+    @Query('take') take?: number,
+    @Query('page') page?: number,
   ) {
-    return this.translationsService.getTranslationsByProject(
-      languageId,
-      fileId,
-    );
+    return this.translationsService.getTranslationsByProject({ languageId: languageId, fileId: fileId, take: take, page: page });
   }
 
   @Post(':id/assemble')

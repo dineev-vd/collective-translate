@@ -10,16 +10,7 @@ export class FilesController {
     private readonly filesService: FilesService,
     private readonly translationsService: TranslationService,
     private readonly languageService: LanguageService,
-  ) {}
-
-  @Get(`:id`)
-  async getTextSegments(
-    @Param('id') id: string,
-    @Query('take') take: number,
-    @Query('page') page: number,
-  ) {
-    return this.textSegmentService.getPiecesByFile(id, take, page);
-  }
+  ) { }
 
   @Get(`:id/peek`)
   async getPeek(@Param('id') id: string) {
@@ -33,13 +24,14 @@ export class FilesController {
       await this.filesService.splitFile(id);
       const languages =
         await this.languageService.getTranslationLanguagesByProjectId(
-          file.projectId,
+          file.projectId.toString(),
         );
-      languages.forEach(async (language) => {
-        await this.translationsService.generateTranslationForFile(
-          language.id.toString(),
-          id,
-        );
+
+      const originalLang = languages.find(l => l.original);
+      const translateLangs = languages.filter(l => !l.original);
+
+      translateLangs.forEach(async (language) => {
+        await this.translationsService.generateTranslationForFile(language.id.toString(), id, originalLang.id.toString())
       });
     };
 

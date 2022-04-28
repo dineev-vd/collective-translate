@@ -33,6 +33,12 @@ class SegmentTranslation {
     (file) => file.textSegments
   )
   file: File;
+
+  @Column()
+  order: number;
+
+  @Column()
+  shouldTranslate: Boolean;
 }
 
 export default SegmentTranslation;

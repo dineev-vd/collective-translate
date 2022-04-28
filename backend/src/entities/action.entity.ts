@@ -26,7 +26,4 @@ export class Action {
 
   @Column({ nullable: true })
   comment: string;
-
-  @ManyToOne(() => TranslationLanguage, { nullable: true })
-  language: TranslationLanguage;
 }
