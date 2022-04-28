@@ -1,55 +1,47 @@
-import { GetTextSegmentDto } from "@common/dto/text-piece.dto";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { putTextChanges, selectTextChanges, selectTextSegments, TextSegmentState } from "store/text-segment-reducer";
 import { putTranslationChanges, selectTranslationChanges, selectTranslations, TranslationState } from "store/translate-piece-reducer";
 
-const TextPiece: React.FC<{ id: number, setScroll: Function, scroll: boolean }> = ({ id, setScroll, scroll }) => {
+const TextPiece: React.FC<{ selectedOrder: number, order: number, languageId: string, original: string, setScroll: Function, scroll: boolean }> = ({ selectedOrder, setScroll, scroll, order, languageId, original }) => {
 
-    const [showTranslation, changeTranslation] = useState<boolean>(false);
+    const [showTranslation, changeTranslation] = useState<boolean>(true);
     const spanRef = useRef<HTMLDivElement>();
     const dispatch = useDispatch();
     const prevUpdateInside = useRef<boolean>(false);
     const navigate = useNavigate();
-    const textSegments = useSelector(selectTextSegments);
     const translations = useSelector(selectTranslations);
-    const value = useMemo(() => textSegments[id], [textSegments, id])
     const translationChanges = useSelector(selectTranslationChanges);
-    const textChanges = useSelector(selectTextChanges);
-    
+
     const params = useParams();
-    const textSegmentId = Number(params.textSegmentId);
-    
-    const [query, setQuery] = useSearchParams();
-    const languageId = useMemo(() => Number(query.get('languageId')), [query]);
-    const translationId = useMemo(() => textSegments[textSegmentId]?.translationIds[languageId], [textSegmentId, textSegments, languageId])
-    const translation = useMemo(() => translations[value.translationIds[Number(languageId)]], [translations, value])
+    const textSegment = useMemo(() => {
+        return translations[languageId] && translations[languageId].length > 0 && translations[languageId][order - translations[languageId][0].order]
+    }, [order, languageId, translations]);
+    const originalSegment = useMemo(() => translations[original] && translations[original].length > 0 && original != languageId ? translations[original][order - translations[original][0].order] : undefined, [order, original, translations]);
+
 
 
     const backgroundColor = useMemo(() => {
-        if (value.shouldTranslate && translation) {
-            return showTranslation ? "lightblue" : (Number(translationId) == translation.id ? "lightgreen" : "lightcoral");
+        if (originalSegment) {
+            return showTranslation ? "lightblue" : (order == selectedOrder ? "lightgreen" : "lightcoral");
         }
 
         return null
     },
-        [showTranslation, value.shouldTranslate, translationId, translation ? translation.id : null]);
+        [showTranslation, originalSegment, order, selectedOrder]);
 
 
     function update() {
         //console.log(spanRef.current.innerText);
-
-        if (showTranslation) {
-            dispatch(putTranslationChanges([{ id: translation.id, translation: { translationText: spanRef.current.innerText, comment: "" } }]))
-        } else {
-            dispatch(putTextChanges([{ id: value.id, textSegment: { text: spanRef.current.innerText, comment: "" } }]))
-        }
+        dispatch(putTranslationChanges([{ id: showTranslation ? textSegment.id : originalSegment.id, translation: { translationText: spanRef.current.innerText, comment: "" } }]))
 
         prevUpdateInside.current = true;
     }
 
     useEffect(() => {
+        if (!textSegment)
+            return;
+
         if (prevUpdateInside.current) {
             prevUpdateInside.current = false;
             return;
@@ -57,37 +49,36 @@ const TextPiece: React.FC<{ id: number, setScroll: Function, scroll: boolean }> 
 
         spanRef.current.contentEditable = "false";
         if (showTranslation) {
-            spanRef.current.innerText = translationChanges[translation.id] ? translationChanges[translation.id].translationText : (translation.translationText.length > 0 ? translation.translationText : "Пока не переведено")
-        } else {
-            spanRef.current.innerText = textChanges[value.id] ? textChanges[value.id].text : value.text;
-
+            spanRef.current.innerText = textSegment?.id in translationChanges ? translationChanges[textSegment?.id]?.translationText : textSegment?.translationText
+        } else if (originalSegment) {
+            spanRef.current.innerText = originalSegment?.id in translationChanges ? translationChanges[originalSegment?.id]?.translationText : originalSegment?.translationText;
         }
 
         spanRef.current.style.backgroundColor = backgroundColor;
-        spanRef.current.style.opacity = showTranslation && !(translation.translationText.length > 0) ? "0.5" : "1";
+        spanRef.current.style.opacity = showTranslation && !(textSegment.translationText.length > 0) ? "0.5" : "1";
         spanRef.current.contentEditable = "true";
 
 
-    }, [translationId, translationChanges, textChanges, prevUpdateInside.current, showTranslation, value, value.shouldTranslate && (translation ? translation.translationText : null)])
+    }, [translationChanges, prevUpdateInside.current, showTranslation, textSegment, originalSegment])
 
     useEffect(() => {
-        if (scroll && Number(translationId) == value.id) {
-            spanRef.current.scrollIntoView({ behavior: "smooth" })
+        if (scroll && order == selectedOrder && spanRef.current) {
+            spanRef.current.scrollIntoView()
         }
 
         setScroll();
-    }, [scroll])
+    }, [scroll, spanRef.current])
 
     useEffect(() => {
         //console.log(translation?.id)
         //console.log(translationId)
-    }, [translations, translation?.id])
+    }, [translations])
 
     return <span>
-        {value.shouldTranslate && <button onClick={() => navigate(`/translate/${id}?languageId=${languageId}`)} style={{ height: "1rem" }}></button>}
-        {value.shouldTranslate && translation && <button onClick={() => changeTranslation(!showTranslation)}>#</button>}
-        <span
-            defaultValue={showTranslation ? (translation.translationText.length > 0 ? translation.translationText : "Пока не переведено") : value.text}
+        {textSegment && <button onClick={() => navigate(`/translate/${textSegment.id}`)} style={{ height: "1rem" }}></button>}
+        {originalSegment && textSegment && <button onClick={() => changeTranslation(!showTranslation)}>#</button>}
+        {textSegment && <span
+            defaultValue={showTranslation ? textSegment.translationText : originalSegment.translationText}
             contentEditable="true"
             suppressContentEditableWarning={true}
             onInput={_ => update()}
@@ -96,7 +87,7 @@ const TextPiece: React.FC<{ id: number, setScroll: Function, scroll: boolean }> 
                 outline: 0,
                 whiteSpace: "pre-wrap"
             }}
-        />
+        />}
     </span>
 }
 

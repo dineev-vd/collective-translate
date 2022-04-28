@@ -49,7 +49,7 @@ const Root = () => {
                             <Route path='profile' element={<Outlet />} >
                                 <Route path=':profileId' element={<ProfilePage />} />
                             </Route>
-                            <Route path='translate/:textSegmentId' element={<TextDisplay />} />
+                            <Route path='translate/:segmentId' element={<TranslationPage />} />
                             <Route path='search' element={<SearchResults />} />
                             <Route path='project/create' element={<CreateProject />} />
                             <Route path='project/:projectId/*' element={<ProjectPage />} />

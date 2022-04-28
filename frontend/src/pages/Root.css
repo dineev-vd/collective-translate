@@ -4,11 +4,12 @@
     flex-direction: column;
     height: 100%;
     width: 100%;
-    bottom: 0;
     background-color: #edf2f4;
+    overflow: hidden;
 }
 
 .content-wrapper {
+    position: relative;
     height: 100%;
     margin: 1rem;
 }

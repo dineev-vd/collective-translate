@@ -2,9 +2,10 @@ import { Language } from '../enums';
 import { GetTranslationDto } from './translate-piece.dto';
 
 export class GetTranslateLanguage {
-  id: number;
+  id: string;
   language: Language;
   translationSegments: GetTranslationDto[];
+  original: Boolean;
 }
 
 export class PostTranslateLanguage {

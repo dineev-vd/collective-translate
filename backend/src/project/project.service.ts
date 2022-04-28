@@ -40,7 +40,8 @@ export class ProjectService implements OnApplicationBootstrap {
       project.owner = user;
 
       const translateLanguage = new TranslationLanguage();
-      translateLanguage.language = Language.ENGLISH;
+      translateLanguage.language = Language.RUSSIAN;
+      translateLanguage.original = true;
       project.translateLanguage = [translateLanguage];
       const insertedProject = await this.projectRepository.save(project);
 
@@ -52,7 +53,6 @@ export class ProjectService implements OnApplicationBootstrap {
     @InjectRepository(Project)
     private projectRepository: Repository<Project>,
     private fileService: FilesService,
-    private translationService: TranslationService,
   ) { }
 
   async findProjectsByQuery(query: string) {

@@ -2,8 +2,7 @@ import { GetActionDto, PostActionDto } from "@common/dto/action.dto";
 import { PeekFileDto, ShortFileDto } from "@common/dto/file.dto";
 import { GetTranslateLanguage, PostTranslateLanguage } from "@common/dto/language.dto";
 import { GetProjectDto, PostProjectDto } from "@common/dto/project.dto";
-import { GetTextSegmentDto, PostTextSegmentDto } from "@common/dto/text-piece.dto";
-import { GetTranslationDto, PostTranslationDto } from "@common/dto/translate-piece.dto";
+import { GetTranslationDto } from "@common/dto/translate-piece.dto";
 import { AnyAction, Dispatch } from "@reduxjs/toolkit";
 import { API_ENDPOINT, AUTH_ENDPOINT, FILE_ENDPOINT, LANGUAGE_ENDPOINT, LOGIN_ENDPOINT, MY_PROFILE_ENDPOINT, PROJECT_ENDPOINT, REFRESH_ENDPOINT, REGISTER_ENDPOINT, TEXT_SEGMENT_ENDPOINT, TRANSLATION_ENDPOINT, USER_ENDPOINT } from "common/constants";
 import { JwtDto } from "common/dto/jwt.dto";
@@ -56,7 +55,7 @@ class ApiClass {
             const initBeforeCatch = this.makeNewInit(newInit, token);
 
             const response = await fetch(uri, initBeforeCatch);
-            if (response.ok) {
+            if (response.status != 401) {
                 return response;
             }
 
@@ -134,19 +133,9 @@ class ApiClass {
         return this.getJson<GetTranslationDto>(uri);
     }
 
-    async getTranslations(params: { languageId?: string, textSegmentsIds?: number[] }) {
-        const uri = this.makeUri([TRANSLATION_ENDPOINT], params);
+    async getTextSegment(languageId: string, order: number, params: { nextMinLength?: number, prevMinLength?: number }) {
+        const uri = this.makeUri([LANGUAGE_ENDPOINT, languageId, 'order', order], params);
         return this.getJson<GetTranslationDto[]>(uri);
-    }
-
-    async getTextSegment(id: number, params: { nextMinLength?: number, prevMinLength?: number }) {
-        const uri = this.makeUri([TEXT_SEGMENT_ENDPOINT, id], params);
-        return this.getJson<GetTextSegmentDto[]>(uri);
-    }
-
-    async putTextPiece(projectId: string, changesArray: PostTextSegmentDto) {
-        const uri = this.makeUri([PROJECT_ENDPOINT, projectId, TEXT_SEGMENT_ENDPOINT]);
-        return this.postJson(uri, changesArray);
     }
 
     async login(email: string, password: string) {
@@ -174,19 +163,29 @@ class ApiClass {
         return this.getJson<JwtDto>(uri, { credentialsRequired: true });
     }
 
-    // async getLanguage(id: number) {
-    //     const uri = this.makeUri([LANGUAGE_ENDPOINT, id.toString()]);
-    //     return this.getJson<GetTranslateLanguage>(uri);
-    // }
+    async getTranslationsByOrders(translationId: string, orders: number[]) {
+        const uri = this.makeUri([LANGUAGE_ENDPOINT, translationId, 'translations-orders'], { orders: orders });
+        return this.getJson<GetTranslationDto[]>(uri);
+    }
 
-    async getTranslationsByLanguage(translationId: number, fileId?: number) {
-        const uri = this.makeUri([LANGUAGE_ENDPOINT, translationId, 'translations'], { fileId: fileId });
+    async getTranslationsByLanguage(translationId: string, params: { fileId?: string, take?: number, page?: number }) {
+        const uri = this.makeUri([LANGUAGE_ENDPOINT, translationId, 'translations'], params);
         return this.getJson<GetTranslationDto[]>(uri);
     }
 
     async getLanguagesBtProjectId(projectId: number) {
-        const uri = this.makeUri([LANGUAGE_ENDPOINT], { projectId: projectId.toString() });
+        const uri = this.makeUri([PROJECT_ENDPOINT, projectId, LANGUAGE_ENDPOINT], { projectId: projectId.toString() });
         return this.getJson<GetTranslateLanguage[]>(uri);
+    }
+
+    async getLanguagesBySegment(segmentId: string) {
+        const uri = this.makeUri([TRANSLATION_ENDPOINT, segmentId, 'languages']);
+        return this.getJson<GetTranslateLanguage[]>(uri);
+    }
+
+    async getLanguageBySegment(segmentId: string) {
+        const uri = this.makeUri([TRANSLATION_ENDPOINT, segmentId, 'language']);
+        return this.getJson<GetTranslateLanguage>(uri);
     }
 
     async getFilesByProject(projectId: number) {
@@ -212,16 +211,6 @@ class ApiClass {
     async postActions(actions: PostActionDto[]) {
         const uri = this.makeUri('actions');
         return this.postJson(uri, actions, { tokenRequired: true });
-    }
-
-    async getTextSegmentsByProject(projectId: string) {
-        const uri = this.makeUri([PROJECT_ENDPOINT, projectId, TEXT_SEGMENT_ENDPOINT]);
-        return this.getJson<GetTextSegmentDto[]>(uri);
-    }
-
-    async getTextSegmentsByFile(fileId: string) {
-        const uri = this.makeUri([FILE_ENDPOINT, fileId]);
-        return this.getJson<GetTextSegmentDto[]>(uri);
     }
 
     async postProject(project: PostProjectDto) {

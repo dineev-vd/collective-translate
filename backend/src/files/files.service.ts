@@ -16,6 +16,7 @@ import { TranslationLanguage } from 'entities/translation-language.entity';
 import { LanguageService } from 'language/language.service';
 import SegmentTranslation from 'entities/segment-translation.entity';
 import { Language } from 'entities/language.entity';
+import * as sbd from "sbd";
 
 @Injectable()
 export class FilesService {
@@ -85,11 +86,12 @@ export class FilesService {
     original: TranslationLanguage
   ): Promise<SegmentTranslation[]> {
     let count = 0;
+    sbd.sentences(completeText, {})
     const array = completeText
       .split(re)
       .reduce((previous, splitPart, index) => {
         if (splitPart.length === 0) return previous;
-
+        sbd
         const textSegment = new SegmentTranslation();
         textSegment.shouldTranslate = index % 2 !== 0;
         textSegment.translationText = splitPart;
@@ -112,7 +114,7 @@ export class FilesService {
   async assembleFile(id: string, languageId: string) {
     const file = await this.getFileById(id);
     const bulkSize = 1000;
-    let offset = 0;
+    let offset = 1;
     const params = { languageId: languageId, fileId: id, take: bulkSize };
 
     let currentBulk = await this.translationsService.getTranslationsByProject({ ...params, page: offset++ })
@@ -120,11 +122,10 @@ export class FilesService {
     const fileName = crypto.randomUUID();
     const fileWrite = await fs.open(fileName, 'a+');
 
+
     while (currentBulk.length > 0) {
       const stringToWrite = currentBulk
-        .map((segment) => {
-          segment.translationText;
-        })
+        .map((segment) => segment.translationText)
         .join('');
 
       await fileWrite.appendFile(iconv.encode(stringToWrite, file.encoding));

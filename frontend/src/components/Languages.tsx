@@ -16,6 +16,8 @@ const Languages: React.FC = () => {
     const [language, setLanguage] = useState<Language>();
 
     useEffect(() => {
+        setLanguage(Language.RUSSIAN)
+
         api.getLanguagesBtProjectId(Number(projectId)).then(([response, _]) => {
             changeState(response);
         })
@@ -28,20 +30,22 @@ const Languages: React.FC = () => {
     }
 
     return <div>
-        <select onChange={e => setLanguage(Language[e.currentTarget.value])}>
-            {Object.keys(Language).map(l => (
-                <option selected={language == Language[l]}>{l}</option>
+        <select value={language} onChange={e => setLanguage(e.currentTarget.value as Language)}>
+            {Object.values(Language).map(l => (
+                <option>{l}</option>
             ))}
         </select>
         <button onClick={handleCreateLanguage}>Создать язык</button>
-        {state && state.map(language => (
-
-            <Link to={`${language.id}`}><h2>{language.language}</h2></Link>
-
-        ))}
-        <Routes>
-            <Route path=":languageId" element={<LanguageDetails />} />
-        </Routes>
+        <div style={{"display":"flex", "width": "100%"}}>
+            <div style={{"width": "100%"}}>
+                {state && state.map(language => (
+                    <Link to={`${language.id}`}><h2>{language.language}</h2></Link>
+                ))}
+            </div>
+            <Routes>
+                <Route path=":languageId" element={<LanguageDetails />} />
+            </Routes>
+        </div>
     </div>
 }
 

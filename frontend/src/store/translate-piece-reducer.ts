@@ -4,13 +4,13 @@ import { RootState } from "./store";
 
 export interface TranslationState {
     id: number;
-    textSegmentId: number;
     translationText: string;
+    order: number;
 }
 
 interface TranslationsState {
-    translations: { [key: number]: TranslationState },
-    changes: { [key: number]: PostTranslationDto }
+    translations: { [key: string]: TranslationState[] },
+    changes: { [key: string]: PostTranslationDto }
 }
 
 const initialState: TranslationsState = {
@@ -22,10 +22,50 @@ export const translationsSlice = createSlice({
     name: 'translations',
     initialState,
     reducers: {
-        putTranslations: (state, action: PayloadAction<{ translation: TranslationState, id: number }[]>) => {
-            action.payload.forEach(piece => {
-                state.translations[piece.id] = piece.translation;
-            })
+        prependTranslations: (state, action: PayloadAction<{ translations: TranslationState[], language: string }>) => {
+            state.translations[action.payload.language] = [...action.payload.translations, ...state.translations[action.payload.language]]
+        },
+        appendTranslations: (state, action: PayloadAction<{ translations: TranslationState[], language: string }>) => {
+            state.translations[action.payload.language] = [...(state.translations[action.payload.language] ?? []), ...action.payload.translations]
+        },
+        putTranslations: (state, action: PayloadAction<{ translations: TranslationState[], language: string }>) => {
+            const translations = action.payload.translations;
+            const language = action.payload.language;
+
+            if (state.translations[language] && state.translations[language].length > 0) {
+                if (translations.length === 0)
+                    return;
+
+                const length = state.translations[language].length;
+                if (translations[0].order > state.translations[language][length - 1].order + 1)
+                    return;
+
+                if (translations[translations.length - 1].order < state.translations[language][0].order - 1)
+                    return;
+
+                if (translations[0].order === state.translations[language][length - 1].order + 1) {
+                    state.translations[language] = [...state.translations[language], ...translations];
+                    return;
+                }
+
+                if (translations[translations.length - 1].order === state.translations[language][0].order - 1) {
+                    state.translations[language] = [...translations, ...state.translations[language]];
+                    return;
+                }
+
+
+                const right = state.translations[language].findIndex(t => t.order === translations[translations.length - 1].order);
+                const left = state.translations[language].findIndex(t => t.order === translations[0].order);
+                state.translations[language] = [
+                    ...state.translations[language].slice(0, left),
+                    ...translations,
+                    ...state.translations[language].slice(right + 1, length)
+                ]
+
+                return;
+            }
+
+            state.translations[language] = translations;
         },
         clearTranslations: (state) => {
             state.translations = {};
@@ -41,6 +81,6 @@ export const translationsSlice = createSlice({
 export const selectTranslations = (state: RootState) => state.translationsReducer.translations;
 export const selectTranslationChanges = (state: RootState) => state.translationsReducer.changes;
 
-export const { putTranslations, clearTranslations, putTranslationChanges } = translationsSlice.actions;
+export const { putTranslations, prependTranslations, appendTranslations, clearTranslations, putTranslationChanges } = translationsSlice.actions;
 
 export default translationsSlice.reducer;

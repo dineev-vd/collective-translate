@@ -1,216 +1,140 @@
 import { GetActionDto, PostActionDto } from "@common/dto/action.dto";
+import { GetTranslationDto } from "@common/dto/translate-piece.dto";
 import { api } from "api/Api";
 import { fchownSync } from "fs";
 import { UIEvent, UIEventHandler, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useSearchParams } from "react-router-dom";
-import { addTranslations, putTextChanges, putTextSegments, selectTextChanges, selectTextSegments, TextSegmentState } from "store/text-segment-reducer";
-import { clearTranslations, putTranslationChanges, putTranslations, selectTranslationChanges, selectTranslations } from "store/translate-piece-reducer";
-import { setTokenSourceMapRange } from "typescript";
+import { appendTranslations, clearTranslations, prependTranslations, putTranslationChanges, putTranslations, selectTranslationChanges, selectTranslations } from "store/translate-piece-reducer";
+import { isConstructorDeclaration } from "typescript";
 import TextPiece from "./TextPiece";
 
-const TextDisplay: React.FC = () => {
-    const params = useParams();
-    const translations = useSelector(selectTranslations);
-    const textSegments = useSelector(selectTextSegments);
-    const textSegmentId = Number(params.textSegmentId);
+const TextDisplay: React.FC<{ languageId: string, order: number, original: string }> = ({ languageId, order, original }) => {
+    // const translations = useSelector(selectTranslations);
+    // const textSegments = useSelector(selectTextSegments);
 
+    const t = useSelector(selectTranslations);
+    const translations = useMemo(() => t[languageId], [languageId, t]);
+
+    // Store
     const dispatch = useDispatch();
+
+    // Util
     const divRef = useRef<HTMLDivElement>();
     const updating = useRef<boolean>(false)
     const once = useRef<boolean>(false);
     const [scroll, setScroll] = useState<boolean>(false);
     const pos = useRef<number>(0);
-    const canGoUp = useRef<boolean>(true);
+    const scrollToTop = useRef<number>(0);
+    const upper = useRef<Boolean>(false);
 
-    const [text, setText] = useState<{ id: number, order: number }[]>([]);
-
-    const [actions, setActions] = useState<GetActionDto[]>();
-
-    const translationChanges = useSelector(selectTranslationChanges);
-    const textChanges = useSelector(selectTextChanges);
-
-    const [query, setQuery] = useSearchParams();
-    const languageId = useMemo(() => Number(query.get('languageId')), [query]);
-    const translationId = useMemo(() => textSegments[textSegmentId]?.translationIds[languageId], [textSegmentId, textSegments, languageId])
+    const upperEndRef = useRef();
+    const lowerEndRef = useRef();
 
 
-
-    function expandDown() {
-        if (updating.current) return;
+    const expandDown = useCallback(async () => {
+        if (updating.current || !translations) return;
         updating.current = true;
 
-        const startIndex = text[text.length - 1].id;
+        const start = translations[translations.length - 1];
+        const startIndex = start.order;
 
-        if (!startIndex) {
+
+
+        api.getTextSegment(languageId, startIndex + 1, { nextMinLength: 50 }).then(([response, _]) => {
+            dispatch(putTranslations({ translations: response, language: languageId }))
+        }).catch(() => updating.current = false)
+
+        if (original != languageId)
+            api.getTextSegment(original, startIndex + 1, { nextMinLength: 50 }).then(([response, _]) => {
+                dispatch(putTranslations({ translations: response, language: original }))
+            })
+
+    }, [translations])
+
+    const expandUp = useCallback(async () => {
+        if (updating.current || !translations) return;
+        updating.current = true;
+
+        const start = translations[0];
+        const startIndex = start.order;
+
+        if (start.order === 0) {
             updating.current = false
             return;
         }
 
-        api.getTextSegment(startIndex, { nextMinLength: 50 }).then(([response, _]) => {
-            dispatch(putTextSegments(response.map(segment => ({ ...segment, translationIds: {} }))))
+        // TODO: make file have max order
+        // if (start.order) {
+        //     updating.current = false
+        //     canGoUp.current = false
+        //     return;
+        // }
+
+
+
+        api.getTextSegment(languageId, startIndex - 1, { prevMinLength: 50 }).then(([response, _]) => {
+            dispatch(putTranslations({ translations: response, language: languageId }))
         }).catch(() => updating.current = false)
 
-    }
-
-    function expandUp() {
-        if (updating.current) return;
-        updating.current = true;
-
-        const startIndex = text[0].id;
-
-        if (!startIndex) {
-            updating.current = false
-            canGoUp.current = false
-            return;
-        }
-
-        api.getTextSegment(startIndex, { prevMinLength: 50 }).then(([response, _]) => {
-            dispatch(putTextSegments(response.map(segment => ({ ...segment, translationIds: {} }))))
-        }).catch(() => updating.current = false)
-    }
-
-    useEffect(() => {
-        api.getActions(textSegmentId, languageId).then(([response, _]) => {
-            setActions(response);
-        })
-    }, [textSegmentId, languageId])
-
-
-    useEffect(() => {
-        if (!textSegmentId)
-            return;
-        // Check if our `TextPiece` is already loaded.
-        // If not - fetch it.
-        if (!(textSegmentId in textSegments)) {
-            api.getTextSegment(textSegmentId, { nextMinLength: 50, prevMinLength: 50 }).then(([response, _]) => {
-                dispatch(putTextSegments(response.map(segment => ({ ...segment, translationIds: {} }))));
+        if (original != languageId)
+            api.getTextSegment(original, startIndex - 1, { prevMinLength: 50 }).then(([response, _]) => {
+                dispatch(putTranslations({ translations: response, language: original }))
             })
-
-            return;
-        }
-
-    }, [textSegmentId]);
-
-    useEffect(() => {
-        dispatch(clearTranslations());
-    }, [languageId])
-
-    useEffect(() => {
-        setText(Object.values(textSegments).map(segment => ({ id: segment.id, order: segment.order })).sort((a, b) => a.order - b.order));
-        if (!languageId)
-            return;
+    }, [translations])
 
 
+    const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                if (e.target.id == 'upper') {
+                    console.log('upper')
+                    const toTop = divRef.current.scrollHeight - divRef.current.scrollTop - divRef.current.clientHeight;
+                    upper.current = true;
+                    scrollToTop.current = toTop;
+                    expandUp().catch(() => updating.current = false);
+                }
 
-        const missingTranslations = Object.values(textSegments).filter(segment => segment.shouldTranslate && !segment.translationIds[languageId]).map(segment => Number(segment.id));
-        if (missingTranslations.length > 0) {
-            api.getTranslations({ languageId: languageId.toString(), textSegmentsIds: missingTranslations }).then(([response, _]) => {
-                dispatch(putTranslations(response.map(translation => ({ id: translation.id, translation: translation }))));
-                dispatch(addTranslations(response.map(translation => ({ languageId: languageId, textSegmentId: translation.textSegmentId, translationId: translation.id }))));
-            })
-
-            return;
-        }
-    }, [textSegments, languageId])
-
-    function handleScroll(event) {
-        const e = divRef.current;
-        //console.log(e.scrollTop);
-
-
-        const toTop = e.scrollHeight - e.scrollTop - e.clientHeight
-
-        if (toTop >= 10 && e.scrollTop >= 10) {
-            pos.current = toTop;
-            if (!once.current) {
-                once.current = true;
+                if (e.target.id == 'lower') {
+                    expandDown().catch(() => updating.current = false);
+                }
             }
-        }
-
-
-        if (e.scrollTop < 10) {
-            if (once.current && canGoUp.current)
-                divRef.current.scrollTop = e.scrollHeight - pos.current - e.clientHeight;
-
-            expandUp()
-        }
-
-        if (toTop < 10) {
-            expandDown()
-        }
-    }
+        })
+    }, [expandUp, expandDown]);
 
     useEffect(() => {
+        const option = {
+            root: null,
+            rootMargin: "20px",
+            threshold: 0
+        };
+
+        const observer = new IntersectionObserver(handleObserver, option);
+        observer.observe(upperEndRef.current);
+        observer.observe(lowerEndRef.current);
+
+        return () => observer.disconnect();
+
+
+    }, [handleObserver]);
+
+    useEffect(() => {
+        if (upper.current || scroll) {
+            divRef.current.scrollTop = divRef.current.scrollHeight - scrollToTop.current - divRef.current.clientHeight;
+        }
+
+        upper.current = false;
         updating.current = false;
-    }, [textSegments])
+    }, [translations])
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const textChange = textChanges[textSegmentId];
-        const translationChange = translationChanges[translationId];
-
-        let arr: PostActionDto[] = [];
-        if (textChange) {
-            arr.push({ change: textChange.text, textSegmentId: textSegmentId, comment: '' })
-        }
-
-        if (translationChange) {
-            arr.push({ languageId: Number(languageId), textSegmentId: textSegmentId, change: translationChange.translationText, comment: '' })
-        }
-
-        api.postActions(arr).then(() => {
-            window.location.reload();
-        })
-    }
-
-    return <div style={{ display: "flex", flexDirection: "row", flex: "1 1 auto" }}>
-        <div style={{ width: "100%" }}>
-            <>
-                <form onSubmit={(e) => handleSubmit(e)}>
-
-                    {textSegmentId in textSegments &&
-                        <div>
-                            <h3>Перевод до:</h3>
-                            <textarea onChange={e => dispatch(putTextChanges([{ id: textSegmentId, textSegment: { comment: "", text: e.target.value } }]))}
-                                value={textSegmentId in textChanges ? textChanges[textSegmentId].text : textSegments[textSegmentId].text} />
-                        </div>}
-
-                    {translationId && translationId in translations && <div>
-                        <h3>Перевод после:</h3>
-                        <textarea onChange={e => dispatch(putTranslationChanges([{ id: translationId, translation: { translationText: e.target.value, comment: "" } }]))}
-                            value={translationId in translationChanges ? translationChanges[translationId].translationText : translations[translationId].translationText} />
-                    </div>}
-                    <button type="submit">Отправить измеения</button>
-                </form>
-
-            </>
-            {actions && (
-                <>
-                    <h3>История изменений: </h3>
-                    {actions.map(edit =>
-                        <div>
-                            <h5>Автор:</h5>
-                            {/* <Link to={`/profile/${edit.author.id}`}> {edit.author.name} </Link> */}
-                            <h5>Изменение:</h5>
-                            {edit.change}
-                            <h5>Заметка:</h5>
-                            {edit.comment}
-                        </div>
-                    )}
-                </>
-            )}
-
-        </div>
-
-
-        <div onScroll={e => handleScroll(e)} ref={divRef} style={{ width: "100%", bottom: 0, height: "90vh", overflowY: "scroll", whiteSpace: "pre-wrap", position: "relative" }} >
-            {text && text.map((value, index) => {
-                return <TextPiece scroll={scroll} setScroll={index < text.length - 1 ? () => { } : () => {
-                    setScroll(true);
-                }} key={value.id.toString()} id={value.id} />;
-            })}
-        </div>
+    return <div ref={divRef} style={{ width: "100%", bottom: 0, height: "90vh", overflowY: "scroll", whiteSpace: "pre-wrap", position: "relative" }} >
+        <div id='upper' ref={upperEndRef}></div>
+        {translations && translations.map((value, index) => {
+            return <TextPiece scroll={scroll} setScroll={index < translations.length - 1 ? () => { } : () => {
+                setScroll(true);
+            }} key={value.id.toString()} selectedOrder={order} order={value.order} languageId={languageId} original={original} />;
+        })}
+        <div id='lower' ref={lowerEndRef}></div>
     </div>
 }
 

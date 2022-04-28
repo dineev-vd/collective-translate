@@ -16,6 +16,10 @@ export class TranslationService {
     private readonly actionsRepository: Repository<Action>,
   ) { }
 
+  getOne(id: string) {
+    return this.pieceRepository.findOne(id);
+  }
+
   getPieces(ids: string[]): Promise<SegmentTranslation[]> {
     return this.pieceRepository.findByIds(ids);
   }
@@ -24,14 +28,14 @@ export class TranslationService {
     const filter: DeepPartial<SegmentTranslation> = {}
 
     if (params.languageId) {
-      filter.translationLanguage.id = Number(params.languageId);
+      filter.translationLanguage = { id: Number(params.languageId) };
     }
 
     if (params.fileId) {
-      filter.file.id = Number(params.fileId);
+      filter.file = { id: Number(params.fileId) };
     }
 
-    if (params.shouldTranslate !== null) {
+    if (params.shouldTranslate !== null && params.shouldTranslate !== undefined) {
       filter.shouldTranslate = params.shouldTranslate;
     }
 
@@ -62,7 +66,8 @@ export class TranslationService {
 
 
   async generateTranslationForFile(languageId: string, fileId: string, fromLanguageId: string) {
-    let currentBulk = await this.getTranslationsByProject({ languageId: fromLanguageId, fileId: fileId, take: 1000 });
+    let page = 1;
+    let currentBulk = await this.getTranslationsByProject({ languageId: fromLanguageId, fileId: fileId, take: 1000, page: page++ });
 
     console.log(`saving translations for ${languageId}`);
 
@@ -73,11 +78,13 @@ export class TranslationService {
         translation.translationText = piece.translationText;
         translation.order = piece.order;
         translation.shouldTranslate = piece.shouldTranslate;
+        translation.file = { id: Number(fileId) }
 
         return translation;
       });
 
       await this.pieceRepository.createQueryBuilder().insert().values(translations).execute();
+      currentBulk = await this.getTranslationsByProject({ languageId: fromLanguageId, fileId: fileId, take: 1000, page: page++ });
     }
 
     console.log('saved');
@@ -93,24 +100,31 @@ export class TranslationService {
     return this.pieceRepository.save(pieces);
   }
 
-  async getSegmentWithNeighbours(segmentId: string, params?: { prev?: number, next?: number }) {
-    const segment = await this.pieceRepository.findOne(segmentId);
+  async getSegmentWithNeighbours(languageId: string, order: number, params?: { prev?: number, next?: number }) {
+    const filter: FindCondition<SegmentTranslation> = { translationLanguage: { id: Number(languageId) }, order: order };
+    console.log(filter)
+    const segment = await this.pieceRepository.findOne(filter);
 
-    const filter: FindCondition<SegmentTranslation> = {};
 
     if (params.next && params.prev) {
-      filter.order = Between(segment.order - params.prev, segment.order + params.next);
-      return this.pieceRepository.find(filter);
+      filter.order = Between(+segment.order - +params.prev, +segment.order + +params.next);
+      console.log(filter)
+
+      return this.pieceRepository.find({ where: filter, order: { order: 'ASC' } });
     }
 
     if (params.next) {
-      filter.order = Between(segment.order, segment.order + params.next);
-      return this.pieceRepository.find(filter);
+      filter.order = Between(+segment.order, +segment.order + +params.next);
+      console.log(filter)
+
+      return this.pieceRepository.find({ where: filter, order: { order: 'ASC' } });
     }
 
     if (params.prev) {
-      filter.order = Between(segment.order - params.prev, segment.order);
-      return this.pieceRepository.find(filter);
+      filter.order = Between(+segment.order - +params.prev, +segment.order);
+      console.log(filter)
+
+      return this.pieceRepository.find({ where: filter, order: { order: 'ASC' } });
     }
 
     return [segment];
@@ -129,7 +143,15 @@ export class TranslationService {
     return arr;
   }
 
-  async generateTextSegments() {
+  async getTranslationsByOrder(languageId: string, orders: number[]) {
+    return this.pieceRepository.find({ where: { translationLanguage: languageId, order: In(orders) }, order: { order: "ASC" } })
+  }
 
+  async getProjectBySegment(segmentId: string) {
+    return (await this.pieceRepository.findOne(segmentId, { relations: ['translationLanguage', 'translationLanguage.project'] })).translationLanguage.project;
+  }
+
+  async getLanguageBySegment(segmentId: string) {
+    return (await this.pieceRepository.findOne(segmentId, { relations: ['translationLanguage'] })).translationLanguage;
   }
 }

@@ -27,7 +27,7 @@ const LanguageDetails: React.FC = () => {
         })
     }
 
-    return <>
+    return <div style={{"width": "100%"}}>
         {language && (
             <div>
                 <h3>{language.language}</h3>
@@ -38,7 +38,7 @@ const LanguageDetails: React.FC = () => {
                 <button onClick={handleAssemble}>Собрать</button>
             </div>
         )}
-    </>
+    </div>
 }
 
 export default LanguageDetails;

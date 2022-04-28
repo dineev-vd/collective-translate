@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -33,7 +34,7 @@ export class ProjectController {
     private readonly filesService: FilesService,
     private readonly languageService: LanguageService,
     private readonly translationsService: TranslationService,
-  ) {}
+  ) { }
 
   @Get()
   async getProjectsByQuery(
@@ -98,6 +99,9 @@ export class ProjectController {
     @Param('id') id: string,
     @Body() language: PostTranslateLanguage,
   ) {
+    if (!language['language'])
+      throw new BadRequestException();
+
     const process = async () => {
       const originalLanguage = await this.languageService.getOriginalLanguage(id);
       const createdLanguage = await this.languageService.saveLanguage({

@@ -1,6 +1,5 @@
 import { ShortFileDto } from "@common/dto/file.dto";
 import { GetTranslateLanguage } from "@common/dto/language.dto";
-import { GetTextSegmentDto } from "@common/dto/text-piece.dto";
 import { GetTranslationDto } from "@common/dto/translate-piece.dto";
 import { api } from "api/Api";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -12,9 +11,10 @@ const TextSegments: React.FC<{}> = () => {
     const [files, setFiles] = useState<ShortFileDto[]>([]);
     const languageId = useMemo(() => searchParams.get('languageId'), [searchParams]);
     const fileId = useMemo(() => searchParams.get('fileId'), [searchParams]);
-    const [textSegments, setTextSegments] = useState<GetTextSegmentDto[]>([]);
-    const [translations, setTranslations] = useState<{ [key: number]: GetTranslationDto }>({});
+    const [textSegments, setTextSegments] = useState<GetTranslationDto[]>([]);
+    const [translations, setTranslations] = useState<GetTranslationDto[]>([]);
     const [languages, setLanguages] = useState<GetTranslateLanguage[]>([]);
+    const originalId = useMemo(() => languages.find(l => l.original)?.id, [languages])
 
     useEffect(() => {
         if (!projectId)
@@ -30,88 +30,94 @@ const TextSegments: React.FC<{}> = () => {
     }, [projectId])
 
     useEffect(() => {
-        if (fileId) {
-            api.getTextSegmentsByFile(fileId).then(([response, _]) => {
-                setTextSegments(response);
-            })
+        languages.length > 0 && handleLanguageSelect(languages[0].id);
+    }, [languages])
 
+    useEffect(() => {
+        handleSelect(-1);
+    }, [files])
+
+    useEffect(() => {
+        if (!languageId)
             return;
-        }
 
-        api.getTextSegmentsByProject(projectId).then(([response, _]) => {
+
+
+        api.getTranslationsByLanguage(languageId, { fileId: fileId }).then(([response, _]) => {
             setTextSegments(response);
         })
-
-
-    }, [projectId, fileId])
+    }, [languageId, fileId])
 
     useEffect(() => {
         if (!languageId || textSegments.length == 0) {
             return;
         }
 
-        console.log(languageId)
+        if (languageId == originalId) {
+            setTranslations([]);
+            return;
+        }
 
-        api.getTranslations({ languageId: languageId, textSegmentsIds: textSegments.map(segment => segment.id) }).then(([response, _]) => {
-            let obj = {};
-            response.forEach(trans => obj[trans.textSegmentId] = trans);
-            setTranslations(obj);
+        api.getTranslationsByOrders(languageId, textSegments.map(segment => segment.order)).then(([response, _]) => {
+            setTranslations(response);
         })
     }, [languageId, textSegments])
 
-    const handleSelect = useCallback((e) => {
+    const handleSelect = useCallback((value) => {
         const params = new URLSearchParams(searchParams);
-        if(e.currentTarget.value == -1) {
+        if (value == -1) {
             params.delete('fileId');
         } else {
-            params.set('fileId', e.currentTarget.value);
-        } 
+            params.set('fileId', value);
+        }
 
 
         setSearchParams(params);
     }, [searchParams])
 
-    const handleLanguageSelect = useCallback((e) => {
+    const handleLanguageSelect = useCallback((value) => {
         const params = new URLSearchParams(searchParams);
-        if(e.currentTarget.value == -1) {
+        if (value == -1) {
             params.delete('languageId');
         } else {
-            params.set('languageId', e.currentTarget.value);
-        } 
+            params.set('languageId', value);
+        }
 
 
         setSearchParams(params);
     }, [searchParams])
 
-    return <>
-        <select value={fileId ?? -1} onChange={handleSelect}>
-            <option value={-1}>Все</option>
+    return <div style={{ "display": "flex", "flexDirection": "column", "height": "100%", "position": "relative", "bottom": 0 }}>
+        <select value={fileId ?? -1} onChange={(e) => handleSelect(e.currentTarget.value)}>
+            <option value={-1}>Все файлы</option>
             {files && files.map(file => (
                 <option key={file.id} value={file.id}>{file.name}</option>
             ))}
         </select>
-        <select value={languageId ?? -1} onChange={handleLanguageSelect}>
-            <option value={-1}>Все</option>
+        <select value={languageId ?? -1} onChange={(e) => handleLanguageSelect(e.currentTarget.value)}>
             {languages && languages.map(language => (
                 <option key={language.id} value={language.id}>{language.language}</option>
             ))}
         </select>
 
-        {textSegments && textSegments.map((segment, index) => (
-            <div key={segment.id} style={{ display: "flex", flex: "1 1 auto", flexDirection: "column", border: "1px solid black", borderRadius: "10px" }}>
-
-                <Link to={`/translate/${segment.id.toString()}?languageId=${languageId}`}><h4>Перейти</h4></Link>
-                <div style={{ width: "100%" }}>
-                    Текст до:
-                    <input style={{ width: "100%", boxSizing: "border-box" }} value={segment.text} disabled />
-                </div>
-                {languageId && (translations[segment.id]) && <div style={{ width: "100%" }}>
-                    Текст после:
-                    <input style={{ width: "100%", boxSizing: "border-box" }} value={translations[segment.id].translationText} disabled />
-                </div>}
+        <div style={{"overflowY": "scroll", "flex": "1 1 100px"}}>
+            <div style={{ "maxHeight":"100%" }}>
+                {textSegments && textSegments.map((segment, index) => (
+                    <div key={segment.id} style={{ display: "flex", flex: "1 1 auto", flexDirection: "column", border: "1px solid black", borderRadius: "10px" }}>
+                        <Link to={`/translate/${segment.id.toString()}?languageId=${languageId}`}><h4>Перейти</h4></Link>
+                        <div style={{ width: "100%" }}>
+                            Текст до:
+                            <input style={{ width: "100%", boxSizing: "border-box" }} value={segment.translationText} disabled />
+                        </div>
+                        {translations.length > 0 && <div style={{ width: "100%" }}>
+                            Текст после:
+                            <input style={{ width: "100%", boxSizing: "border-box" }} value={translations[index].translationText} disabled />
+                        </div>}
+                    </div>
+                ))}
             </div>
-        ))}
-    </>
+        </div>
+    </div>
 }
 
 export default TextSegments;
