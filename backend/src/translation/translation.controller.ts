@@ -19,9 +19,15 @@ export class PiecesController {
     @Param('id') id: string,
     @Query('nextMinLength') nextMinLength?: number,
     @Query('prevMinLength') prevMinLength?: number,
-    @Query('toLanguageId') toLanguageId?: number
+    @Query('toLanguageId') toLanguageId?: number,
+    @Query('withOriginal') withOriginal?: Boolean
   ) {
-    return this.translationService.getSegmentWithNeighbours(id, { prev: prevMinLength, next: nextMinLength, toLanguageId: toLanguageId });
+    return this.translationService.getSegmentWithNeighbours(id, { 
+      prev: prevMinLength, 
+      next: nextMinLength, 
+      toLanguageId: toLanguageId,
+      withOriginal: withOriginal
+     });
   }
 
   @Get(':id/actions')

@@ -12,8 +12,7 @@ export class TranslationService {
     @InjectRepository(SegmentTranslation)
     private pieceRepository: Repository<SegmentTranslation>,
     // TODO: Replace with service
-    @InjectRepository(Action)
-    private readonly actionsRepository: Repository<Action>,
+    private languageService: LanguageService
   ) { }
 
   getOne(id: string) {
@@ -115,7 +114,7 @@ export class TranslationService {
     return this.pieceRepository.save(pieces);
   }
 
-  async getSegmentWithNeighbours(id: string, params?: { prev?: number, next?: number, toLanguageId?: number }) {
+  async getSegmentWithNeighbours(id: string, params?: { prev?: number, next?: number, toLanguageId?: number, withOriginal?: Boolean }) {
     const segment = await this.pieceRepository.findOne(id);
 
     if (!segment) {
@@ -126,22 +125,17 @@ export class TranslationService {
 
     if (params.next && params.prev) {
       filter.order = Between(+filter.order - +params.prev, +filter.order + +params.next);
-
-      return this.pieceRepository.find({ where: filter, order: { order: 'ASC' } });
-    }
-
-    if (params.next) {
+    } else if (params.next) {
       filter.order = Between(+filter.order, +filter.order + +params.next);
-      console.log(filter)
-
-      return this.pieceRepository.find({ where: filter, order: { order: 'ASC' } });
+    } else if (params.prev) {
+      filter.order = Between(+filter.order - +params.prev, +filter.order);
     }
 
-    if (params.prev) {
-      filter.order = Between(+filter.order - +params.prev, +filter.order);
-      console.log(filter)
+    const result = await this.pieceRepository.find({ where: filter });
 
-      return this.pieceRepository.find({ where: filter, order: { order: 'ASC' } });
+    if (params.withOriginal) {
+      const original = await this.getOriginalBySegment(id);
+      return result.map(segment => ({ ...segment, original: original }))
     }
 
     return this.pieceRepository.find({ where: filter });
@@ -170,5 +164,10 @@ export class TranslationService {
 
   async getLanguageBySegment(segmentId: string) {
     return (await this.pieceRepository.findOne(segmentId, { relations: ['translationLanguage'] })).translationLanguage;
+  }
+
+  async getOriginalBySegment(segmentId: string) {
+    const project = await this.getProjectBySegment(segmentId);
+    return this.languageService.getTranslationLanguagesByProjectId(project.id.toString());
   }
 }
