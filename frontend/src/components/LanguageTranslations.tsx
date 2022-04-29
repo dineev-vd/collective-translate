@@ -88,17 +88,19 @@ const TextSegments: React.FC<{}> = () => {
     }, [searchParams])
 
     return <div style={{ "display": "flex", "flexDirection": "column", "height": "100%", "position": "relative", "bottom": 0 }}>
-        <select value={fileId ?? -1} onChange={(e) => handleSelect(e.currentTarget.value)}>
-            <option value={-1}>Все файлы</option>
-            {files && files.map(file => (
-                <option key={file.id} value={file.id}>{file.name}</option>
-            ))}
-        </select>
-        <select value={languageId ?? -1} onChange={(e) => handleLanguageSelect(e.currentTarget.value)}>
-            {languages && languages.map(language => (
-                <option key={language.id} value={language.id}>{language.language}</option>
-            ))}
-        </select>
+        <div>
+            <select value={fileId ?? -1} onChange={(e) => handleSelect(e.currentTarget.value)}>
+                <option value={-1}>Все файлы</option>
+                {files && files.map(file => (
+                    <option key={file.id} value={file.id}>{file.name}</option>
+                ))}
+            </select>
+            <select value={languageId ?? -1} onChange={(e) => handleLanguageSelect(e.currentTarget.value)}>
+                {languages && languages.map(language => (
+                    <option key={language.id} value={language.id}>{language.language}</option>
+                ))}
+            </select>
+        </div>
 
         <div style={{"overflowY": "scroll", "flex": "1 1 100px"}}>
             <div style={{ "maxHeight":"100%" }}>

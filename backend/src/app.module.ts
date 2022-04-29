@@ -17,6 +17,8 @@ import { Comment } from 'entities/comment.entity';
 import { CommentModule } from './comment/comment.module';
 import { Assembly } from 'entities/assembly.entity';
 import { AssemblyModule } from './assembly/assembly.module';
+import { RegularExpression } from 'entities/regexp.entity';
+import { RegexpModule } from './regexp/regexp.module';
 
 const {
   POSTGRES_HOST,
@@ -48,6 +50,7 @@ const {
         Comment,
         TranslationLanguage,
         Assembly,
+        RegularExpression
       ],
     }),
     ProjectModule,
@@ -59,6 +62,7 @@ const {
     FilesModule,
     CommentModule,
     AssemblyModule,
+    RegexpModule,
   ],
   controllers: [],
   providers: [],

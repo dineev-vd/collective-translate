@@ -12,15 +12,16 @@ export class PiecesController {
     private readonly actionsService: ActionsService,
     private readonly translationService: TranslationService,
     private readonly languageService: LanguageService
-    ) { }
-  
-
+  ) { }
 
   @Get(':id')
-  async getById(
-    @Param('id') id: string
+  async getTextPieceById(
+    @Param('id') id: string,
+    @Query('nextMinLength') nextMinLength?: number,
+    @Query('prevMinLength') prevMinLength?: number,
+    @Query('toLanguageId') toLanguageId?: number
   ) {
-    return this.translationService.getOne(id);
+    return this.translationService.getSegmentWithNeighbours(id, { prev: prevMinLength, next: nextMinLength, toLanguageId: toLanguageId });
   }
 
   @Get(':id/actions')

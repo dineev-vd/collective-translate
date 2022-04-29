@@ -11,6 +11,8 @@ import { TranslationLanguage } from 'entities/translation-language.entity';
 import { Language } from 'common/enums';
 import { FilesService } from 'files/files.service';
 import { TranslationService } from 'translation/translation.service';
+import { LanguageService } from 'language/language.service';
+import { PostTranslateLanguage } from 'common/dto/language.dto';
 
 @Injectable()
 export class ProjectService implements OnApplicationBootstrap {
@@ -46,6 +48,7 @@ export class ProjectService implements OnApplicationBootstrap {
       const insertedProject = await this.projectRepository.save(project);
 
       await this.fileService.splitFile(insertedProject.files[0].id.toString());
+      await this.kek(insertedProject.id.toString(), { language: Language.ENGLISH });
     }
   }
 
@@ -53,7 +56,27 @@ export class ProjectService implements OnApplicationBootstrap {
     @InjectRepository(Project)
     private projectRepository: Repository<Project>,
     private fileService: FilesService,
+    private languageService: LanguageService,
+    private translationsService: TranslationService
   ) { }
+
+  async kek(id: string, language: PostTranslateLanguage) {
+    const originalLanguage = await this.languageService.getOriginalLanguage(id);
+    const createdLanguage = await this.languageService.saveLanguage({
+      ...language,
+      project: { id: Number(id) },
+    });
+    const files = await this.fileService.getFilesByProject(id);
+    await Promise.all(
+      files.map((file) =>
+        this.translationsService.generateTranslationForFile(
+          createdLanguage.id.toString(),
+          file.id.toString(),
+          originalLanguage.id.toString()
+        ),
+      ),
+    );
+  }
 
   async findProjectsByQuery(query: string) {
     return this.projectRepository.find({

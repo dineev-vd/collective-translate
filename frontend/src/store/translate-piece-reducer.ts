@@ -33,34 +33,53 @@ export const translationsSlice = createSlice({
             const language = action.payload.language;
 
             if (state.translations[language] && state.translations[language].length > 0) {
-                if (translations.length === 0)
-                    return;
 
-                const length = state.translations[language].length;
-                if (translations[0].order > state.translations[language][length - 1].order + 1)
-                    return;
+                const final = [...translations, ...state.translations[language]].filter((v, i, a) => a.findIndex(c => c.order === v.order) === i).sort((a, b) => a.order - b.order);
 
-                if (translations[translations.length - 1].order < state.translations[language][0].order - 1)
-                    return;
-
-                if (translations[0].order === state.translations[language][length - 1].order + 1) {
-                    state.translations[language] = [...state.translations[language], ...translations];
+                if (final[0].order == state.translations[language][0].order && final.length > 300) {
+                    state.translations[language] = final.slice(100, final.length);
                     return;
                 }
 
-                if (translations[translations.length - 1].order === state.translations[language][0].order - 1) {
-                    state.translations[language] = [...translations, ...state.translations[language]];
+                if (final[final.length - 1].order == state.translations[language][state.translations[language].length - 1].order && final.length > 300) {
+                    state.translations[language] = final.slice(0, final.length - 100);
                     return;
                 }
 
+                state.translations[language] = final;
 
-                const right = state.translations[language].findIndex(t => t.order === translations[translations.length - 1].order);
-                const left = state.translations[language].findIndex(t => t.order === translations[0].order);
-                state.translations[language] = [
-                    ...state.translations[language].slice(0, left),
-                    ...translations,
-                    ...state.translations[language].slice(right + 1, length)
-                ]
+                // if (translations.length === 0)
+                //     return;
+
+                // if(translations.length > state.translations[language].length) {
+                //     state.translations[language] = translations;
+                //     return;
+                // }
+
+                // const length = state.translations[language].length;
+                // if (translations[0].order > state.translations[language][length - 1].order + 1)
+                //     return;
+
+                // if (translations[translations.length - 1].order < state.translations[language][0].order - 1)
+                //     return;
+
+                // if (translations[0].order === state.translations[language][length - 1].order + 1) {
+                //     state.translations[language] = [...state.translations[language], ...translations];
+                //     return;
+                // }
+
+                // if (translations[translations.length - 1].order === state.translations[language][0].order - 1) {
+                //     state.translations[language] = [...translations, ...state.translations[language]];
+                //     return;
+                // }
+
+                // const right = state.translations[language].findIndex(t => t.order === translations[translations.length - 1].order);
+                // const left = state.translations[language].findIndex(t => t.order === translations[0].order);
+                // state.translations[language] = [
+                //     ...state.translations[language].slice(0, left),
+                //     ...translations,
+                //     ...state.translations[language].slice(right + 1, length)
+                // ]
 
                 return;
             }

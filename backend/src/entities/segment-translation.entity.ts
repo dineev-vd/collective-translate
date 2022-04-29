@@ -34,6 +34,9 @@ class SegmentTranslation {
   )
   file: File;
 
+  @RelationId((segment: SegmentTranslation) => segment.file)
+  fileId: number;
+
   @Column()
   order: number;
 

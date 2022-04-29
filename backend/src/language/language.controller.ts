@@ -18,15 +18,7 @@ export class LanguageController {
     return this.languageService.getTranslationLanguageById(id);
   }
 
-  @Get(':id/order/:order')
-  async getTextPieceById(
-    @Param('id') id: string,
-    @Param('order') order: number,
-    @Query('nextMinLength') nextMinLength?: number,
-    @Query('prevMinLength') prevMinLength?: number,
-  ) {
-    return this.translationsService.getSegmentWithNeighbours(id, Number(order), { prev: prevMinLength, next: nextMinLength });
-  }
+  
 
   @Get(':id/translations-orders') 
   async getTranslationsByOrder(

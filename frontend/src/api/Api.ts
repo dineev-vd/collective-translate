@@ -133,8 +133,8 @@ class ApiClass {
         return this.getJson<GetTranslationDto>(uri);
     }
 
-    async getTextSegment(languageId: string, order: number, params: { nextMinLength?: number, prevMinLength?: number }) {
-        const uri = this.makeUri([LANGUAGE_ENDPOINT, languageId, 'order', order], params);
+    async getTextSegment(id: number, params?: { nextMinLength?: number, prevMinLength?: number, toLanguageId?: string }) {
+        const uri = this.makeUri([TRANSLATION_ENDPOINT, id], params);
         return this.getJson<GetTranslationDto[]>(uri);
     }
 

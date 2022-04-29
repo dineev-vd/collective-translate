@@ -9,11 +9,12 @@ import { appendTranslations, clearTranslations, prependTranslations, putTranslat
 import { isConstructorDeclaration } from "typescript";
 import TextPiece from "./TextPiece";
 
-const TextDisplay: React.FC<{ languageId: string, order: number, original: string }> = ({ languageId, order, original }) => {
+const TextDisplay: React.FC<{ languageId: string, order: number, originalLanguageId: string }> = ({ languageId, order, originalLanguageId }) => {
     // const translations = useSelector(selectTranslations);
     // const textSegments = useSelector(selectTextSegments);
 
     const t = useSelector(selectTranslations);
+    const originalTranslations = useMemo(() => t[originalLanguageId], [originalLanguageId, t]);
     const translations = useMemo(() => t[languageId], [languageId, t]);
 
     // Store
@@ -21,7 +22,8 @@ const TextDisplay: React.FC<{ languageId: string, order: number, original: strin
 
     // Util
     const divRef = useRef<HTMLDivElement>();
-    const updating = useRef<boolean>(false)
+    const updatingUp = useRef<boolean>(false)
+    const updatingDown = useRef<boolean>(false)
     const once = useRef<boolean>(false);
     const [scroll, setScroll] = useState<boolean>(false);
     const pos = useRef<number>(0);
@@ -31,36 +33,52 @@ const TextDisplay: React.FC<{ languageId: string, order: number, original: strin
     const upperEndRef = useRef();
     const lowerEndRef = useRef();
 
+    const canGoUp = useRef(true);
+    const canGoDown = useRef(true);
+
 
     const expandDown = useCallback(async () => {
-        if (updating.current || !translations) return;
-        updating.current = true;
+        if (updatingDown.current || !originalTranslations) return;
+        updatingDown.current = true;
 
-        const start = translations[translations.length - 1];
-        const startIndex = start.order;
-
+        const start = originalTranslations[originalTranslations.length - 1];
 
 
-        api.getTextSegment(languageId, startIndex + 1, { nextMinLength: 50 }).then(([response, _]) => {
-            dispatch(putTranslations({ translations: response, language: languageId }))
-        }).catch(() => updating.current = false)
+        api.getTextSegment(start.id, { nextMinLength: 50 }).then(([response, _]) => {
+            if(response.length == 1) {
+                canGoDown.current = false;
+            }
+            dispatch(putTranslations({ translations: response, language: originalLanguageId }))
 
-        if (original != languageId)
-            api.getTextSegment(original, startIndex + 1, { nextMinLength: 50 }).then(([response, _]) => {
-                dispatch(putTranslations({ translations: response, language: original }))
-            })
+            if (languageId && originalLanguageId != languageId) {
+                api.getTextSegment(start.id, { nextMinLength: 50, toLanguageId: languageId }).then(([transResponse, _]) => {
+                    const toInput = response.map(orig => transResponse.find(trans => trans.order == orig.order) ?? orig)
+                    dispatch(putTranslations({ translations: toInput, language: languageId }))
+                }).catch(() => updatingDown.current = false)
+            }
+        })
 
-    }, [translations])
+
+
+        // api.getTextSegment(start.id,  { nextMinLength: 50 }).then(([response, _]) => {
+        //     dispatch(putTranslations({ translations: response, language: languageId }))
+        // }).catch(() => updating.current = false)
+
+        // if (original != languageId)
+        //     api.getTextSegment(start.id, { nextMinLength: 50 }).then(([response, _]) => {
+        //         dispatch(putTranslations({ translations: response, language: original }))
+        //     })
+
+    }, [originalTranslations])
 
     const expandUp = useCallback(async () => {
-        if (updating.current || !translations) return;
-        updating.current = true;
+        if (updatingUp.current || !originalTranslations) return;
+        updatingUp.current = true;
 
-        const start = translations[0];
-        const startIndex = start.order;
+        const start = originalTranslations[0];
 
         if (start.order === 0) {
-            updating.current = false
+            updatingUp.current = false
             return;
         }
 
@@ -72,16 +90,31 @@ const TextDisplay: React.FC<{ languageId: string, order: number, original: strin
         // }
 
 
+        api.getTextSegment(start.id, { prevMinLength: 50 }).then(([response, _]) => {
+            if(response.length == 1) {
+                canGoUp.current = false;
+            }
+            dispatch(putTranslations({ translations: response, language: originalLanguageId }))
 
-        api.getTextSegment(languageId, startIndex - 1, { prevMinLength: 50 }).then(([response, _]) => {
-            dispatch(putTranslations({ translations: response, language: languageId }))
-        }).catch(() => updating.current = false)
+            if (languageId && (originalLanguageId != languageId)) {
+                api.getTextSegment(start.id, { prevMinLength: 50, toLanguageId: languageId }).then(([transResponse, _]) => {
+                    const toInput = response.map(orig => transResponse.find(trans => trans.order == orig.order) ?? orig)
+                    dispatch(putTranslations({ translations: toInput, language: languageId }))
+                }).catch(() => updatingUp.current = false)
+            }
+        })
 
-        if (original != languageId)
-            api.getTextSegment(original, startIndex - 1, { prevMinLength: 50 }).then(([response, _]) => {
-                dispatch(putTranslations({ translations: response, language: original }))
-            })
-    }, [translations])
+
+
+        //     api.getTextSegment(start.id, { prevMinLength: 50 }).then(([response, _]) => {
+        //         dispatch(putTranslations({ translations: response, language: languageId }))
+        //     }).catch(() => updating.current = false)
+
+        //     if (original != languageId)
+        //         api.getTextSegment(start.id, { prevMinLength: 50 }).then(([response, _]) => {
+        //             dispatch(putTranslations({ translations: response, language: original }))
+        //         })
+    }, [originalTranslations])
 
 
     const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
@@ -92,47 +125,82 @@ const TextDisplay: React.FC<{ languageId: string, order: number, original: strin
                     const toTop = divRef.current.scrollHeight - divRef.current.scrollTop - divRef.current.clientHeight;
                     upper.current = true;
                     scrollToTop.current = toTop;
-                    expandUp().catch(() => updating.current = false);
+                    expandUp().catch(() => updatingUp.current = false);
                 }
 
                 if (e.target.id == 'lower') {
-                    expandDown().catch(() => updating.current = false);
+                    expandDown().catch(() => updatingDown.current = false);
                 }
             }
         })
     }, [expandUp, expandDown]);
 
     useEffect(() => {
-        const option = {
-            root: null,
-            rootMargin: "20px",
-            threshold: 0
-        };
+        expandDown();
+        expandUp();
+    }, [])
 
-        const observer = new IntersectionObserver(handleObserver, option);
-        observer.observe(upperEndRef.current);
-        observer.observe(lowerEndRef.current);
+    // useEffect(() => {
+    //     const option = {
+    //         root: null,
+    //         rootMargin: "20px",
+    //         threshold: 0
+    //     };
 
-        return () => observer.disconnect();
+    //     const observer = new IntersectionObserver(handleObserver, option);
+    //     if (canGoUp.current)
+    //         observer.observe(upperEndRef.current);
+    //     if (canGoDown.current)
+    //         observer.observe(lowerEndRef.current);
+
+    //     return () => observer.disconnect();
+    // }, [handleObserver]);
+
+    function handleScroll(event) {
+        const e = divRef.current;
+        //console.log(e.scrollTop);
 
 
-    }, [handleObserver]);
+        const toTop = e.scrollHeight - e.scrollTop - e.clientHeight
 
-    useEffect(() => {
-        if (upper.current || scroll) {
-            divRef.current.scrollTop = divRef.current.scrollHeight - scrollToTop.current - divRef.current.clientHeight;
+        if (toTop >= 10 && e.scrollTop >= 10) {
+            pos.current = toTop;
+            if (!once.current) {
+                once.current = true;
+            }
         }
 
-        upper.current = false;
-        updating.current = false;
-    }, [translations])
 
-    return <div ref={divRef} style={{ width: "100%", bottom: 0, height: "90vh", overflowY: "scroll", whiteSpace: "pre-wrap", position: "relative" }} >
+        if (e.scrollTop < 10) {
+            if (once.current && canGoUp.current)
+                divRef.current.scrollTop = e.scrollHeight - pos.current - e.clientHeight;
+
+            expandUp()
+        }
+
+        if (toTop < 10) {
+            expandDown()
+        }
+    }
+
+    useEffect(() => {
+        // if (upper.current || scroll) {
+        //     divRef.current.scrollTop = divRef.current.scrollHeight - scrollToTop.current - divRef.current.clientHeight;
+        // }
+
+        upper.current = false;
+        updatingUp.current = false;
+        updatingDown.current = false;
+    }, [originalTranslations])
+
+    return <div onScroll={handleScroll} ref={divRef} style={{ width: "100%", bottom: 0, height: "90vh", overflowY: "scroll", whiteSpace: "pre-wrap", position: "relative" }} >
         <div id='upper' ref={upperEndRef}></div>
-        {translations && translations.map((value, index) => {
-            return <TextPiece scroll={scroll} setScroll={index < translations.length - 1 ? () => { } : () => {
+        {originalTranslations && originalTranslations.length > 1 && originalTranslations.map((value, index) => {
+            return <TextPiece scroll={scroll} setScroll={index < originalTranslations.length - 1 ? () => { } : () => {
                 setScroll(true);
-            }} key={value.id.toString()} selectedOrder={order} order={value.order} languageId={languageId} original={original} />;
+                
+
+            }} key={value.id.toString()} selectedOrder={order} order={value.order} languageId={languageId} originalLanguageId={originalLanguageId} />;
         })}
         <div id='lower' ref={lowerEndRef}></div>
     </div>

@@ -28,6 +28,7 @@ export class ActionsService {
       action.comment = change.comment;
     }
 
+    await this.translationsService.savePiece({ id: change.textSegmentId, translationText: change.change })
     return this.actionsRepository.save(action);
   }
 

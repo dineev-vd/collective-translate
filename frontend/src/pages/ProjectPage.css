@@ -6,16 +6,23 @@
     height: 100%;
 }
 
-.project-page_content, .project-page_nav {
-    padding: 10px;
+.project-page_nav {
+    display: flex;
+    margin-bottom: -1px;
 }
 
 .project-page_nav > :not(:first-child){
-    margin-left: 5px;
+    margin-left: 10px;
+}
+
+.project-page_nav > :first-child {
+    margin-left: 20px;
 }
 
 .project-page_content {
     border: 1px solid gray;
     border-radius: 10px;
     height: 100%;
+    background-color: white;
+    padding: 20px
 }

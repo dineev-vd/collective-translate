@@ -6,6 +6,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useSearchParams } from "react-router-dom";
 import { appendTranslations, putTranslationChanges, putTranslations, selectTranslationChanges, selectTranslations } from "store/translate-piece-reducer";
+import "./TranslatePiecePage.css";
+
 
 const TranslationPage: React.FC<{}> = () => {
     const params = useParams<string>();
@@ -28,47 +30,40 @@ const TranslationPage: React.FC<{}> = () => {
     const [actions, setActions] = useState<GetActionDto[]>([]);
     const [order, setOrder] = useState<number>();
     //const languageId = Number(params.languageId);
-    const segment = useMemo(() => translations && translations[order - translations[0]?.order], [translations, order])
+    const segment = useMemo(() => {
+        if (languageId == original?.id)
+            return undefined;
+
+        return translations && translations[order - translations[0]?.order]
+    }, [translations, order, original, languageId])
     const originalSegment = useMemo(() => originalTranslations && originalTranslations[order - originalTranslations[0]?.order], [originalTranslations, translations, order])
 
     useEffect(() => {
         if (!segmentId)
             return;
 
-        api.getLanguagesBySegment(segmentId).then(([response, _]) => {
-            setLanguages(response);
-        })
-
-        api.getLanguageBySegment(segmentId).then(([response, _]) => {
-            setLanguageId(response.id.toString());
+        api.getLanguagesBySegment(segmentId).then(([languages, _]) => {
+            setLanguages(languages);
+            api.getLanguageBySegment(segmentId).then(([langResponse, _]) => {
+                setLanguageId(langResponse.id.toString());
+                api.getTextSegment(+segmentId).then(([[response], _]) => {
+                    dispatch(putTranslations({ language: langResponse.id, translations: [response] }))
+                    setOrder(response.order);
+                })
+            })
         })
 
     }, [segmentId])
 
     useEffect(() => {
-        if (!segmentId || !languageId)
+        if (originalSegment || !original || !segmentId)
             return;
 
-        api.getTranslation(segmentId).then(([response, _]) => {
-            dispatch(putTranslations({ language: languageId, translations: [response] }))
-            setOrder(response.order);
-        })
-    }, [languageId, segmentId])
-
-    useEffect(() => {
-        if (!original || (original.id.toString() === languageId) || !order)
-            return;
-
-
-
-        if (originalTranslations && originalTranslations.length > 0 && (originalTranslations[order - originalTranslations[0].order]))
-            return;
-
-        api.getTranslationsByOrders(original.id, [order]).then(([response, _]) => {
+        api.getTextSegment(+segmentId, { toLanguageId: original.id }).then(([response, _]) => {
             dispatch(putTranslations({ language: original.id, translations: response }))
         })
 
-    }, [original, order, languageId, originalTranslations])
+    }, [originalSegment, original, segmentId])
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -88,6 +83,10 @@ const TranslationPage: React.FC<{}> = () => {
             window.location.reload();
         })
     }
+
+    
+
+
 
     return <div style={{ display: "flex", flexDirection: "row", flex: "1 1 auto" }}>
         <div style={{ width: "100%" }}>
@@ -121,7 +120,7 @@ const TranslationPage: React.FC<{}> = () => {
                 </>
             )} */}
         </div>
-        {original && order !== undefined && <TextDisplay original={original.id.toString()} order={order} languageId={languageId ?? original.id.toString()} />}
+        {originalSegment && <TextDisplay originalLanguageId={original.id.toString()} order={order} languageId={languageId} />}
     </div>
 
 }

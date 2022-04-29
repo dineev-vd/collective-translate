@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  OnApplicationBootstrap,
   Param,
   Post,
   Query,
@@ -35,6 +36,7 @@ export class ProjectController {
     private readonly languageService: LanguageService,
     private readonly translationsService: TranslationService,
   ) { }
+
 
   @Get()
   async getProjectsByQuery(
@@ -101,26 +103,8 @@ export class ProjectController {
   ) {
     if (!language['language'])
       throw new BadRequestException();
-
-    const process = async () => {
-      const originalLanguage = await this.languageService.getOriginalLanguage(id);
-      const createdLanguage = await this.languageService.saveLanguage({
-        ...language,
-        project: { id: Number(id) },
-      });
-      const files = await this.filesService.getFilesByProject(id);
-      await Promise.all(
-        files.map((file) =>
-          this.translationsService.generateTranslationForFile(
-            createdLanguage.id.toString(),
-            file.id.toString(),
-            originalLanguage.id.toString()
-          ),
-        ),
-      );
-    };
-
-    process();
+      
+    this.projectService.kek(id, language);
     return 'OK';
   }
 }
