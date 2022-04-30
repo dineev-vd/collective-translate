@@ -14,7 +14,6 @@ import "./TranslatePiecePage.css";
 const TranslationPage: React.FC<{}> = () => {
     const { segmentId } = useParams<string>();
     const dispatch = useDispatch();
-    const [origSegmentId, setOrigSegmentId] = useState<string>();
 
     const translations = useSelector(selectTranslations);
     const translationChanges = useSelector(selectTranslationChanges);
@@ -73,11 +72,11 @@ const TranslationPage: React.FC<{}> = () => {
                     <button type="submit">Отправить измеения</button>
                 </div>)}
             </form>
-            {actions && (
+            {actions && actions.length > 0 && (
                 <>
                     <h3>История изменений: </h3>
                     {actions.map(edit =>
-                        <div>
+                        <div key={edit.id}>
                             {edit.author && <div>
                                 <h5>Автор:</h5>
                                 <Link to={`/profile/${edit.author.id}`}> {edit.author.name} </Link>

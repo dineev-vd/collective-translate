@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { setShouldLogin, setUser } from "store/userReducer";
 import { auth } from "./Auth";
 import { GetAssemblyDto } from '@common/dto/assembly.dto';
+import { GetRegexpDto } from '@common/dto/regexp.dto';
 
 class ApiClass {
     private dispatch: Dispatch<AnyAction>;
@@ -48,7 +49,6 @@ class ApiClass {
         const { init, tokenRequired, credentialsRequired } = options;
         const newInit = init ?? {};
         newInit.credentials = credentialsRequired ? "include" : "omit";
-        console.log(newInit);
 
         if (tokenRequired) {
             const token = auth.getAccessToken();
@@ -133,9 +133,9 @@ class ApiClass {
         return this.getJson<GetTranslationDto>(uri);
     }
 
-    async getTextSegment(id: string, params?: { 
-        nextMinLength?: number, 
-        prevMinLength?: number, 
+    async getTextSegment(id: string, params?: {
+        nextMinLength?: number,
+        prevMinLength?: number,
         toLanguageId?: string,
         withOriginal?: Boolean
     }) {
@@ -198,14 +198,14 @@ class ApiClass {
         return this.getJson<ShortFileDto[]>(uri);
     }
 
-    async getFilePeek(id: number) {
+    async getFilePeek(id: number, regexp?: string) {
         const uri = this.makeUri([FILE_ENDPOINT, id, 'peek']);
-        return this.getJson<PeekFileDto>(uri);
+        return this.postJson<PeekFileDto>(uri, { regexp: regexp });
     }
 
-    async splitFile(id: number) {
+    async splitFile(id: number, regexp?: string) {
         const uri = this.makeUri([FILE_ENDPOINT, id, 'split']);
-        return this.postJson(uri);
+        return this.postJson(uri, { regexp: regexp });
     }
 
     async getActions(segmentId: number) {
@@ -241,6 +241,11 @@ class ApiClass {
     async getAssembliesByLanguage(languageId: string) {
         const uri = this.makeUri([LANGUAGE_ENDPOINT, languageId, 'assemblies']);
         return this.getJson<GetAssemblyDto[]>(uri);
+    }
+
+    async getAllRegexps() {
+        const uri = this.makeUri(['regexp']);
+        return this.getJson<GetRegexpDto[]>(uri);
     }
 }
 

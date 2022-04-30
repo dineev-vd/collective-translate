@@ -12,13 +12,13 @@ const TextSegmentDisplay: React.FC<{ segmentId: string, originalSegmentId: strin
         navigate(`../translate/${!showOriginal ? segmentId ?? originalSegmentId : originalSegmentId ?? segmentId}`)
     }, [segmentId, originalSegmentId, showOriginal]);
 
-    return <div>
+    return <span>
         <button onClick={() => navigateToSegment()}>К сегменту</button>
         {segmentId && <button onClick={() => setShowOriginal(prev => !prev)}>#</button>}
         {!showOriginal ?
             (translations[segmentId] ? translations[segmentId].translationText : "отсутствует") :
             translations[originalSegmentId] ? translations[segmentId].translationText : "отсутствует"}
-    </div>
+    </span>
 }
 
 export default TextSegmentDisplay;

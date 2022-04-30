@@ -5,5 +5,5 @@ export class ShortFileDto {
 }
 
 export type PeekFileDto = {
-  text: string;
+  text: { marked: Boolean, text: string }[];
 };

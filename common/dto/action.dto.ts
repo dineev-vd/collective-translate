@@ -7,6 +7,7 @@ export class PostActionDto {
 }
 
 export class GetActionDto {
+  id: string;
   textSegmentId: number;
   change: string;
   comment?: string;

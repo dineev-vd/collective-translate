@@ -24,8 +24,17 @@
     padding: 10px;
     border: 1px solid gray;
     border-radius: 5px;
+    white-space: pre-wrap;
 }
 
-.file-peek_marked {
-    background-color: red;
+.file-peek_marked_1 {
+    background-color: lightsalmon;
+}
+
+.file-peek_marked_2 {
+    background-color: lightseagreen;
+}
+
+.file-peek_marked_0 {
+    background-color: lightgreen;
 }

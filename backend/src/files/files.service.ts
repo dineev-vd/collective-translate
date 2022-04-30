@@ -17,6 +17,7 @@ import { LanguageService } from 'language/language.service';
 import SegmentTranslation from 'entities/segment-translation.entity';
 import { Language } from 'entities/language.entity';
 import * as sbd from "sbd";
+import { RegularExpression } from 'entities/regexp.entity';
 
 @Injectable()
 export class FilesService {
@@ -62,7 +63,7 @@ export class FilesService {
     return this.fileRepository.save(files);
   }
 
-  async peekFileById(id: string, charsFromStart: number) {
+  async peekFileById(id: string, charsFromStart: number, regexp?: string) {
     const file = await this.fileRepository.findOne(id);
     const stream = createReadStream(file.path, {
       start: 0,
@@ -75,8 +76,17 @@ export class FilesService {
 
     const buffer = Buffer.concat(chunks);
     const fileString = iconv.decode(buffer, file.encoding);
+    const re = regexp ? new RegExp(`${decodeURI(regexp)}`, 'g') : /(.*)/g;
 
-    return { text: fileString };
+    return { text: fileString.split(re).map((value, index) => ({ marked: index % 2 !== 0, text: value })).filter(t => t.text.length > 0) };
+  }
+
+  async getFirstSegment(fileId: string) {
+    const file = await this.fileRepository.findOne(fileId);
+    const languages = await this.languageService.getTranslationLanguagesByProjectId(file.projectId.toString());
+    const originalLanguage = languages.find(l => l.original);
+
+    return this.translationsService.getFirstByFileAndLanguage(file.id.toString(), originalLanguage.id.toString());
   }
 
   async formTextSegments(
@@ -117,7 +127,9 @@ export class FilesService {
     let offset = 1;
     const params = { languageId: languageId, fileId: id, take: bulkSize };
 
-    let currentBulk = await this.translationsService.getTranslationsByProject({ ...params, page: offset++ })
+    const first = await this.getFirstSegment(id);
+
+    let currentBulk = await this.translationsService.getSegmentWithNeighbours(first.id.toString(), { next: bulkSize * offset, toLanguageId: +languageId, withOriginal: true, include: true })
 
     const fileName = crypto.randomUUID();
     const fileWrite = await fs.open(fileName, 'a+');
@@ -125,12 +137,18 @@ export class FilesService {
 
     while (currentBulk.length > 0) {
       const stringToWrite = currentBulk
-        .map((segment) => segment.translationText)
+        .map((segment) => {
+          if(segment.id) {
+            return segment.translationText;
+          }
+
+          return segment.original.translationText;
+        })
         .join('');
 
       await fileWrite.appendFile(iconv.encode(stringToWrite, file.encoding));
 
-      currentBulk = await this.translationsService.getTranslationsByProject({ ...params, page: offset++ })
+      currentBulk = await this.translationsService.getSegmentWithNeighbours(currentBulk[currentBulk.length - 1].id ? currentBulk[currentBulk.length - 1].id.toString() : currentBulk[currentBulk.length - 1].original.id.toString(), { next: bulkSize * offset, toLanguageId: +languageId, withOriginal: true })
     }
 
     await fileWrite.close();
@@ -153,7 +171,7 @@ export class FilesService {
     return this.assemblyRepository.save(assembly);
   }
 
-  async splitFile(id: string) {
+  async splitFile(id: string, regexp?: string) {
     const file = await this.fileRepository.findOne(id);
     await this.fileRepository.save({
       id: Number(id),
@@ -167,7 +185,7 @@ export class FilesService {
       const decoded = iconv.decode(fileBuffer, file.encoding);
       console.log('fileDecoded');
 
-      const reg = /(\s+[^.!?]*[.!?])/g;
+      const reg = regexp ? new RegExp(`${decodeURI(regexp)}`, 'g') : /(\s+[^.!?]*[.!?])/g;
       await this.translationsService.removeSegmentsFromFile(file.id);
 
       const original = (await this.languageService.getOriginalLanguage(file.projectId.toString()));

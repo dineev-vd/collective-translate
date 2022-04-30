@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { FILE_ENDPOINT } from 'common/constants';
 import { LanguageService } from 'language/language.service';
 import { TranslationService } from 'translation/translation.service';
@@ -12,16 +12,22 @@ export class FilesController {
     private readonly languageService: LanguageService,
   ) { }
 
-  @Get(`:id/peek`)
-  async getPeek(@Param('id') id: string) {
-    return this.filesService.peekFileById(id, 5000);
+  @Post(`:id/peek`)
+  async getPeek(
+    @Param('id') id: string,
+    @Body('regexp') regexp?: string
+  ) {
+    return this.filesService.peekFileById(id, 5000, regexp);
   }
 
   @Post(`:id/split`)
-  async splitFile(@Param('id') id: string) {
+  async splitFile(
+    @Param('id') id: string,
+    @Body('regexp') regexp?: string
+  ) {
     const process = async () => {
       const file = await this.filesService.getFileById(id);
-      await this.filesService.splitFile(id);
+      await this.filesService.splitFile(id, regexp);
       const languages =
         await this.languageService.getTranslationLanguagesByProjectId(
           file.projectId.toString(),

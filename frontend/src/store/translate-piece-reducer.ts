@@ -28,8 +28,10 @@ export const translationsSlice = createSlice({
             action.payload.forEach(translation => {
                 if (translation.original) {
                     const { original, ...withoutOriginal } = translation;
-                    state.translations[translation.original.id] = original;
-                    state.translations[translation.id] = { ...withoutOriginal, originalSegmentId: original.id }
+                    state.translations[original.id] = original;
+                    if (Object.keys(withoutOriginal).length > 0) {
+                        state.translations[translation.id] = { ...withoutOriginal, originalSegmentId: original.id }
+                    }
                     return;
                 }
 

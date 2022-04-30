@@ -15,6 +15,10 @@ export class TranslationService {
     private languageService: LanguageService
   ) { }
 
+  getFirstByFileAndLanguage(fileId: string, languageId: string) {
+    return this.pieceRepository.findOne({ where: { file: { id: fileId }, translationLanguage: { id: languageId }, order: 0 } })
+  }
+
   getOne(id: string) {
     return this.pieceRepository.findOne(id);
   }
@@ -97,6 +101,8 @@ export class TranslationService {
       //   return translation;
       // });
 
+
+
       await this.pieceRepository.createQueryBuilder().insert().values(translations).execute();
       currentBulk = await this.getTranslationsByProject({ languageId: fromLanguageId, fileId: fileId, take: 1000, page: page++ });
     }
@@ -114,7 +120,7 @@ export class TranslationService {
     return this.pieceRepository.save(pieces);
   }
 
-  async getSegmentWithNeighbours(segmentId: string, params?: { prev?: number, next?: number, toLanguageId?: number, withOriginal?: Boolean }) {
+  async getSegmentWithNeighbours(segmentId: string, params?: { prev?: number, next?: number, toLanguageId?: number, withOriginal?: Boolean, include?: Boolean }): Promise<(SegmentTranslation & {original?: SegmentTranslation})[]> {
     const segment = await this.pieceRepository.findOne(segmentId);
 
     if (!segment) {
@@ -127,14 +133,14 @@ export class TranslationService {
     if (params.next && params.prev) {
       filter.order = Between(+filter.order - +params.prev, +filter.order + +params.next);
     } else if (params.next) {
-      filter.order = Between(+filter.order + 1, +filter.order + +params.next);
+      filter.order = Between(+filter.order + 1 - (params.include ? 1 : 0), +filter.order + +params.next);
     } else if (params.prev) {
-      filter.order = Between(+filter.order - +params.prev, +filter.order - 1);
+      filter.order = Between(+filter.order - +params.prev, +filter.order - 1 + (params.include ? 1 : 0));
     }
 
     const result = await this.pieceRepository.find({ where: filter, order: { order: 'ASC' } });
 
-    if (params.withOriginal && result.length > 0) {
+    if (params.withOriginal) {
       const project = await this.getProjectBySegment(segmentId);
       const languages = await this.languageService.getTranslationLanguagesByProjectId(project.id.toString());
       const originalLanguage = languages.find(l => l.original);
@@ -183,4 +189,6 @@ export class TranslationService {
     const [originalSegment] = await this.getSegmentWithNeighbours(segmentId, { toLanguageId: orig.id });
     return originalSegment;
   }
+
+
 }

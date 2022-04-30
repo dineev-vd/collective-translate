@@ -104,17 +104,13 @@ const TextSegments: React.FC<{}> = () => {
 
         <div style={{"overflowY": "scroll", "flex": "1 1 100px"}}>
             <div style={{ "maxHeight":"100%" }}>
-                {textSegments && textSegments.map((segment, index) => (
+                {textSegments && textSegments.map((segment) => (
                     <div key={segment.id} style={{ display: "flex", flex: "1 1 auto", flexDirection: "column", border: "1px solid black", borderRadius: "10px" }}>
                         <Link to={`/translate/${segment.id.toString()}?languageId=${languageId}`}><h4>Перейти</h4></Link>
                         <div style={{ width: "100%" }}>
-                            Текст до:
+                            Текст:
                             <input style={{ width: "100%", boxSizing: "border-box" }} value={segment.translationText} disabled />
                         </div>
-                        {translations.length > 0 && <div style={{ width: "100%" }}>
-                            Текст после:
-                            <input style={{ width: "100%", boxSizing: "border-box" }} value={translations[index].translationText} disabled />
-                        </div>}
                     </div>
                 ))}
             </div>

@@ -42,6 +42,15 @@ export class ActionsService {
   }
 
   async insertActions(actions: DeepPartial<Action>[]) {
-    return this.actionsRepository.createQueryBuilder().insert().values(actions).execute();
+    const chunkSize = 1000;
+    let arr: ObjectLiteral[] = [];
+    for (let i = 0; i < actions.length; i += chunkSize) {
+      const chunk = actions.slice(i, i + chunkSize);
+      const { identifiers } = await this.actionsRepository.createQueryBuilder().insert().values(chunk).execute();
+      arr.push.apply(arr, identifiers)
+      //arr = arr.concat(identifiers);
+    }
+
+    return arr;
   }
 }
