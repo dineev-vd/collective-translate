@@ -12,7 +12,6 @@ import ProfilePage from './ProfilePage';
 import Login from 'components/Login';
 import TextSegments from 'components/LanguageTranslations';
 import TranslationPage from './TranslatePiecePage';
-import TextDisplay from 'components/TextDisplay';
 import CreateProject from 'components/CreateProject';
 import { auth } from 'api/Auth';
 

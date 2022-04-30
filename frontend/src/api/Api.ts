@@ -133,7 +133,7 @@ class ApiClass {
         return this.getJson<GetTranslationDto>(uri);
     }
 
-    async getTextSegment(id: number, params?: { 
+    async getTextSegment(id: string, params?: { 
         nextMinLength?: number, 
         prevMinLength?: number, 
         toLanguageId?: string,
@@ -208,8 +208,8 @@ class ApiClass {
         return this.postJson(uri);
     }
 
-    async getActions(segmentId: number, languageId?: number) {
-        const uri = this.makeUri([TEXT_SEGMENT_ENDPOINT, segmentId, 'actions'], { languageId: languageId });
+    async getActions(segmentId: number) {
+        const uri = this.makeUri([TRANSLATION_ENDPOINT, segmentId, 'actions']);
         return this.getJson<GetActionDto[]>(uri);
     }
 

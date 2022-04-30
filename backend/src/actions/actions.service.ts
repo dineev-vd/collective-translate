@@ -37,6 +37,7 @@ export class ActionsService {
       where: {
         segment: { id: textSegmentId },
       },
+      relations: ['author']
     });
   }
 

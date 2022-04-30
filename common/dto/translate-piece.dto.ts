@@ -15,6 +15,6 @@ export class GetTranslationDto {
   id: string;
   translationText: string;
   order: number;
-  translationLanguageId: number;
+  translationLanguageId: string;
   original?: GetTranslationDto;
 }

@@ -114,31 +114,41 @@ export class TranslationService {
     return this.pieceRepository.save(pieces);
   }
 
-  async getSegmentWithNeighbours(id: string, params?: { prev?: number, next?: number, toLanguageId?: number, withOriginal?: Boolean }) {
-    const segment = await this.pieceRepository.findOne(id);
+  async getSegmentWithNeighbours(segmentId: string, params?: { prev?: number, next?: number, toLanguageId?: number, withOriginal?: Boolean }) {
+    const segment = await this.pieceRepository.findOne(segmentId);
 
     if (!segment) {
       return [];
     }
 
-    const filter: FindCondition<SegmentTranslation> = { translationLanguage: { id: params.toLanguageId ?? segment.translationLanguageId }, order: segment.order, file: { id: segment.fileId } };
+    const filterLanguageId = params.toLanguageId ?? segment.translationLanguageId;
+    const filter: FindCondition<SegmentTranslation> = { translationLanguage: { id: filterLanguageId }, order: segment.order, file: { id: segment.fileId } };
 
     if (params.next && params.prev) {
       filter.order = Between(+filter.order - +params.prev, +filter.order + +params.next);
     } else if (params.next) {
-      filter.order = Between(+filter.order, +filter.order + +params.next);
+      filter.order = Between(+filter.order + 1, +filter.order + +params.next);
     } else if (params.prev) {
-      filter.order = Between(+filter.order - +params.prev, +filter.order);
+      filter.order = Between(+filter.order - +params.prev, +filter.order - 1);
     }
 
-    const result = await this.pieceRepository.find({ where: filter });
+    const result = await this.pieceRepository.find({ where: filter, order: { order: 'ASC' } });
 
-    if (params.withOriginal) {
-      const original = await this.getOriginalBySegment(id);
-      return result.map(segment => ({ ...segment, original: original }))
+    if (params.withOriginal && result.length > 0) {
+      const project = await this.getProjectBySegment(segmentId);
+      const languages = await this.languageService.getTranslationLanguagesByProjectId(project.id.toString());
+      const originalLanguage = languages.find(l => l.original);
+
+      if (originalLanguage.id !== filterLanguageId) {
+        const originalArray = await this.pieceRepository.find({ where: { ...filter, translationLanguage: { id: originalLanguage.id } }, order: { order: 'ASC' } });
+        return originalArray.map(originalSegment => ({
+          ...result.find(segment => segment.order === originalSegment.order),
+          original: originalSegment
+        }))
+      }
     }
 
-    return this.pieceRepository.find({ where: filter });
+    return result;
   }
 
   async insertTextSegments(segments: DeepPartial<SegmentTranslation>[]) {
@@ -166,8 +176,11 @@ export class TranslationService {
     return (await this.pieceRepository.findOne(segmentId, { relations: ['translationLanguage'] })).translationLanguage;
   }
 
-  async getOriginalBySegment(segmentId: string) {
+  async getOriginalBySegment(segmentId: string): Promise<SegmentTranslation> {
     const project = await this.getProjectBySegment(segmentId);
-    return this.languageService.getTranslationLanguagesByProjectId(project.id.toString());
+    const languages = await this.languageService.getTranslationLanguagesByProjectId(project.id.toString());
+    const orig = languages.find(l => l.original);
+    const [originalSegment] = await this.getSegmentWithNeighbours(segmentId, { toLanguageId: orig.id });
+    return originalSegment;
   }
 }

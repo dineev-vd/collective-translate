@@ -1,3 +1,5 @@
+import { GetUserDto } from "./user.dto";
+
 export class PostActionDto {
   textSegmentId: number;
   change: string;
@@ -8,4 +10,5 @@ export class GetActionDto {
   textSegmentId: number;
   change: string;
   comment?: string;
+  author: GetUserDto;
 }

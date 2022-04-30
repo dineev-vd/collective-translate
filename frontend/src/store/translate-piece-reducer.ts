@@ -6,7 +6,8 @@ export interface TranslationState {
     id: string;
     translationText: string;
     order: number;
-    originalSegmentId?: string;   
+    translationLanguageId: string;
+    originalSegmentId?: string;
 }
 
 interface TranslationsState {
@@ -25,10 +26,14 @@ export const translationsSlice = createSlice({
     reducers: {
         putTranslations: (state, action: PayloadAction<GetTranslationDto[]>) => {
             action.payload.forEach(translation => {
-                state.translations[translation.id] = translation;
-                if(translation.original) {
-                    state.translations[translation.original.id] = translation.original;
+                if (translation.original) {
+                    const { original, ...withoutOriginal } = translation;
+                    state.translations[translation.original.id] = original;
+                    state.translations[translation.id] = { ...withoutOriginal, originalSegmentId: original.id }
+                    return;
                 }
+
+                state.translations[translation.id] = translation;
             })
         },
         // prependTranslations: (state, action: PayloadAction<{ translations: TranslationState[], language: string }>) => {
