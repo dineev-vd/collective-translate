@@ -17,6 +17,8 @@ services:
     env_file: development.env
     networks:
       - main
+    ports:
+      - 5432:5432
   pgadmin:
     env_file: development.env
     image: dpage/pgadmin4

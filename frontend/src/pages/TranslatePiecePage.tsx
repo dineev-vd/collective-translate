@@ -61,13 +61,13 @@ const TranslationPage: React.FC<{}> = () => {
             <form onSubmit={(e) => handleSubmit(e)}>
                 {originalSegment && (<div>
                     <h3>Оригинал:</h3>
-                    <textarea onChange={e => dispatch(putTranslationChanges([{ id: +originalSegment.id, translation: { id: +originalSegment.id, translationText: e.target.value, comment: "" } }]))}
+                    <textarea onChange={e => dispatch(putTranslationChanges([{ id: originalSegment.id, translation: { id: +originalSegment.id, translationText: e.target.value, comment: "" } }]))}
                         value={originalSegment.id in translationChanges ? translationChanges[originalSegment.id].translationText : originalSegment.translationText} />
                 </div>)}
 
                 {segment && (<div>
                     <h3>Перевод:</h3>
-                    <textarea onChange={e => dispatch(putTranslationChanges([{ id: +segment.id, translation: { id: +segment.id, translationText: e.target.value, comment: "" } }]))}
+                    <textarea onChange={e => dispatch(putTranslationChanges([{ id: segment.id, translation: { id: +segment.id, translationText: e.target.value, comment: "" } }]))}
                         value={segment.id in translationChanges ? translationChanges[segment.id].translationText : segment.translationText} />
                     <button type="submit">Отправить измеения</button>
                 </div>)}

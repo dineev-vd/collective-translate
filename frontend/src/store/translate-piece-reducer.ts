@@ -105,7 +105,7 @@ export const translationsSlice = createSlice({
         clearTranslations: (state) => {
             state.translations = {};
         },
-        putTranslationChanges: (state, action: PayloadAction<{ translation: PostTranslationDto, id: number }[]>) => {
+        putTranslationChanges: (state, action: PayloadAction<{ translation: PostTranslationDto, id: string }[]>) => {
             action.payload.forEach(piece => {
                 state.changes[piece.id] = piece.translation;
             })

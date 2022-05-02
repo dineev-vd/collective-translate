@@ -29,13 +29,13 @@ const LanguageDetails: React.FC = () => {
 
     return <div style={{"width": "100%"}}>
         {language && (
-            <div>
+            <div style={{"display" : "flex", "flexDirection": "column"}}>
                 <h3>{language.language}</h3>
                 <h6>{language.id}</h6>
                 {assemblies && assemblies.map(a => (
                     <a href={`/api/assembly/${a.id}`}>{a.name}</a>
                 ))}
-                <button onClick={handleAssemble}>Собрать</button>
+                <button style={{"width":"100px"}} onClick={handleAssemble}>Собрать</button>
             </div>
         )}
     </div>
