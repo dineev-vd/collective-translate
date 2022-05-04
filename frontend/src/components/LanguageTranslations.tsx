@@ -106,7 +106,7 @@ const TextSegments: React.FC<{}> = () => {
             <div style={{ "maxHeight":"100%" }}>
                 {textSegments && textSegments.map((segment) => (
                     <div key={segment.id} style={{ display: "flex", flex: "1 1 auto", flexDirection: "column", border: "1px solid black", borderRadius: "10px" }}>
-                        <Link to={`/translate/${segment.id.toString()}?languageId=${languageId}`}><h4>Перейти</h4></Link>
+                        <Link to={`/segments/${segment.id.toString()}`}><h4>Перейти</h4></Link>
                         <div style={{ width: "100%" }}>
                             Текст:
                             <input style={{ width: "100%", boxSizing: "border-box" }} value={segment.translationText} disabled />

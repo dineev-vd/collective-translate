@@ -24,5 +24,6 @@ import { LanguageModule } from 'language/language.module';
     ]),
   ],
   providers: [ProjectService],
+  exports: [ProjectService]
 })
 export class ProjectModule {}

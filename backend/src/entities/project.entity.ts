@@ -32,4 +32,7 @@ export default class Project {
 
   @OneToMany(() => File, (file) => file.project, { cascade: true })
   files: File[];
+
+  @Column({ default: false })
+  private: Boolean;
 }

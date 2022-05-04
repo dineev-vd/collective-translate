@@ -27,7 +27,7 @@ export class TranslationService {
     return this.pieceRepository.findByIds(ids);
   }
 
-  getTranslationsByProject(params: { languageId: string, fileId?: string, take?: number, page?: number, shouldTranslate?: Boolean }) {
+  async getTranslationsByLanguage(params: { languageId: string, fileId?: string, take?: number, page?: number, shouldTranslate?: Boolean, withOriginal?: Boolean }) {
     const filter: DeepPartial<SegmentTranslation> = {}
 
     if (params.languageId) {
@@ -42,14 +42,30 @@ export class TranslationService {
       filter.shouldTranslate = params.shouldTranslate;
     }
 
-    //filter.file.project.id = Number(params.projectId);
 
-    return this.pieceRepository.find({
+
+    const result = await this.pieceRepository.find({
       take: params.take | 10,
       skip: (params.page - 1) * (params.take | 10) | 0,
       where: filter,
       order: { order: 'ASC' }
     });
+
+    if (params.withOriginal && result.length > 0) {
+      const project = await this.getProjectBySegment(result[0].id.toString());
+      const languages = await this.languageService.getTranslationLanguagesByProjectId(project.id.toString());
+      const originalLanguage = languages.find(l => l.original);
+
+      if (originalLanguage.id.toString() !== params.languageId) {
+        const originalArray = await this.pieceRepository.find({ where: { translationLanguage: { id: originalLanguage.id }, order: In(result.map(s => s.order)) } });
+        return originalArray.map(originalSegment => ({
+          ...result.find(segment => segment.order === originalSegment.order),
+          original: originalSegment
+        }))
+      }
+    }
+
+    return result;
   }
 
   updatePieces(pieces: { piece: PostTranslationDto; id: string }[]) {
@@ -70,7 +86,7 @@ export class TranslationService {
 
   async generateTranslationForFile(languageId: string, fileId: string, fromLanguageId: string) {
     let page = 1;
-    let currentBulk = await this.getTranslationsByProject({ languageId: fromLanguageId, fileId: fileId, take: 1000, page: page++ });
+    let currentBulk = await this.getTranslationsByLanguage({ languageId: fromLanguageId, fileId: fileId, take: 1000, page: page++ });
 
     console.log(`saving translations for ${languageId}`);
 
@@ -104,7 +120,7 @@ export class TranslationService {
 
 
       await this.pieceRepository.createQueryBuilder().insert().values(translations).execute();
-      currentBulk = await this.getTranslationsByProject({ languageId: fromLanguageId, fileId: fileId, take: 1000, page: page++ });
+      currentBulk = await this.getTranslationsByLanguage({ languageId: fromLanguageId, fileId: fileId, take: 1000, page: page++ });
     }
 
     console.log('saved');
@@ -120,7 +136,7 @@ export class TranslationService {
     return this.pieceRepository.save(pieces);
   }
 
-  async getSegmentWithNeighbours(segmentId: string, params?: { prev?: number, next?: number, toLanguageId?: number, withOriginal?: Boolean, include?: Boolean }): Promise<(SegmentTranslation & {original?: SegmentTranslation})[]> {
+  async getSegmentWithNeighbours(segmentId: string, params?: { prev?: number, next?: number, toLanguageId?: number, withOriginal?: Boolean, include?: Boolean }): Promise<(SegmentTranslation & { original?: SegmentTranslation })[]> {
     const segment = await this.pieceRepository.findOne(segmentId);
 
     if (!segment) {

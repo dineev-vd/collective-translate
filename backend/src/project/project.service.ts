@@ -13,16 +13,13 @@ import { FilesService } from 'files/files.service';
 import { TranslationService } from 'translation/translation.service';
 import { LanguageService } from 'language/language.service';
 import { PostTranslateLanguage } from 'common/dto/language.dto';
+import { throwIfEmpty } from 'rxjs';
 
 @Injectable()
 export class ProjectService implements OnApplicationBootstrap {
   async onApplicationBootstrap() {
     if ((await this.projectRepository.findOne(1)) != null) return;
 
-    const reg = /(\s+[^.!?]*[.!?])/g;
-    let testString = '';
-    const data = await fs.readFile('../test.txt');
-    testString = iconv.decode(data, 'windows-1251');
     const user = new User();
     user.email = 'admin@admin.com';
     user.password = 'admin';
@@ -35,20 +32,22 @@ export class ProjectService implements OnApplicationBootstrap {
       project.description = `Это описание проекта с номером ${i}`;
 
       const file = new File();
-      file.name = 'Война и Мир.txt';
+      file.name = 'Субтитры.srt';
       file.path = '../test.txt';
-      file.encoding = 'windows-1251';
+      file.encoding = 'utf-8';
       project.files = [file];
       project.owner = user;
+      project.private = i % 2 === 0;
 
       const translateLanguage = new TranslationLanguage();
       translateLanguage.language = Language.RUSSIAN;
       translateLanguage.original = true;
+      translateLanguage.name = "Русский";
       project.translateLanguage = [translateLanguage];
       const insertedProject = await this.projectRepository.save(project);
 
       await this.fileService.splitFile(insertedProject.files[0].id.toString());
-      await this.kek(insertedProject.id.toString(), { language: Language.ENGLISH });
+      await this.createTranslation(insertedProject.id.toString(), { language: Language.ENGLISH });
     }
   }
 
@@ -60,7 +59,7 @@ export class ProjectService implements OnApplicationBootstrap {
     private translationsService: TranslationService
   ) { }
 
-  async kek(id: string, language: PostTranslateLanguage) {
+  async createTranslation(id: string, language: PostTranslateLanguage) {
     const originalLanguage = await this.languageService.getOriginalLanguage(id);
     const createdLanguage = await this.languageService.saveLanguage({
       ...language,
@@ -76,6 +75,13 @@ export class ProjectService implements OnApplicationBootstrap {
         ),
       ),
     );
+  }
+
+  async findProjectsByUser(userId: string, params: { withPrivate?: Boolean } = {}) {
+    if (params.withPrivate)
+      return this.projectRepository.find({ where: { owner: { id: userId } } });
+
+    return this.projectRepository.find({ where: { owner: { id: userId }, private: false } });
   }
 
   async findProjectsByQuery(query: string) {

@@ -3,12 +3,13 @@ import { api } from "api/Api";
 import { useEffect, useState } from "react";
 import { Link, Route, Routes, useParams } from "react-router-dom";
 import LanguageDetails from "./LanguageDetails";
+import LanguageSmall from "./LanguageSmall";
 
 export enum Language {
-    RUSSIAN = 'russian',
-    ENGLISH = 'english',
-    GERMAN = 'german',
-}
+    RUSSIAN = 'Русский',
+    ENGLISH = 'Английский',
+    GERMAN = 'Немецкий'
+  }
 
 const Languages: React.FC = () => {
     const [state, changeState] = useState<GetTranslateLanguage[]>([]);
@@ -39,12 +40,15 @@ const Languages: React.FC = () => {
         <div style={{"display":"flex", "width": "100%"}}>
             <div style={{"width": "100%"}}>
                 {state && state.map(language => (
-                    <Link to={`${language.id}`}><h2>{language.language}</h2></Link>
+                    <LanguageSmall language={language} />
                 ))}
             </div>
-            <Routes>
-                <Route path=":languageId" element={<LanguageDetails />} />
-            </Routes>
+            <div style={{"width": "100%"}}>
+                <Routes>
+                    <Route index element={<h3>Выберите язык</h3>} />
+                    <Route path=":languageId" element={<LanguageDetails />} />
+                </Routes>
+            </div>
         </div>
     </div>
 }

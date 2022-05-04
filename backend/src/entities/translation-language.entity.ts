@@ -10,7 +10,6 @@ import {
 import { Language } from 'common/enums';
 import SegmentTranslation from './segment-translation.entity';
 import Project from './project.entity';
-import { Action } from './action.entity';
 import { Assembly } from './assembly.entity';
 
 @Entity()
@@ -24,6 +23,9 @@ export class TranslationLanguage {
     enum: Language,
   })
   language: Language;
+
+  @Column({ nullable: true })
+  name: string;
 
   @OneToMany(
     () => SegmentTranslation,

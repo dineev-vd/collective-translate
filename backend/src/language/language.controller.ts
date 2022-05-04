@@ -18,9 +18,9 @@ export class LanguageController {
     return this.languageService.getTranslationLanguageById(id);
   }
 
-  
 
-  @Get(':id/translations-orders') 
+
+  @Get(':id/translations-orders')
   async getTranslationsByOrder(
     @Param('id') languageId: string,
     @Query('orders') orders: string
@@ -34,8 +34,10 @@ export class LanguageController {
     @Query('fileId') fileId?: string,
     @Query('take') take?: number,
     @Query('page') page?: number,
+    @Query('shouldTranslate') shouldTranslate?: Boolean,
+    @Query('withOriginal') withOriginal?: Boolean
   ) {
-    return this.translationsService.getTranslationsByProject({ languageId: languageId, fileId: fileId, take: take, page: page });
+    return this.translationsService.getTranslationsByLanguage({ languageId: languageId, withOriginal: withOriginal, fileId: fileId, take: take, page: page, shouldTranslate: shouldTranslate });
   }
 
   @Post(':id/assemble')

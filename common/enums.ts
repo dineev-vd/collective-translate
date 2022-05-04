@@ -1,7 +1,7 @@
 export enum Language {
-  RUSSIAN = 'russian',
-  ENGLISH = 'english',
-  GERMAN = 'german',
+  RUSSIAN = 'Русский',
+  ENGLISH = 'Английский',
+  GERMAN = 'Немецкий'
 }
 
 export enum FileStatus {

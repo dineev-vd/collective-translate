@@ -13,6 +13,7 @@ const Header: React.FC = () => {
     const navigate = useNavigate();
     const curUser = useSelector(selectUser);
     const match = useMatch("/");
+    const [showTopMenu, setShowTopMenu] = useState(false);
 
     function handleChange(event) {
         setSearchValue(event.target.value);
@@ -31,13 +32,20 @@ const Header: React.FC = () => {
                     <input placeholder="Поиск..." className="header_input" onChange={handleChange} value={searchValue}></input>
                 </form >}
             </div>
-            {curUser && <div className="header_profile_name">
-                {curUser.name}
-            </div>}
-            <TopMenuProfile />
-            <div className="header_avatar">
-                
-            </div>
+            {curUser ?
+                <>
+                    <div className="header_profile" onClick={() => setShowTopMenu(prev => !prev)}>
+                        <div className="header_profile_name">
+                            {curUser.name}
+                        </div>
+                        <div className="header_avatar">
+                        </div>
+                    </div>
+                    <TopMenuProfile show={showTopMenu} />
+                </>
+                :
+                <Link to={'/login'}>Вход</Link>
+            }
         </header>
     )
 }

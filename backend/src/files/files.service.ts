@@ -87,7 +87,7 @@ export class FilesService implements OnApplicationBootstrap {
 
     const buffer = Buffer.concat(chunks);
     const fileString = iconv.decode(buffer, file.encoding);
-    const re = regexp ? new RegExp(`${decodeURI(regexp)}`, 'g') : /(.*)/g;
+    const re = regexp ? new RegExp(`${decodeURI(regexp)}`, 'g') : /(\s+[^.!?]*[.!?])/g;
 
     return { text: fileString.split(re).map((value, index) => ({ marked: index % 2 !== 0, text: value })).filter(t => t.text.length > 0) };
   }

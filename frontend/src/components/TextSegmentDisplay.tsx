@@ -21,7 +21,7 @@ const TextSegmentDisplay: React.FC<{ segmentId: string, originalSegmentId: strin
     const navigate = useNavigate();
 
     const navigateToSegment = useCallback(() => {
-        navigate(`../translate/${!showOriginal ? segmentId ?? originalSegmentId : originalSegmentId ?? segmentId}`)
+        navigate(`../segments/${!showOriginal ? segmentId ?? originalSegmentId : originalSegmentId ?? segmentId}`)
     }, [segmentId, originalSegmentId, showOriginal]);
 
     useEffect(() => {

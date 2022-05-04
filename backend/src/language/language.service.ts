@@ -11,7 +11,7 @@ export class LanguageService {
   ) {}
 
   async getTranslationLanguageById(id: string) {
-    return this.languageRepository.findOne(id);
+    return this.languageRepository.findOne(id, {relations: ['project']});
   }
 
   async getTranslationLanguagesByProjectId(projectId: string) {

@@ -17,7 +17,6 @@ import {
   FILE_ENDPOINT,
   LANGUAGE_ENDPOINT,
   PROJECT_ENDPOINT,
-  TEXT_SEGMENT_ENDPOINT,
 } from 'common/constants';
 import { PostProjectDto, GetProjectDto } from 'common/dto/project.dto';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
@@ -26,7 +25,7 @@ import { JwtAuthGuard } from 'guards/simple-guards.guard';
 import { ExtendedRequest } from 'util/ExtendedRequest';
 import { LanguageService } from 'language/language.service';
 import { PostTranslateLanguage } from 'common/dto/language.dto';
-import { TranslationService } from 'translation/translation.service';
+import { TranslationLanguage } from 'entities/translation-language.entity';
 
 @Controller(PROJECT_ENDPOINT)
 export class ProjectController {
@@ -34,7 +33,6 @@ export class ProjectController {
     private readonly projectService: ProjectService,
     private readonly filesService: FilesService,
     private readonly languageService: LanguageService,
-    private readonly translationsService: TranslationService,
   ) { }
 
 
@@ -64,7 +62,11 @@ export class ProjectController {
     @Body() project: PostProjectDto,
     @Req() { user }: ExtendedRequest,
   ) {
-    return this.projectService.createProject({ ...project, owner: user });
+    const { language, ...rest } = project;
+    const originalLanguage = new TranslationLanguage();
+    originalLanguage.language = language;
+    originalLanguage.original = true;
+    return this.projectService.createProject({ ...rest, owner: user, translateLanguage: [originalLanguage] });
   }
 
   @Get(`:id/${FILE_ENDPOINT}`)
@@ -103,8 +105,8 @@ export class ProjectController {
   ) {
     if (!language['language'])
       throw new BadRequestException();
-      
-    this.projectService.kek(id, language);
+
+    this.projectService.createTranslation(id, language);
     return 'OK';
   }
 }

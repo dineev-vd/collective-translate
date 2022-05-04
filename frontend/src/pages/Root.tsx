@@ -14,6 +14,8 @@ import TextSegments from 'components/LanguageTranslations';
 import TranslationPage from './TranslatePiecePage';
 import CreateProject from 'components/CreateProject';
 import { auth } from 'api/Auth';
+import LanguageSegments from 'components/language-segments/LanguageSegments';
+import LanguageSegmentsPage from './LanguageSegmentsPage';
 
 
 const Root = () => {
@@ -45,10 +47,9 @@ const Root = () => {
                     <div className='content-wrapper'>
 
                         <Routes>
-                            <Route path='profile' element={<Outlet />} >
-                                <Route path=':profileId' element={<ProfilePage />} />
-                            </Route>
-                            <Route path='translate/:segmentId' element={<TranslationPage />} />
+                            <Route path='profile/:profileId/*' element={<ProfilePage />} />
+                            <Route path='segments/:segmentId' element={<TranslationPage />} />
+                            <Route path='languages/:languageId' element={<LanguageSegmentsPage />} />
                             <Route path='search' element={<SearchResults />} />
                             <Route path='project/create' element={<CreateProject />} />
                             <Route path='project/:projectId/*' element={<ProjectPage />} />

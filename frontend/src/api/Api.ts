@@ -1,6 +1,6 @@
 import { GetActionDto, PostActionDto } from "@common/dto/action.dto";
 import { PeekFileDto, ShortFileDto } from "@common/dto/file.dto";
-import { GetTranslateLanguage, PostTranslateLanguage } from "@common/dto/language.dto";
+import { GetTranslateLanguage, GetTranslateLanguageWithProject, PostTranslateLanguage } from "@common/dto/language.dto";
 import { GetProjectDto, PostProjectDto } from "@common/dto/project.dto";
 import { GetTranslationDto } from "@common/dto/translate-piece.dto";
 import { AnyAction, Dispatch } from "@reduxjs/toolkit";
@@ -28,9 +28,8 @@ class ApiClass {
         if (response.status === 401) {
             if (this.dispatch) {
                 this.dispatch(setUser(null));
-                this.onUnauthorized();
+                //this.onUnauthorized();
             }
-
         }
 
         if (!response.ok) {
@@ -130,7 +129,7 @@ class ApiClass {
 
     async getTranslation(pieceId: string) {
         const uri = this.makeUri([TRANSLATION_ENDPOINT, pieceId]);
-        return this.getJson<GetTranslationDto>(uri);
+        return this.getJson<GetTranslateLanguageWithProject>(uri);
     }
 
     async getTextSegment(id: string, params?: {
@@ -173,7 +172,7 @@ class ApiClass {
         return this.getJson<GetTranslationDto[]>(uri);
     }
 
-    async getTranslationsByLanguage(translationId: string, params: { fileId?: string, take?: number, page?: number }) {
+    async getTranslationsByLanguage(translationId: string, params: { withOriginal?: Boolean, fileId?: string, take?: number, page?: number, shouldTranslate?: Boolean } = {}) {
         const uri = this.makeUri([LANGUAGE_ENDPOINT, translationId, 'translations'], params);
         return this.getJson<GetTranslationDto[]>(uri);
     }
@@ -230,7 +229,7 @@ class ApiClass {
 
     async getLanguage(languageId: string) {
         const uri = this.makeUri([LANGUAGE_ENDPOINT, languageId]);
-        return this.getJson<GetTranslateLanguage>(uri);
+        return this.getJson<GetTranslateLanguageWithProject>(uri);
     }
 
     async assembleLanguage(languageId: string) {
@@ -246,6 +245,11 @@ class ApiClass {
     async getAllRegexps() {
         const uri = this.makeUri(['regexp']);
         return this.getJson<GetRegexpDto[]>(uri);
+    }
+
+    async getProjectsByUser(id: string) {
+        const uri = this.makeUri([USER_ENDPOINT, id, 'projects']);
+        return this.getJson<GetProjectDto[]>(uri, { tokenRequired: true });
     }
 }
 
