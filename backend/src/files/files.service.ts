@@ -1,10 +1,11 @@
-import { forwardRef, Injectable } from '@nestjs/common';
+import { forwardRef, Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { File } from 'entities/file.entity';
 import { DeepPartial, Repository } from 'typeorm';
 import { createReadStream } from 'fs';
 import * as chardet from 'chardet';
 import * as iconv from 'iconv-lite';
+import * as fsSync from 'fs';
 import * as fs from 'fs/promises';
 import { FileStatus } from 'common/enums';
 import * as crypto from 'crypto';
@@ -20,7 +21,7 @@ import * as sbd from "sbd";
 import { RegularExpression } from 'entities/regexp.entity';
 
 @Injectable()
-export class FilesService {
+export class FilesService implements OnApplicationBootstrap {
   constructor(
     @InjectRepository(File)
     private readonly fileRepository: Repository<File>,
@@ -31,12 +32,22 @@ export class FilesService {
     private readonly languageService: LanguageService,
   ) { }
 
+  onApplicationBootstrap() {
+    if (!fsSync.existsSync('../assemblies/')) {
+      fsSync.mkdirSync('../assemblies/', { recursive: true })
+    }
+
+    if (!fsSync.existsSync('../uploads/')) {
+      fsSync.mkdirSync('../uploads/', { recursive: true })
+    }
+  }
+
   async getFileById(id: string) {
     return this.fileRepository.findOne(id);
   }
 
   async saveFileToStorage(buffer: Buffer) {
-    const fileName = crypto.randomUUID();
+    const fileName = `../uploads/${crypto.randomUUID()}`;
     await fs.writeFile(fileName, buffer);
     return fileName;
   }
@@ -131,14 +142,14 @@ export class FilesService {
 
     let currentBulk = await this.translationsService.getSegmentWithNeighbours(first.id.toString(), { next: bulkSize * offset, toLanguageId: +languageId, withOriginal: true, include: true })
 
-    const fileName = crypto.randomUUID();
+    const fileName = `../assemblies/${crypto.randomUUID()}`;
     const fileWrite = await fs.open(fileName, 'a+');
 
 
     while (currentBulk.length > 0) {
       const stringToWrite = currentBulk
         .map((segment) => {
-          if(segment.id) {
+          if (segment.id) {
             return segment.translationText;
           }
 
