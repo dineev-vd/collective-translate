@@ -1,5 +1,5 @@
 import { ChangeEvent, useState } from "react";
-import { GetProjectDto } from "@common/dto/project.dto";
+import { GetProjectDto } from "common/dto/project.dto";
 import { useEffect } from "react";
 import { api } from "api/Api";
 import { useParams } from "react-router-dom";

@@ -1,18 +1,16 @@
-import { GetActionDto, PostActionDto } from "@common/dto/action.dto";
-import { PeekFileDto, ShortFileDto } from "@common/dto/file.dto";
-import { GetTranslateLanguage, GetTranslateLanguageWithProject, PostTranslateLanguage } from "@common/dto/language.dto";
-import { GetProjectDto, PostProjectDto } from "@common/dto/project.dto";
-import { GetTranslationDto } from "@common/dto/translate-piece.dto";
+import { GetActionDto, PostActionDto } from "common/dto/action.dto";
+import { PeekFileDto, ShortFileDto } from "common/dto/file.dto";
+import { GetTranslateLanguage, GetTranslateLanguageWithProject, PostTranslateLanguage } from "common/dto/language.dto";
+import { GetProjectDto, PostProjectDto } from "common/dto/project.dto";
+import { GetTranslationDto } from "common/dto/translate-piece.dto";
 import { AnyAction, Dispatch } from "@reduxjs/toolkit";
 import { API_ENDPOINT, AUTH_ENDPOINT, FILE_ENDPOINT, LANGUAGE_ENDPOINT, LOGIN_ENDPOINT, MY_PROFILE_ENDPOINT, PROJECT_ENDPOINT, REFRESH_ENDPOINT, REGISTER_ENDPOINT, TEXT_SEGMENT_ENDPOINT, TRANSLATION_ENDPOINT, USER_ENDPOINT } from "common/constants";
 import { JwtDto } from "common/dto/jwt.dto";
 import { GetUserDto, PostUserDto } from "common/dto/user.dto";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { setShouldLogin, setUser } from "store/userReducer";
 import { auth } from "./Auth";
-import { GetAssemblyDto } from '@common/dto/assembly.dto';
-import { GetRegexpDto } from '@common/dto/regexp.dto';
+import { GetAssemblyDto } from 'common/dto/assembly.dto';
+import { GetRegexpDto } from 'common/dto/regexp.dto';
 
 class ApiClass {
     private dispatch: Dispatch<AnyAction>;

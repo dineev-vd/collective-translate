@@ -1,6 +1,6 @@
-import { ShortFileDto } from "@common/dto/file.dto";
-import { GetTranslateLanguage } from "@common/dto/language.dto";
-import { GetTranslationDto } from "@common/dto/translate-piece.dto";
+import { ShortFileDto } from "common/dto/file.dto";
+import { GetTranslateLanguage } from "common/dto/language.dto";
+import { GetTranslationDto } from "common/dto/translate-piece.dto";
 import { api } from "api/Api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";

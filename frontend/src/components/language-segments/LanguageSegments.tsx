@@ -1,10 +1,10 @@
-import { GetTranslationDto } from "@common/dto/translate-piece.dto";
+import { GetTranslationDto } from "common/dto/translate-piece.dto";
 import { api } from "api/Api";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import SegmentSplit from "./SegmentSplit";
 import "./LanguageSegments.css"
-import { GetActionDto } from "@common/dto/action.dto";
+import { GetActionDto } from "common/dto/action.dto";
 
 const LanguageSegments: React.FC = () => {
     const { languageId } = useParams();

@@ -1,4 +1,4 @@
-import { GetTranslationDto } from "@common/dto/translate-piece.dto";
+import { GetTranslationDto } from "common/dto/translate-piece.dto";
 import { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";

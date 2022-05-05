@@ -1,6 +1,6 @@
-import { GetActionDto, PostActionDto } from "@common/dto/action.dto";
-import { GetTranslateLanguage } from "@common/dto/language.dto";
-import { GetTranslationDto } from "@common/dto/translate-piece.dto";
+import { GetActionDto, PostActionDto } from "common/dto/action.dto";
+import { GetTranslateLanguage } from "common/dto/language.dto";
+import { GetTranslationDto } from "common/dto/translate-piece.dto";
 import { api } from "api/Api";
 import TextDisplay from "components/text/TextDisplay";
 import { useEffect, useMemo, useState } from "react";

@@ -1,4 +1,4 @@
-import { GetUserDto } from "@common/dto/user.dto";
+import { GetUserDto } from "common/dto/user.dto";
 import { api } from "api/Api";
 import UserProjectList from "components/project/ProjectList";
 import { useEffect, useState } from "react";

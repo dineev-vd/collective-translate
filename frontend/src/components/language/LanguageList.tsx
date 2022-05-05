@@ -1,4 +1,4 @@
-import { GetTranslateLanguage } from "@common/dto/language.dto";
+import { GetTranslateLanguage } from "common/dto/language.dto";
 import { api } from "api/Api";
 import { useEffect, useState } from "react";
 import { Route, Routes } from "react-router-dom";

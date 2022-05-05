@@ -1,4 +1,4 @@
-import { GetTranslationDto, PostTranslationDto } from "@common/dto/translate-piece.dto";
+import { GetTranslationDto, PostTranslationDto } from "common/dto/translate-piece.dto";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "./store";
 

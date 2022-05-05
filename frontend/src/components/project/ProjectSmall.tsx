@@ -1,4 +1,4 @@
-import { GetProjectDto } from "@common/dto/project.dto";
+import { GetProjectDto } from "common/dto/project.dto";
 import { Link } from "react-router-dom";
 import "./ProjectSmall.css";
 

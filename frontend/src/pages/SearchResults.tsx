@@ -1,5 +1,5 @@
 import "./SearchResults.css"
-import { GetProjectDto } from "@common/dto/project.dto";
+import { GetProjectDto } from "common/dto/project.dto";
 import { useEffect, useState } from "react";
 import { api } from "api/Api";
 import ProjectSmall from "../components/project/ProjectSmall";

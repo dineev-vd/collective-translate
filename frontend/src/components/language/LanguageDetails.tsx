@@ -1,5 +1,5 @@
-import { GetAssemblyDto } from "@common/dto/assembly.dto";
-import { GetTranslateLanguage } from "@common/dto/language.dto";
+import { GetAssemblyDto } from "common/dto/assembly.dto";
+import { GetTranslateLanguage } from "common/dto/language.dto";
 import { api } from "api/Api";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";

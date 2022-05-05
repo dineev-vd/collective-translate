@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useState } from "react";
-import { ShortFileDto } from "@common/dto/file.dto"
+import { ShortFileDto } from "common/dto/file.dto"
 import { Link, Outlet, Route, Routes, useParams } from "react-router-dom";
 import { api } from "api/Api";
 import FilePeek from "./FilePeek";

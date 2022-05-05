@@ -1,4 +1,4 @@
-import { GetTranslateLanguage } from "@common/dto/language.dto";
+import { GetTranslateLanguage } from "common/dto/language.dto";
 import { Link } from "react-router-dom";
 import "./LanguageSmall.css"
 

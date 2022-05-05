@@ -1,4 +1,4 @@
-import { GetRegexpDto } from "@common/dto/regexp.dto";
+import { GetRegexpDto } from "common/dto/regexp.dto";
 import { api } from "api/Api";
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";

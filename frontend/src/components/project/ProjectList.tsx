@@ -1,4 +1,4 @@
-import { GetProjectDto } from "@common/dto/project.dto";
+import { GetProjectDto } from "common/dto/project.dto";
 import { api } from "api/Api";
 import { useEffect, useState } from "react";
 import ProjectSmall from "./ProjectSmall";
