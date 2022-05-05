@@ -1,5 +1,12 @@
 {
   "dependencies": {
     "detect-character-encoding": "^0.8.0"
+  },
+  "workspaces": {
+    "packages": [
+      "frontend",
+      "backend",
+      "common"
+    ]
   }
 }
