@@ -6,11 +6,6 @@
     ],
     "moduleResolution": "node",
     "noEmit": true,
-    "paths": {
-      "common/*": [
-        "common/*"
-      ]
-    },
     "baseUrl": "./src",
     "jsx": "preserve",
     "forceConsistentCasingInFileNames": true,
@@ -18,7 +13,7 @@
     "strict": false,
     "outDir": "../dist/frontend",
     "allowSyntheticDefaultImports": true,
-    "composite": true
+    "preserveSymlinks": true
   },
   "exclude": [
     "node_modules"

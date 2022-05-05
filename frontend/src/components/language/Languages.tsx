@@ -4,13 +4,7 @@ import { useEffect, useState } from "react";
 import { Link, Route, Routes, useParams } from "react-router-dom";
 import LanguageDetails from "./LanguageDetails";
 import LanguageSmall from "./LanguageSmall";
-import {Language} from "common/enums";
-
-// export enum Language {
-//     RUSSIAN = 'Русский',
-//     ENGLISH = 'Английский',
-//     GERMAN = 'Немецкий'
-//   }
+import {Language} from "../../utils/enums";
 
 const Languages: React.FC = () => {
     const [state, changeState] = useState<GetTranslateLanguage[]>([]);
