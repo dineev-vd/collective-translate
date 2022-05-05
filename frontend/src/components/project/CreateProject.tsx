@@ -7,8 +7,8 @@ enum Language {
     RUSSIAN = 'Русский',
     ENGLISH = 'Английский',
     GERMAN = 'Немецкий'
-  }
-  
+}
+
 
 const CreateProject: React.FC = () => {
     const [projectName, setProjectName] = useState<string>('');

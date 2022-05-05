@@ -1,6 +1,6 @@
 import { GetUserDto } from "@common/dto/user.dto";
 import { api } from "api/Api";
-import UserProjectList from "components/ProjectList";
+import UserProjectList from "components/project/ProjectList";
 import { useEffect, useState } from "react";
 import { Navigate, Route, Routes, useParams } from "react-router-dom";
 

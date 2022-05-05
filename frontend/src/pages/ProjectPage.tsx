@@ -1,12 +1,11 @@
-import FileList from "components/FileList";
-import FilePeek from "components/FilePeek";
-import Languages from "components/Languages";
-import TextSegments from "components/LanguageTranslations";
-import ProjectSummary from "components/ProjectSummary";
-import { Link, Navigate, Route, Routes } from "react-router-dom";
-import TranslationPage from "./TranslatePiecePage";
+import FileList from "components/file/FileList";
+import FilePeek from "components/file/FilePeek";
+import Languages from "components/language/Languages";
+import TextSegments from "components/language/LanguageTranslations";
+import ProjectSummary from "components/project/ProjectSummary";
+import { Navigate, Route, Routes } from "react-router-dom";
 import "./ProjectPage.css"
-import TabLink from "components/TabLink";
+import TabLink from "components/ui-components/TabLink";
 
 const ProjectPage: React.FC<{}> = (_) => {
     return <div className="project-page">

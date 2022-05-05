@@ -27,14 +27,14 @@ const LanguageSegments: React.FC = () => {
 
 
     return <div className="language-segments">
-        <div>
+        <div className="language-segments_left">
             {segments.map(segment => (
                 <div onClick={() => setSelectedId(segment.id)} className={`language-segments_wrapper ${segment.id == selectedId ? "language-segments__selected" : ""}`}>
                     <SegmentSplit segment={segment} />
                 </div>
             ))}
         </div>
-        <div>
+        <div className="language-segments_right">
             {actions ? (
                 <>
                     <h3>История изменений: </h3>

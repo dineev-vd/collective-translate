@@ -2,9 +2,9 @@
   "compilerOptions": {
     "lib": [
       "dom",
-      "es6"
+      "es2020"
     ],
-    "moduleResolution": "Node",
+    "moduleResolution": "node",
     "noEmit": true,
     "paths": {
       "@common/*": [
@@ -17,7 +17,8 @@
     "isolatedModules": true,
     "strict": false,
     "outDir": "../dist/frontend",
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "preserveSymlinks": true
   },
   "exclude": [
     "node_modules"
@@ -25,7 +26,6 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "../../common",
     "**/*.css"
   ]
 }

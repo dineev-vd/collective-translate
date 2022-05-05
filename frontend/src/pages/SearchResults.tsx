@@ -2,7 +2,7 @@ import "./SearchResults.css"
 import { GetProjectDto } from "@common/dto/project.dto";
 import { useEffect, useState } from "react";
 import { api } from "api/Api";
-import ProjectSmall from "../components/ProjectSmall";
+import ProjectSmall from "../components/project/ProjectSmall";
 import { useSearchParams } from "react-router-dom";
 
 const SearchResults: React.FC = () => {

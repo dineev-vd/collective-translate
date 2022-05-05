@@ -21,3 +21,13 @@
     border-bottom-right-radius: 10px;
     border-bottom: 1px solid black;
 }
+
+.language-segments_left {
+    flex: 1 1 auto;
+    width: 100%;
+}
+
+.language-segments_right {
+    width: 20%;
+    margin-left: 20px;
+}

@@ -27,11 +27,11 @@ const LanguageDetails: React.FC = () => {
         })
     }
 
-    return <div style={{"width": "100%"}}>
+    return <div style={{"width": "100%", "padding": "0px 10px"}}>
         {language && (
             <div style={{"display" : "flex", "flexDirection": "column"}}>
                 <h3>{language.language}</h3>
-                <h6>{language.id}</h6>
+                {/* <h6>{language.id}</h6> */}
                 {assemblies && assemblies.map(a => (
                     <a href={`/api/assembly/${a.id}`}>{a.name}</a>
                 ))}

@@ -2,7 +2,7 @@ import { GetActionDto, PostActionDto } from "@common/dto/action.dto";
 import { GetTranslateLanguage } from "@common/dto/language.dto";
 import { GetTranslationDto } from "@common/dto/translate-piece.dto";
 import { api } from "api/Api";
-import TextDisplay from "components/TextDisplay";
+import TextDisplay from "components/text/TextDisplay";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useParams, useSearchParams } from "react-router-dom";
