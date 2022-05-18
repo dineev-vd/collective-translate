@@ -42,7 +42,7 @@ export class LanguageController {
     @Query('shouldTranslate') shouldTranslate?: Boolean,
     @Query('withOriginal') withOriginal?: Boolean,
     @Query('status') status?: SegmentStatus,
-    @Query('hasSuggestions') hasSuggestions?: string
+    @Query('hasSuggestions') hasSuggestions?: string,
   ): Promise<PagedResponseDto<SegmentTranslation[]>> {
     return this.translationsService.getTranslationsByLanguage({
       languageId: languageId,
@@ -52,7 +52,7 @@ export class LanguageController {
       page: page,
       shouldTranslate: shouldTranslate,
       status: status,
-      hasSuggestions: hasSuggestions
+      hasSuggestions: hasSuggestions,
     });
   }
 
@@ -61,6 +61,7 @@ export class LanguageController {
     const language = await this.languageService.getTranslationLanguageById(
       languageId,
     );
+    await this.assemblyService.deleteAssembliesByLanguage(languageId);
     const files = await this.filesService.getFilesByProject(
       language.projectId.toString(),
     );

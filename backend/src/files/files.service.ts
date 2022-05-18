@@ -208,7 +208,7 @@ export class FilesService implements OnApplicationBootstrap {
     const assembly = new Assembly();
     assembly.path = filePath;
     assembly.language = language;
-    assembly.name = file.name + ' assembly';
+    assembly.name = `${file.name}_${language.language}_${new Date().toLocaleDateString()}_${new Date().toLocaleTimeString()}`;
     return this.assemblyRepository.save(assembly);
   }
 
