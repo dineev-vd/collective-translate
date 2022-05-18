@@ -6,6 +6,7 @@ import ProjectSummary from "components/project/ProjectSummary";
 import { Navigate, Route, Routes } from "react-router-dom";
 import "./ProjectPage.css"
 import TabLink from "components/ui-components/TabLink";
+import Actions from "components/project/Actions";
 
 const ProjectPage: React.FC<{}> = (_) => {
     return <div className="project-page">
@@ -14,6 +15,7 @@ const ProjectPage: React.FC<{}> = (_) => {
             <TabLink to={'languages'}>Перевод</TabLink>
             <TabLink to={'files'}>Файлы</TabLink>
             <TabLink to={'text-segments'}>Все сегменты</TabLink>
+            <TabLink to={'actions'}>История изменений</TabLink>
         </div>
         <div className="project-page_content">
             <Routes>
@@ -24,6 +26,7 @@ const ProjectPage: React.FC<{}> = (_) => {
                 <Route path='text-segments' element={<TextSegments />} />
                 <Route path="details" element={<ProjectSummary />} />
                 <Route index element={<Navigate to={"details"} replace />} />
+                <Route path='actions' element={<Actions />} />
             </Routes>
         </div>
     </div>

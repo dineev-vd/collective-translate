@@ -1,5 +1,6 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   Index,
   ManyToOne,
@@ -26,4 +27,7 @@ export class Action {
 
   @Column({ nullable: true })
   comment: string;
+
+  @CreateDateColumn()
+  timestamp: Date;
 }

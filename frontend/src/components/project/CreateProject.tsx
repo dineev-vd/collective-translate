@@ -26,14 +26,19 @@ const CreateProject: React.FC = () => {
 
     return <form onSubmit={handleSubmit}>
         <div className='create-project-wrapper'>
-            <input onChange={e => setProjectName(e.currentTarget.value)} value={projectName} placeholder="Название"></input>
-            <textarea onChange={e => setDescription(e.currentTarget.value)} value={description} placeholder="Описание"></textarea>
+            Название проекта
+            <input required onChange={e => setProjectName(e.currentTarget.value)} value={projectName} placeholder="Название"></input>
+            Описание
+            <textarea className='create-project-description' onChange={e => setDescription(e.currentTarget.value)} value={description} placeholder="Описание"></textarea>
+            Язык оригинала
             <select value={language} onChange={(e) => setLanguage(e.currentTarget.value as Language)}>
                 {Object.values(Language).map(l => (
                     <option value={l}>{l}</option>
                 ))}
             </select>
-            <button>Создать</button>
+            Приватный
+            <input type={'checkbox'} />
+            <button type='submit'>Создать</button>
         </div>
     </form>
 }

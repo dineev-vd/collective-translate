@@ -25,6 +25,7 @@
     border: 1px solid gray;
     border-radius: 5px;
     white-space: pre-wrap;
+    max-height: 700px;
 }
 
 .file-peek_marked_1 {

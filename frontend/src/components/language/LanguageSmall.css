@@ -2,6 +2,9 @@
     border: 1px solid;
     border-bottom: 0;
     padding: 10px;
+}
+
+.language-small_info {
     display: flex;
 }
 

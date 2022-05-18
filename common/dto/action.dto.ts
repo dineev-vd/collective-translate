@@ -1,4 +1,5 @@
 import { GetUserDto } from "./user.dto";
+import {GetTranslationDto} from "./translate-piece.dto"
 
 export class PostActionDto {
   textSegmentId: number;
@@ -12,4 +13,6 @@ export class GetActionDto {
   change: string;
   comment?: string;
   author: GetUserDto;
+  segment?: GetTranslationDto;
+  timestamp: Date;
 }

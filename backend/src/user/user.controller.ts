@@ -1,5 +1,16 @@
-import { Controller, Get, UseGuards, Request, Param, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  UseGuards,
+  Request,
+  Param,
+  Req,
+  Post,
+  Body,
+  ForbiddenException,
+} from '@nestjs/common';
 import { MY_PROFILE_ENDPOINT, USER_ENDPOINT } from 'common/constants';
+import { ChangeUserDto } from 'common/dto/user.dto';
 import { JwtAuthGuard, OptionalJwtAuthGuard } from 'guards/simple-guards.guard';
 import { ProjectService } from 'project/project.service';
 import { ExtendedRequest } from 'util/ExtendedRequest';
@@ -9,8 +20,8 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    private readonly projectService: ProjectService
-  ) { }
+    private readonly projectService: ProjectService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Get(MY_PROFILE_ENDPOINT)
@@ -23,12 +34,23 @@ export class UserController {
     return this.userService.findById(id);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post(':id')
+  changeUser(
+    @Param('id') id: string,
+    @Body() changes: ChangeUserDto,
+    @Req() { user }: ExtendedRequest,
+  ) {
+    if (user.id.toString() !== id) {
+      throw new ForbiddenException();
+    }
+
+    return this.userService.updateUser(id, changes);
+  }
+
   @UseGuards(OptionalJwtAuthGuard)
   @Get(':id/projects')
-  getProjectsByUser(
-    @Req() { user }: ExtendedRequest,
-    @Param('id') id: string
-  ) {
+  getProjectsByUser(@Req() { user }: ExtendedRequest, @Param('id') id: string) {
     if (user && user.id.toString() == id)
       return this.projectService.findProjectsByUser(id, { withPrivate: true });
 

@@ -1,4 +1,5 @@
 import { Controller, Get, Param, Res } from '@nestjs/common';
+import { ResponseDto } from 'common/dto/response.dto';
 import { Response } from 'express';
 import { createReadStream } from 'fs';
 import { AssemblyService } from './assembly.service';

@@ -11,33 +11,18 @@ export class ActionsService {
   constructor(
     @InjectRepository(Action)
     private readonly actionsRepository: Repository<Action>,
-    private readonly translationsService: TranslationService,
-  ) { }
+  ) {}
 
-  async removeByFileId() { }
+  async removeByFileId() {}
 
   // TODO
-
-  async processAction(change: PostActionDto, user: User) {
-    const action: DeepPartial<Action> = {};
-    action.author = user;
-    action.change = change.change;
-    action.segment = { id: change.textSegmentId }
-
-    if (change.comment) {
-      action.comment = change.comment;
-    }
-
-    await this.translationsService.savePiece({ id: change.textSegmentId, translationText: change.change })
-    return this.actionsRepository.save(action);
-  }
 
   async getActionsBySegment(textSegmentId: string) {
     return this.actionsRepository.find({
       where: {
         segment: { id: textSegmentId },
       },
-      relations: ['author']
+      relations: ['author'],
     });
   }
 
@@ -46,11 +31,24 @@ export class ActionsService {
     let arr: ObjectLiteral[] = [];
     for (let i = 0; i < actions.length; i += chunkSize) {
       const chunk = actions.slice(i, i + chunkSize);
-      const { identifiers } = await this.actionsRepository.createQueryBuilder().insert().values(chunk).execute();
-      arr.push.apply(arr, identifiers)
+      const { identifiers } = await this.actionsRepository
+        .createQueryBuilder()
+        .insert()
+        .values(chunk)
+        .execute();
+      arr.push.apply(arr, identifiers);
       //arr = arr.concat(identifiers);
     }
 
     return arr;
+  }
+
+  async getActionsForProject(projectId: string) {
+    return this.actionsRepository.find({
+      order: {timestamp: 'DESC'},
+      take: 30,
+      where: { segment: { file: { project: { id: projectId } } } },
+      relations: ['segment', 'segment.file', 'segment.file.project', 'author']
+    });
   }
 }

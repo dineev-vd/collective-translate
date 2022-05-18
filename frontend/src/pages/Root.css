@@ -2,10 +2,10 @@
     position: absolute;
     display: flex;
     flex-direction: column;
-    height: 100%;
     width: 100%;
     background-color: #edf2f4;
-    overflow: hidden;
+    min-height: 100%;
+    /* overflow-y: scroll; */
 }
 
 .content-wrapper {

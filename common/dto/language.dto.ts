@@ -8,6 +8,8 @@ export class GetTranslateLanguage {
   language: Language;
   translationSegments: GetTranslationDto[];
   original: Boolean;
+  all?: number;
+  translated?: number;
 }
 
 export class PostTranslateLanguage {

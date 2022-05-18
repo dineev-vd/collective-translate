@@ -19,6 +19,7 @@ import { Assembly } from 'entities/assembly.entity';
 import { AssemblyModule } from './assembly/assembly.module';
 import { RegularExpression } from 'entities/regexp.entity';
 import { RegexpModule } from './regexp/regexp.module';
+import { Suggestion } from 'entities/suggestion.entity';
 
 const {
   POSTGRES_HOST,
@@ -50,7 +51,8 @@ const {
         Comment,
         TranslationLanguage,
         Assembly,
-        RegularExpression
+        RegularExpression,
+        Suggestion
       ],
     }),
     ProjectModule,

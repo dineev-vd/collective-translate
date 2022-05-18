@@ -4,7 +4,7 @@ import Project from 'entities/project.entity';
 import { DeepPartial, ILike, Repository } from 'typeorm';
 import * as fs from 'fs/promises';
 import * as iconv from 'iconv-lite';
-import { PostProjectDto } from 'common/dto/project.dto';
+import { ChangeProjectDto, PostProjectDto } from 'common/dto/project.dto';
 import { File } from 'entities/file.entity';
 import User from 'entities/user.entity';
 import { TranslationLanguage } from 'entities/translation-language.entity';
@@ -26,7 +26,13 @@ export class ProjectService implements OnApplicationBootstrap {
     user.name = 'Владислав Динеев';
     user.refreshToken = '';
 
-    for (let i = 0; i < 2; i++) {
+    const editorUser = new User();
+    editorUser.email = 'editor@editor.com';
+    editorUser.password = 'editor';
+    editorUser.name = 'Редактор Тест';
+    editorUser.refreshToken = '';
+
+    for (let i = 0; i < 3; i++) {
       const project = new Project();
       project.name = `Проект ${i}`;
       project.description = `Это описание проекта с номером ${i}`;
@@ -37,7 +43,8 @@ export class ProjectService implements OnApplicationBootstrap {
       file.encoding = 'utf-8';
       project.files = [file];
       project.owner = user;
-      project.private = i % 2 === 0;
+      project.editors = i < 2 ? [editorUser] : [];
+      project.private = i === 1;
 
       const translateLanguage = new TranslationLanguage();
       translateLanguage.language = Language.RUSSIAN;
@@ -101,8 +108,8 @@ export class ProjectService implements OnApplicationBootstrap {
     return this.projectRepository.save(project);
   }
 
-  async updateProject(projectId: string, project: PostProjectDto) {
-    return this.projectRepository.save(project);
+  async updateProject(projectId: string, project: ChangeProjectDto) {
+    return this.projectRepository.update(projectId, project);
   }
 
   async findProjectByLanguage(languageId: string) {

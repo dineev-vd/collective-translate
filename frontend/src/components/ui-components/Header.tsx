@@ -29,7 +29,7 @@ const Header: React.FC = () => {
             <div className="header_input_wrapper">
                 {!match && <form onSubmit={handleSubmit}>
                     <input placeholder="Поиск..." className="header_input" onChange={handleChange} value={searchValue}></input>
-                </form >}
+                </form>}
             </div>
             {curUser ?
                 <>
@@ -43,7 +43,10 @@ const Header: React.FC = () => {
                     <TopMenuProfile show={showTopMenu} />
                 </>
                 :
+                <>
+                <Link to={'/register'}>Регистрация</Link>
                 <Link to={'/login'}>Вход</Link>
+                </>
             }
         </header>
     )

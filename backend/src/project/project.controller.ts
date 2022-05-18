@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  ForbiddenException,
   Get,
   OnApplicationBootstrap,
   Param,
@@ -18,7 +19,11 @@ import {
   LANGUAGE_ENDPOINT,
   PROJECT_ENDPOINT,
 } from 'common/constants';
-import { PostProjectDto, GetProjectDto } from 'common/dto/project.dto';
+import {
+  PostProjectDto,
+  GetProjectDto,
+  ChangeProjectDto,
+} from 'common/dto/project.dto';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { FilesService } from 'files/files.service';
 import { JwtAuthGuard } from 'guards/simple-guards.guard';
@@ -26,6 +31,8 @@ import { ExtendedRequest } from 'util/ExtendedRequest';
 import { LanguageService } from 'language/language.service';
 import { PostTranslateLanguage } from 'common/dto/language.dto';
 import { TranslationLanguage } from 'entities/translation-language.entity';
+import { ActionsService } from 'actions/actions.service';
+import { TranslationService } from 'translation/translation.service';
 
 @Controller(PROJECT_ENDPOINT)
 export class ProjectController {
@@ -33,8 +40,9 @@ export class ProjectController {
     private readonly projectService: ProjectService,
     private readonly filesService: FilesService,
     private readonly languageService: LanguageService,
-  ) { }
-
+    private readonly actionsService: ActionsService,
+    private readonly translationsService: TranslationService,
+  ) {}
 
   @Get()
   async getProjectsByQuery(
@@ -45,15 +53,26 @@ export class ProjectController {
 
   @Get(':id')
   async getProjectById(@Param('id') id: string): Promise<GetProjectDto> {
-    return this.projectService.findProjectById(id);
+    return {
+      ...(await this.projectService.findProjectById(id)),
+      ...(await this.translationsService.countSegmentsByProject(id)),
+    };
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post(':id')
   async postProjectById(
     @Param('id') id: string,
-    @Body() project: PostProjectDto,
+    @Body() projectChange: ChangeProjectDto,
+    @Req() { user }: ExtendedRequest,
   ) {
-    return this.projectService.updateProject(id, project);
+    const project = await this.projectService.findProjectById(id);
+
+    if (!(project.ownerId == user.id.toString())) {
+      throw new ForbiddenException();
+    }
+
+    return this.projectService.updateProject(id, projectChange);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -66,12 +85,24 @@ export class ProjectController {
     const originalLanguage = new TranslationLanguage();
     originalLanguage.language = language;
     originalLanguage.original = true;
-    return this.projectService.createProject({ ...rest, owner: user, translateLanguage: [originalLanguage] });
+    return this.projectService.createProject({
+      ...rest,
+      owner: user,
+      translateLanguage: [originalLanguage],
+    });
   }
 
   @Get(`:id/${FILE_ENDPOINT}`)
   async getFiles(@Param('id') id: string) {
-    return this.filesService.getFilesByProject(id);
+    const files = await this.filesService.getFilesByProject(id);
+    return Promise.all(
+      files.map(async (file) => {
+        const counts = await this.translationsService.countSegmentsByFile(
+          file.id.toString(),
+        );
+        return { ...file, ...counts };
+      }),
+    );
   }
 
   @Post(`:id/${FILE_ENDPOINT}`)
@@ -95,7 +126,16 @@ export class ProjectController {
 
   @Get(`:id/${LANGUAGE_ENDPOINT}`)
   async getProjectLanguages(@Param('id') projectId: string) {
-    return this.languageService.getTranslationLanguagesByProjectId(projectId);
+    const languages =
+      await this.languageService.getTranslationLanguagesByProjectId(projectId);
+    return Promise.all(
+      languages.map(async (language) => {
+        const counts = await this.translationsService.countSegmentsByLanguage(
+          language.id.toString(),
+        );
+        return { ...language, ...counts };
+      }),
+    );
   }
 
   @Post(`:id/${LANGUAGE_ENDPOINT}`)
@@ -103,10 +143,14 @@ export class ProjectController {
     @Param('id') id: string,
     @Body() language: PostTranslateLanguage,
   ) {
-    if (!language['language'])
-      throw new BadRequestException();
+    if (!language['language']) throw new BadRequestException();
 
     this.projectService.createTranslation(id, language);
     return 'OK';
+  }
+
+  @Get(':id/actions')
+  async getAllActions(@Param('id') id: string) {
+    return this.actionsService.getActionsForProject(id);
   }
 }

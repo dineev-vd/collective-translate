@@ -17,7 +17,7 @@ import { TranslationLanguage } from 'entities/translation-language.entity';
 import { LanguageService } from 'language/language.service';
 import SegmentTranslation from 'entities/segment-translation.entity';
 import { Language } from 'entities/language.entity';
-import * as sbd from "sbd";
+import * as sbd from 'sbd';
 import { RegularExpression } from 'entities/regexp.entity';
 
 @Injectable()
@@ -30,15 +30,15 @@ export class FilesService implements OnApplicationBootstrap {
     private readonly actionsService: ActionsService,
     private readonly translationsService: TranslationService,
     private readonly languageService: LanguageService,
-  ) { }
+  ) {}
 
   onApplicationBootstrap() {
     if (!fsSync.existsSync('../assemblies/')) {
-      fsSync.mkdirSync('../assemblies/', { recursive: true })
+      fsSync.mkdirSync('../assemblies/', { recursive: true });
     }
 
     if (!fsSync.existsSync('../uploads/')) {
-      fsSync.mkdirSync('../uploads/', { recursive: true })
+      fsSync.mkdirSync('../uploads/', { recursive: true });
     }
   }
 
@@ -48,6 +48,7 @@ export class FilesService implements OnApplicationBootstrap {
 
   async saveFileToStorage(buffer: Buffer) {
     const fileName = `../uploads/${crypto.randomUUID()}`;
+    
     await fs.writeFile(fileName, buffer);
     return fileName;
   }
@@ -87,32 +88,45 @@ export class FilesService implements OnApplicationBootstrap {
 
     const buffer = Buffer.concat(chunks);
     const fileString = iconv.decode(buffer, file.encoding);
-    const re = regexp ? new RegExp(`${decodeURI(regexp)}`, 'g') : /(\s+[^.!?]*[.!?])/g;
+    const re = regexp
+      ? new RegExp(`${decodeURI(regexp)}`, 'g')
+      : /(\s+[^.!?]*[.!?])/g;
 
-    return { text: fileString.split(re).map((value, index) => ({ marked: index % 2 !== 0, text: value })).filter(t => t.text.length > 0) };
+    return {
+      text: fileString
+        .split(re)
+        .map((value, index) => ({ marked: index % 2 !== 0, text: value }))
+        .filter((t) => t.text.length > 0),
+    };
   }
 
   async getFirstSegment(fileId: string) {
     const file = await this.fileRepository.findOne(fileId);
-    const languages = await this.languageService.getTranslationLanguagesByProjectId(file.projectId.toString());
-    const originalLanguage = languages.find(l => l.original);
+    const languages =
+      await this.languageService.getTranslationLanguagesByProjectId(
+        file.projectId.toString(),
+      );
+    const originalLanguage = languages.find((l) => l.original);
 
-    return this.translationsService.getFirstByFileAndLanguage(file.id.toString(), originalLanguage.id.toString());
+    return this.translationsService.getFirstByFileAndLanguage(
+      file.id.toString(),
+      originalLanguage.id.toString(),
+    );
   }
 
   async formTextSegments(
     re: RegExp,
     completeText: string,
     file: File,
-    original: TranslationLanguage
+    original: TranslationLanguage,
   ): Promise<SegmentTranslation[]> {
     let count = 0;
-    sbd.sentences(completeText, {})
+    sbd.sentences(completeText, {});
     const array = completeText
       .split(re)
       .reduce((previous, splitPart, index) => {
         if (splitPart.length === 0) return previous;
-        sbd
+        sbd;
         const textSegment = new SegmentTranslation();
         textSegment.shouldTranslate = index % 2 !== 0;
         textSegment.translationText = splitPart;
@@ -140,11 +154,18 @@ export class FilesService implements OnApplicationBootstrap {
 
     const first = await this.getFirstSegment(id);
 
-    let currentBulk = await this.translationsService.getSegmentWithNeighbours(first.id.toString(), { next: bulkSize * offset, toLanguageId: +languageId, withOriginal: true, include: true })
+    let currentBulk = await this.translationsService.getSegmentWithNeighbours(
+      first.id.toString(),
+      {
+        next: bulkSize * offset,
+        toLanguageId: +languageId,
+        withOriginal: true,
+        include: true,
+      },
+    );
 
     const fileName = `../assemblies/${crypto.randomUUID()}`;
     const fileWrite = await fs.open(fileName, 'a+');
-
 
     while (currentBulk.length > 0) {
       const stringToWrite = currentBulk
@@ -159,7 +180,16 @@ export class FilesService implements OnApplicationBootstrap {
 
       await fileWrite.appendFile(iconv.encode(stringToWrite, file.encoding));
 
-      currentBulk = await this.translationsService.getSegmentWithNeighbours(currentBulk[currentBulk.length - 1].id ? currentBulk[currentBulk.length - 1].id.toString() : currentBulk[currentBulk.length - 1].original.id.toString(), { next: bulkSize * offset, toLanguageId: +languageId, withOriginal: true })
+      currentBulk = await this.translationsService.getSegmentWithNeighbours(
+        currentBulk[currentBulk.length - 1].id
+          ? currentBulk[currentBulk.length - 1].id.toString()
+          : currentBulk[currentBulk.length - 1].original.id.toString(),
+        {
+          next: bulkSize * offset,
+          toLanguageId: +languageId,
+          withOriginal: true,
+        },
+      );
     }
 
     await fileWrite.close();
@@ -196,21 +226,32 @@ export class FilesService implements OnApplicationBootstrap {
       const decoded = iconv.decode(fileBuffer, file.encoding);
       console.log('fileDecoded');
 
-      const reg = regexp ? new RegExp(`${decodeURI(regexp)}`, 'g') : /(\s+[^.!?]*[.!?])/g;
+      const reg = regexp
+        ? new RegExp(`${decodeURI(regexp)}`, 'g')
+        : /(\s+[^.!?]*[.!?])/g;
       await this.translationsService.removeSegmentsFromFile(file.id);
 
-      const original = (await this.languageService.getOriginalLanguage(file.projectId.toString()));
+      const original = await this.languageService.getOriginalLanguage(
+        file.projectId.toString(),
+      );
 
-      const segments = await this.formTextSegments(reg, decoded, file, original);
+      const segments = await this.formTextSegments(
+        reg,
+        decoded,
+        file,
+        original,
+      );
       // this should be fast as fuck
-      const identifiers = await this.translationsService.insertTextSegments(segments);
+      const identifiers = await this.translationsService.insertTextSegments(
+        segments,
+      );
       //console.log(identifiers)
 
       const actions = identifiers.map((i) => {
         const action: DeepPartial<Action> = {};
         action.change = '';
         action.comment = 'Сегмент создан';
-        action.segment = { id: Number(i.id) };
+        action.segment = { id: i.id };
 
         return action;
       });
@@ -219,7 +260,9 @@ export class FilesService implements OnApplicationBootstrap {
       await this.actionsService.insertActions(actions);
       console.log('actions inserted');
 
-      await this.fileRepository.update(Number(id), { status: FileStatus.SPLITTED });
+      await this.fileRepository.update(Number(id), {
+        status: FileStatus.SPLITTED,
+      });
       console.log('text segments saved');
     } catch (e) {
       console.log(e);

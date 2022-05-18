@@ -9,12 +9,14 @@ import { File } from 'entities/file.entity';
 import { FilesModule } from 'files/files.module';
 import { TranslationModule } from 'translation/translation.module';
 import { LanguageModule } from 'language/language.module';
+import { ActionsModule } from 'actions/actions.module';
 
 @Module({
   controllers: [ProjectController],
   imports: [
     TranslationModule,
     FilesModule,
+    ActionsModule,
     LanguageModule,
     TypeOrmModule.forFeature([
       Project,

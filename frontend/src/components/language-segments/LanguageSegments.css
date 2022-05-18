@@ -1,5 +1,4 @@
 .language-segments {
-    overflow-y: scroll;
     position: relative;
     flex: 1 1 100px;
     display: flex;

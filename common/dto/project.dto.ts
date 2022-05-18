@@ -12,4 +12,12 @@ export class GetProjectDto {
   name: string;
   description: string;
   owner: GetShortUserDto;
+  private?: Boolean;
+  all?: number;
+  translated?: number;
+}
+
+export class ChangeProjectDto {
+  name: string;
+  description: string;
 }

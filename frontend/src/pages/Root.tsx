@@ -16,6 +16,7 @@ import CreateProject from 'components/project/CreateProject';
 import { auth } from 'api/Auth';
 import LanguageSegments from 'components/language-segments/LanguageSegments';
 import LanguageSegmentsPage from './LanguageSegmentsPage';
+import Register from 'components/ui-components/Register';
 
 
 const Root = () => {
@@ -54,6 +55,7 @@ const Root = () => {
                             <Route path='project/create' element={<CreateProject />} />
                             <Route path='project/:projectId/*' element={<ProjectPage />} />
                             <Route path='/login' element={<Login />} />
+                            <Route path='/register' element={<Register />} />
 
                             <Route path='*' element={<div>404</div>} />
                             <Route index element={<LandingPage />} />

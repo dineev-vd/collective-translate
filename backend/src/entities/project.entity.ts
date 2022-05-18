@@ -2,9 +2,12 @@ import {
   Column,
   Entity,
   Index,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  RelationId,
 } from 'typeorm';
 import User from './user.entity';
 import { TranslationLanguage } from './translation-language.entity';
@@ -22,6 +25,9 @@ export default class Project {
   @ManyToOne(() => User, { cascade: true })
   owner: User;
 
+  @RelationId((project: Project) => project.owner)
+  ownerId: string;
+
   @OneToMany(() => TranslationLanguage, (language) => language.project, {
     cascade: true,
   })
@@ -35,4 +41,18 @@ export default class Project {
 
   @Column({ default: false })
   private: Boolean;
+
+  @ManyToMany(() => User, user => user.editableProjects, { cascade: true })
+  @JoinTable({
+    joinColumn: {
+      name: 'editor',
+    },
+    inverseJoinColumn: {
+      name: 'project',
+    },
+  })
+  editors: User[];
+
+  @RelationId((project: Project) => project.editors)
+  editorsId: string[];
 }

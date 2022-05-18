@@ -3,6 +3,7 @@ import {
   Column,
   Entity,
   Index,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -23,11 +24,17 @@ export default class User {
   @Column()
   password: string;
 
-  @Column()
+  @Column({default: ''})
+  info: string;
+
+  @Column({default: ''})
   refreshToken: string;
 
   @OneToMany(() => Project, (project) => project.owner)
   projects: Project[];
+
+  @ManyToMany(() => Project, project => project.editors)
+  editableProjects: Project[];
 
   toGetShortUserDto(): GetShortUserDto {
     return {

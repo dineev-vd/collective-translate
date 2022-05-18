@@ -1,16 +1,26 @@
 import User from 'entities/user.entity';
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PostUserDto } from 'common/dto/user.dto';
+import { ChangeUserDto, PostUserDto } from 'common/dto/user.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class UserService {
+export class UserService implements OnApplicationBootstrap {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
+
+  onApplicationBootstrap() {
+    const simpleUser = new User();
+    simpleUser.email = 'user@user.com';
+    simpleUser.name = 'Обычный пользователь';
+    simpleUser.password = 'user';
+    simpleUser.refreshToken = '';
+
+    this.userRepository.save(simpleUser);
+  }
 
   async findOne(email: string): Promise<User | undefined> {
     return this.userRepository.findOne({ where: { email: email } });
@@ -22,6 +32,10 @@ export class UserService {
 
   async findById(id: string) {
     return this.userRepository.findOne(id);
+  }
+
+  async updateUser(id: string, changes: ChangeUserDto) {
+    return this.userRepository.update(id, changes);
   }
 
   async setCurrentRefreshToken(refreshToken: string, userId: number) {
