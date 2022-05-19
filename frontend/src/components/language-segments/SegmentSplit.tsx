@@ -14,8 +14,8 @@ import { selectUser } from "store/userReducer";
 
 export function segmentStatusToColor(status: SegmentStatus) {
   switch (status) {
-    case SegmentStatus.LOCKED:
-      return "coral";
+    // case SegmentStatus.LOCKED:
+    //   return "coral";
 
     case SegmentStatus.NEW:
       return "cornflowerblue";

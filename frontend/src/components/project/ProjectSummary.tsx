@@ -3,12 +3,15 @@ import { GetProjectDto, ChangeProjectDto } from "common/dto/project.dto";
 import { useEffect } from "react";
 import { api } from "api/Api";
 import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { selectUser } from "store/userReducer";
 
 const ProjectSummary: React.FC<{}> = () => {
   const { projectId } = useParams();
   const [summaryResponse, setSummaryResponse] = useState<GetProjectDto>();
   const [change, setChange] = useState<ChangeProjectDto>();
   const [showEdit, setShowEdit] = useState<boolean>(false);
+  const user = useSelector(selectUser);
 
   useEffect(() => {
     api.getProjectById(projectId).then(([response, _]) => {
@@ -27,9 +30,13 @@ const ProjectSummary: React.FC<{}> = () => {
     <>
       {summaryResponse && (
         <div>
-          <button onClick={() => setShowEdit((prev) => !prev)}>
-            {!showEdit ? "Изменить" : "Отмена"}
-          </button>
+          {summaryResponse &&
+            (summaryResponse.editorsId.includes(user.id.toString()) ||
+            summaryResponse.ownerId == user.id.toString()) && (
+              <button onClick={() => setShowEdit((prev) => !prev)}>
+                {!showEdit ? "Изменить" : "Отмена"}
+              </button>
+            )}
 
           {showEdit && (
             <>

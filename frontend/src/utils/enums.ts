@@ -13,13 +13,13 @@ export enum FileStatus {
 export enum SegmentStatus {
   NEW = 'new',
   TRANSLATED = 'translated',
-  LOCKED = 'locked',
+  // LOCKED = 'locked',
 }
 
 export function segmentStatusToText(status: SegmentStatus) {
   switch (status) {
-    case SegmentStatus.LOCKED:
-      return "Заблокирован";
+    // case SegmentStatus.LOCKED:
+    //   return "Заблокирован";
 
     case SegmentStatus.NEW:
       return "Новый";

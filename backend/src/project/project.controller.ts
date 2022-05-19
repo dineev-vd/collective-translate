@@ -145,8 +145,7 @@ export class ProjectController {
   ) {
     if (!language['language']) throw new BadRequestException();
 
-    this.projectService.createTranslation(id, language);
-    return 'OK';
+    return this.projectService.createTranslation(id, language);
   }
 
   @Get(':id/actions')

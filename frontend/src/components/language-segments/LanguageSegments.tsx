@@ -76,7 +76,7 @@ const LanguageSegments: React.FC<{project: GetProjectDto}> = ({project}) => {
           <div>
             <h3>Предложенные переводы</h3>
             {suggestions.map((s) => (
-              <Suggestion suggestion={s} />
+              <Suggestion suggestion={s} project={project}/>
             ))}
           </div>
         )}

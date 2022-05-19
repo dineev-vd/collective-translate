@@ -73,7 +73,7 @@ export class ProjectService implements OnApplicationBootstrap {
       project: { id: Number(id) },
     });
     const files = await this.fileService.getFilesByProject(id);
-    await Promise.all(
+    return Promise.all(
       files.map((file) =>
         this.translationsService.generateTranslationForFile(
           createdLanguage.id.toString(),
