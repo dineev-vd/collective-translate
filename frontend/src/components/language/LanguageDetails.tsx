@@ -23,7 +23,7 @@ const LanguageDetails: React.FC = () => {
 
     function handleAssemble() {
         api.assembleLanguage(languageId).then(() => {
-
+            location.reload();
         })
     }
 
@@ -35,7 +35,7 @@ const LanguageDetails: React.FC = () => {
                 {assemblies && assemblies.map(a => (
                     <a href={`/api/assembly/${a.id}`}>{a.name}</a>
                 ))}
-                <button style={{"width":"100px"}} onClick={handleAssemble}>Собрать</button>
+                <button style={{"width":"100px", marginTop: "20px"}} onClick={handleAssemble}>Собрать</button>
             </div>
         )}
     </div>

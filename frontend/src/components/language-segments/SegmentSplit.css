@@ -21,4 +21,6 @@
 .segment-split_textarea {
     width: 100%;
     min-height: 100px;
+    resize: none;
+    margin-top: 10px;
 }

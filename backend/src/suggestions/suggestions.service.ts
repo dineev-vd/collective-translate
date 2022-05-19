@@ -58,6 +58,7 @@ export class SuggestionsService {
   async getSuggestiont(segmentId: string) {
     return this.suggestionRepository.find({
       where: { segment: { id: segmentId } },
+      relations: ['author']
     });
   }
 

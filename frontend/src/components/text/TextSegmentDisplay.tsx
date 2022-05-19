@@ -92,12 +92,12 @@ const TextSegmentDisplay: React.FC<{
   return (
     <span>
       <span onInput={handleInput} ref={spanRef} contentEditable></span>
-      {segmentId && (
+      {/* {segmentId && (
         <button onClick={() => setShowOriginal((prev) => !prev)}>#</button>
       )}
       {translations[segmentId] && (
         <button onClick={() => navigateToSegment()}>К сегменту</button>
-      )}
+      )} */}
     </span>
   );
 };

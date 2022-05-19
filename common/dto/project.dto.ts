@@ -15,6 +15,8 @@ export class GetProjectDto {
   private?: Boolean;
   all?: number;
   translated?: number;
+  editorsId: string[];
+  ownerId: string;
 }
 
 export class ChangeProjectDto {

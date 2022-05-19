@@ -9,6 +9,8 @@ import {
 } from "store/translate-piece-reducer";
 import { SegmentStatus, segmentStatusToText } from "utils/enums";
 import "./SegmentSplit.css";
+import { GetProjectDto } from "common/dto/project.dto";
+import { selectUser } from "store/userReducer";
 
 export function segmentStatusToColor(status: SegmentStatus) {
   switch (status) {
@@ -26,11 +28,14 @@ export function segmentStatusToColor(status: SegmentStatus) {
   }
 }
 
-const SegmentSplit: React.FC<{ segment: GetTranslationDto }> = ({
-  segment,
-}) => {
+const SegmentSplit: React.FC<{
+  segment: GetTranslationDto;
+  project: GetProjectDto;
+}> = ({ segment, project }) => {
   const translationChanges = useSelector(selectTranslationChanges);
   const dispatch = useDispatch();
+
+  const user = useSelector(selectUser);
 
   const translation = useMemo(
     () =>
@@ -86,8 +91,7 @@ const SegmentSplit: React.FC<{ segment: GetTranslationDto }> = ({
     <div className="segment-split">
       {segment.original && (
         <div className="segment-split_part">
-          <div>Оригинал</div>
-          {/* <Link to={`/segments/${segment.original.id}`}>Открыть в контексте</Link> */}
+          <div>Оригинал <span style={{color:"lightgray"}}>{`#${segment.original.id}`}</span></div>
           <textarea
             readOnly
             className={`segment-split_textarea ${
@@ -102,7 +106,7 @@ const SegmentSplit: React.FC<{ segment: GetTranslationDto }> = ({
       )}
       <div className="segment-split_part">
         <div>
-          Сегмент
+          Сегмент <span style={{color:"lightgray"}}>{`#${segment.id}`}</span>
           <span
             style={{
               color: "white",
@@ -115,20 +119,22 @@ const SegmentSplit: React.FC<{ segment: GetTranslationDto }> = ({
           >
             {segmentStatusToText(segment.status)}
           </span>
-          {segment.suggestionsIds.length > 0 && <span
-            style={{
-              color: "white",
-              backgroundColor: "orange",
-              borderRadius: "5px",
-              padding: "0 3px",
-              marginLeft: "5px",
-              float: "right",
-            }}
-          >
-            {"Предложен перевод"}
-          </span>}
+          {segment.suggestionsIds.length > 0 && (
+            <span
+              style={{
+                color: "white",
+                backgroundColor: "orange",
+                borderRadius: "5px",
+                padding: "0 3px",
+                marginLeft: "5px",
+                float: "right",
+              }}
+            >
+              {"Предложен перевод"}
+            </span>
+          )}
         </div>
-        <Link to={`/segments/${segment.id}`}>Открыть в контексте</Link>
+        {/* <Link to={`/segments/${segment.id}`}>Открыть в контексте</Link> */}
         <textarea
           className={`segment-split_textarea ${
             segment.id in translationChanges
@@ -138,19 +144,24 @@ const SegmentSplit: React.FC<{ segment: GetTranslationDto }> = ({
           onChange={(e) => handleSegmentChange(e.currentTarget.value)}
           value={translation}
         />
-        <button
-          onClick={() => handleCommitChange()}
-          disabled={!(segment.id in translationChanges)}
-        >
-          Сохранить перевод
-        </button>
-        <button
-          onClick={() => handleSuggestTranslation()}
-          disabled={!(segment.id in translationChanges)}
-          style={{ marginLeft: "5px" }}
-        >
-          Предложить перевод
-        </button>
+        {user && (
+          <>
+            {(project.editorsId.includes(user.id.toString()) || project.ownerId == user.id.toString()) && <button
+              onClick={() => handleCommitChange()}
+              disabled={!(segment.id in translationChanges)}
+              style={{ marginRight: "5px" }}
+            >
+              Сохранить перевод
+            </button>}
+            <button
+              onClick={() => handleSuggestTranslation()}
+              disabled={!(segment.id in translationChanges)}
+              
+            >
+              Предложить перевод
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

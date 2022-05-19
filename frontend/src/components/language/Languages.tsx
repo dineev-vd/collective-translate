@@ -31,14 +31,14 @@ const Languages: React.FC = () => {
                 <option>{l}</option>
             ))}
         </select>
-        <button onClick={handleCreateLanguage}>Создать язык</button>
-        <div style={{"display":"flex", "width": "100%"}}>
+        <button style={{marginLeft: "5px"}} onClick={handleCreateLanguage}>Создать язык</button>
+        <div style={{"display":"flex", "width": "100%", marginTop:"10px"}}>
             <div style={{"width": "100%"}}>
                 {state && state.map(language => (
                     <LanguageSmall language={language} />
                 ))}
             </div>
-            <div style={{"width": "100%"}}>
+            <div style={{"width": "100%", marginLeft: "20px"}}>
                 <Routes>
                     <Route index element={<h3>Выберите язык</h3>} />
                     <Route path=":languageId" element={<LanguageDetails />} />

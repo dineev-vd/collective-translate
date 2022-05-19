@@ -36,14 +36,14 @@ export class FilesController {
       const originalLang = languages.find(l => l.original);
       const translateLangs = languages.filter(l => !l.original);
 
-      translateLangs.forEach(async (language) => {
-        await this.translationsService.generateTranslationForFile(language.id.toString(), id, originalLang.id.toString())
-      });
+      return Promise.all(translateLangs.map(async (language) => {
+        return this.translationsService.generateTranslationForFile(language.id.toString(), id, originalLang.id.toString())
+      }));
     };
 
-    process();
+    // process();
 
-    return { response: 'File is being processed' };
+    return process();
   }
 
   @Get(`:id/assemble`)

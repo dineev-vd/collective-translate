@@ -52,7 +52,7 @@ const FilePeek: React.FC = () => {
   return (
     <div className="file-peek">
       <div className="file-peek_process">
-        <button onClick={() => api.splitFile(+fileId, regexpToSend).then()}>
+        <button onClick={() => api.splitFile(+fileId, regexpToSend).then(()=> location.reload())}>
           Обработать
         </button>
         <input

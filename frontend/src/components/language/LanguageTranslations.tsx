@@ -123,7 +123,7 @@ const TextSegments: React.FC<{}> = () => {
         bottom: 0,
       }}
     >
-      <div>
+      <div style={{marginBottom: "5px"}}>
         <select
           value={fileId ?? -1}
           onChange={(e) => handleSelect(e.currentTarget.value)}

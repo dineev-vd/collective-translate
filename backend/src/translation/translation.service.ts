@@ -207,6 +207,7 @@ export class TranslationService {
         .insert()
         .values(translations)
         .execute();
+    
       const { data } = await this.getTranslationsByLanguage({
         languageId: fromLanguageId,
         fileId: fileId,
@@ -217,6 +218,7 @@ export class TranslationService {
     }
 
     console.log('saved');
+    return 'saved';
   }
 
   async removeSegmentsFromFile(fileId: number) {
