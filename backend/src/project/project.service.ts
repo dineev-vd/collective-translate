@@ -15,9 +15,13 @@ import { LanguageService } from 'language/language.service';
 import { PostTranslateLanguage } from 'common/dto/language.dto';
 import { throwIfEmpty } from 'rxjs';
 
+const { PRODUCTION } = process.env;
+
 @Injectable()
 export class ProjectService implements OnApplicationBootstrap {
   async onApplicationBootstrap() {
+    if(PRODUCTION) return;
+
     if ((await this.projectRepository.findOne(1)) != null) return;
 
     const user = new User();
@@ -49,12 +53,14 @@ export class ProjectService implements OnApplicationBootstrap {
       const translateLanguage = new TranslationLanguage();
       translateLanguage.language = Language.RUSSIAN;
       translateLanguage.original = true;
-      translateLanguage.name = "Русский";
+      translateLanguage.name = 'Русский';
       project.translateLanguage = [translateLanguage];
       const insertedProject = await this.projectRepository.save(project);
 
       await this.fileService.splitFile(insertedProject.files[0].id.toString());
-      await this.createTranslation(insertedProject.id.toString(), { language: Language.ENGLISH });
+      await this.createTranslation(insertedProject.id.toString(), {
+        language: Language.ENGLISH,
+      });
     }
   }
 
@@ -63,8 +69,8 @@ export class ProjectService implements OnApplicationBootstrap {
     private projectRepository: Repository<Project>,
     private fileService: FilesService,
     private languageService: LanguageService,
-    private translationsService: TranslationService
-  ) { }
+    private translationsService: TranslationService,
+  ) {}
 
   async createTranslation(id: string, language: PostTranslateLanguage) {
     const originalLanguage = await this.languageService.getOriginalLanguage(id);
@@ -78,17 +84,22 @@ export class ProjectService implements OnApplicationBootstrap {
         this.translationsService.generateTranslationForFile(
           createdLanguage.id.toString(),
           file.id.toString(),
-          originalLanguage.id.toString()
+          originalLanguage.id.toString(),
         ),
       ),
     );
   }
 
-  async findProjectsByUser(userId: string, params: { withPrivate?: Boolean } = {}) {
+  async findProjectsByUser(
+    userId: string,
+    params: { withPrivate?: Boolean } = {},
+  ) {
     if (params.withPrivate)
       return this.projectRepository.find({ where: { owner: { id: userId } } });
 
-    return this.projectRepository.find({ where: { owner: { id: userId }, private: false } });
+    return this.projectRepository.find({
+      where: { owner: { id: userId }, private: false },
+    });
   }
 
   async findProjectsByQuery(query: string) {
@@ -113,6 +124,8 @@ export class ProjectService implements OnApplicationBootstrap {
   }
 
   async findProjectByLanguage(languageId: string) {
-    return this.projectRepository.findOne({ where: { translateLanguage: { id: languageId } } })
+    return this.projectRepository.findOne({
+      where: { translateLanguage: { id: languageId } },
+    });
   }
 }

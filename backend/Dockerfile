@@ -1,3 +1,9 @@
 FROM node:16-alpine
+WORKDIR /app
+COPY . .
+RUN apk add g++ make py3-pip
+RUN npm ci
 WORKDIR /app/backend
-CMD npm run start:dev
+RUN npm run build
+WORKDIR /app/backend/dist
+CMD node main

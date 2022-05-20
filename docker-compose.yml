@@ -1,31 +1,17 @@
 services:
   frontend:
-    build: ./frontend
-    volumes:
-      - './:/app/'
+    build: 
+      context: .
+      dockerfile: ./frontend/Dockerfile
     networks:
       - main
   backend:
-    env_file: development.env
-    build: ./backend
-    volumes:
-      - './:/app/'
+    env_file: production.env
+    build: 
+      context: .
+      dockerfile: ./backend/Dockerfile
     networks:
       - main
-  db:
-    image: postgres
-    env_file: development.env
-    networks:
-      - main
-    ports:
-      - 5432:5432
-  pgadmin:
-    env_file: development.env
-    image: dpage/pgadmin4
-    networks:
-      - main
-    ports:
-      - 3001:80
   nginx:
     image: nginx:alpine
     networks:
