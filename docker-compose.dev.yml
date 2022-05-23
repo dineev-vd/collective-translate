@@ -38,6 +38,10 @@ services:
       - 3000:80
     volumes:
       - "./proxy/nginx.dev.conf:/etc/nginx/nginx.conf"
+  watcher:
+    build: ./openapi
+    volumes:
+      - "./:/app"
 
 networks:
   main:

@@ -1,0 +1,520 @@
+openapi: 3.0.0
+paths:
+  /project:
+    get:
+      operationId: ProjectController_getProjectsByQuery
+      parameters:
+        - name: query
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+    post:
+      operationId: ProjectController_insertProject
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostProjectDto"
+      responses:
+        "201":
+          description: ""
+  "/project/{id}":
+    get:
+      operationId: ProjectController_getProjectById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+    post:
+      operationId: ProjectController_postProjectById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeProjectDto"
+      responses:
+        "201":
+          description: ""
+  "/project/{id}/files":
+    get:
+      operationId: ProjectController_getFiles
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+    post:
+      operationId: ProjectController_uploadFile
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "201":
+          description: ""
+  "/project/{id}/language":
+    get:
+      operationId: ProjectController_getProjectLanguages
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+    post:
+      operationId: ProjectController_createTranslation
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostTranslateLanguage"
+      responses:
+        "201":
+          description: ""
+  "/project/{id}/actions":
+    get:
+      operationId: ProjectController_getAllActions
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+  "/translation/{id}/suggestions":
+    get:
+      operationId: PiecesController_getSuggestions
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+  "/translation/{id}":
+    get:
+      operationId: PiecesController_getTextPieceById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: nextMinLength
+          required: true
+          in: query
+          schema:
+            type: number
+        - name: prevMinLength
+          required: true
+          in: query
+          schema:
+            type: number
+        - name: toLanguageId
+          required: true
+          in: query
+          schema:
+            type: number
+        - name: withOriginal
+          required: true
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: ""
+  "/translation/{id}/actions":
+    get:
+      operationId: PiecesController_getActions
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+  "/translation/{id}/languages":
+    get:
+      operationId: PiecesController_getLanguages
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+  "/translation/{id}/language":
+    get:
+      operationId: PiecesController_getLanguage
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+  "/translation/{id}/suggest":
+    post:
+      operationId: PiecesController_suggest
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "201":
+          description: ""
+  /translation:
+    post:
+      operationId: PiecesController_putTranslations
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+      responses:
+        "201":
+          description: ""
+  "/language/{id}":
+    get:
+      operationId: LanguageController_getLanguageById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+  "/language/{id}/translations-orders":
+    get:
+      operationId: LanguageController_getTranslationsByOrder
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: orders
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+  "/language/{id}/translations":
+    get:
+      operationId: LanguageController_getTranslationsByLanguage
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: fileId
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: take
+          required: true
+          in: query
+          schema:
+            type: number
+        - name: page
+          required: true
+          in: query
+          schema:
+            type: number
+        - name: shouldTranslate
+          required: true
+          in: query
+          schema:
+            type: boolean
+        - name: withOriginal
+          required: true
+          in: query
+          schema:
+            type: boolean
+        - name: status
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: hasSuggestions
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+  "/language/{id}/assemble":
+    post:
+      operationId: LanguageController_assembleFiles
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "201":
+          description: ""
+  "/language/{id}/assemblies":
+    get:
+      operationId: LanguageController_getAssemblies
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+  "/suggestions/{id}/approve":
+    post:
+      operationId: SuggestionsController_approve
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "201":
+          description: ""
+  "/suggestions/{id}/deny":
+    post:
+      operationId: SuggestionsController_deny
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "201":
+          description: ""
+      security:
+        - bearer: []
+  "/files/{id}/peek":
+    post:
+      operationId: FilesController_getPeek
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "201":
+          description: ""
+  "/files/{id}/split":
+    post:
+      operationId: FilesController_splitFile
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "201":
+          description: ""
+  "/files/{id}/assemble":
+    get:
+      operationId: FilesController_assembleFile
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: languageId
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+  "/assembly/{id}":
+    get:
+      operationId: AssemblyController_getAssemblyById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+  /user/me:
+    get:
+      operationId: UserController_getProfile
+      parameters: []
+      responses:
+        "200":
+          description: ""
+  "/user/{id}":
+    get:
+      operationId: UserController_getUserById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+    post:
+      operationId: UserController_changeUser
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeUserDto"
+      responses:
+        "201":
+          description: ""
+  "/user/{id}/projects":
+    get:
+      operationId: UserController_getProjectsByUser
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+  /auth/login:
+    post:
+      operationId: AuthController_login
+      parameters: []
+      responses:
+        "201":
+          description: ""
+  /auth/register:
+    post:
+      operationId: AuthController_register
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostUserDto"
+      responses:
+        "201":
+          description: ""
+  /auth/refresh:
+    get:
+      operationId: AuthController_refresh
+      parameters: []
+      responses:
+        "200":
+          description: ""
+  /regexp:
+    get:
+      operationId: RegexpController_getAll
+      parameters: []
+      responses:
+        "200":
+          description: ""
+info:
+  title: Collaborative Translate API
+  description: Collaborative Translate web-app API specification
+  version: "1.0"
+  contact: {}
+tags: []
+servers: []
+components:
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    cookie:
+      type: apiKey
+      in: cookie
+      name: connect.sid
+  schemas:
+    ChangeProjectDto:
+      type: object
+      properties: {}
+    PostProjectDto:
+      type: object
+      properties: {}
+    PostTranslateLanguage:
+      type: object
+      properties: {}
+    ChangeUserDto:
+      type: object
+      properties: {}
+    PostUserDto:
+      type: object
+      properties: {}

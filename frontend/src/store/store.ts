@@ -1,6 +1,7 @@
 import {configureStore} from "@reduxjs/toolkit";
 import userReducer from "./userReducer";
 import translationsReducer from "./translate-piece-reducer";
+import { BaseAPI, DefaultApi } from "gen";
 
 export const store = configureStore({
     reducer: {

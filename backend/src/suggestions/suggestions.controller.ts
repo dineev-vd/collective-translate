@@ -1,4 +1,5 @@
 import { Controller, ForbiddenException, Param, Post, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'guards/simple-guards.guard';
 import { TranslationService } from 'translation/translation.service';
 import { ExtendedRequest } from 'util/ExtendedRequest';
@@ -23,6 +24,7 @@ export class SuggestionsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Post(':id/deny')
   async deny(@Param('id') id: string, @Req() { user }: ExtendedRequest) {
     const segment = await this.suggestionService.getSegmentBySuggestion(id);
