@@ -1,9 +1,8 @@
-import { SegmentStatus } from 'common/enums';
+import { SegmentStatus } from 'util/enums';
 import {
   Column,
   Entity,
   Index,
-  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -32,10 +31,7 @@ class SegmentTranslation {
   @RelationId((segment: SegmentTranslation) => segment.translationLanguage)
   translationLanguageId: number;
 
-  @ManyToOne(
-    () => File,
-    (file) => file.textSegments
-  )
+  @ManyToOne(() => File, (file) => file.textSegments)
   file: File;
 
   @RelationId((segment: SegmentTranslation) => segment.file)
@@ -45,23 +41,23 @@ class SegmentTranslation {
   order: number;
 
   @Column()
-  shouldTranslate: Boolean;
+  shouldTranslate: boolean;
 
   @Column({
-    type: "enum",
+    type: 'enum',
     enum: SegmentStatus,
-    default: SegmentStatus.NEW
+    default: SegmentStatus.NEW,
   })
   status: SegmentStatus;
 
-  @OneToMany(() => Suggestion, suggestion => suggestion.segment)
+  @OneToMany(() => Suggestion, (suggestion) => suggestion.segment)
   suggestions: Suggestion[];
 
   @RelationId((segment: SegmentTranslation) => segment.suggestions)
   suggestionsIds: string[];
 
-  @OneToMany(() => Action, action => action.segment, {cascade: true})
-  actions: Action[]
+  @OneToMany(() => Action, (action) => action.segment, { cascade: true })
+  actions: Action[];
 }
 
 export default SegmentTranslation;

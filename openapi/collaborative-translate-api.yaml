@@ -2,7 +2,7 @@ openapi: 3.0.0
 paths:
   /project:
     get:
-      operationId: ProjectController_getProjectsByQuery
+      operationId: getProjectsByQuery
       parameters:
         - name: query
           required: true
@@ -13,7 +13,7 @@ paths:
         "200":
           description: ""
     post:
-      operationId: ProjectController_insertProject
+      operationId: insertProject
       parameters: []
       requestBody:
         required: true
@@ -26,7 +26,7 @@ paths:
           description: ""
   "/project/{id}":
     get:
-      operationId: ProjectController_getProjectById
+      operationId: getProjectById
       parameters:
         - name: id
           required: true
@@ -37,7 +37,7 @@ paths:
         "200":
           description: ""
     post:
-      operationId: ProjectController_postProjectById
+      operationId: postProjectById
       parameters:
         - name: id
           required: true
@@ -55,7 +55,7 @@ paths:
           description: ""
   "/project/{id}/files":
     get:
-      operationId: ProjectController_getFiles
+      operationId: getFiles
       parameters:
         - name: id
           required: true
@@ -66,7 +66,7 @@ paths:
         "200":
           description: ""
     post:
-      operationId: ProjectController_uploadFile
+      operationId: uploadFile
       parameters:
         - name: id
           required: true
@@ -78,7 +78,7 @@ paths:
           description: ""
   "/project/{id}/language":
     get:
-      operationId: ProjectController_getProjectLanguages
+      operationId: getProjectLanguages
       parameters:
         - name: id
           required: true
@@ -89,7 +89,7 @@ paths:
         "200":
           description: ""
     post:
-      operationId: ProjectController_createTranslation
+      operationId: createTranslation
       parameters:
         - name: id
           required: true
@@ -107,7 +107,7 @@ paths:
           description: ""
   "/project/{id}/actions":
     get:
-      operationId: ProjectController_getAllActions
+      operationId: getAllActions
       parameters:
         - name: id
           required: true
@@ -119,7 +119,7 @@ paths:
           description: ""
   "/translation/{id}/suggestions":
     get:
-      operationId: PiecesController_getSuggestions
+      operationId: getSuggestions
       parameters:
         - name: id
           required: true
@@ -131,7 +131,7 @@ paths:
           description: ""
   "/translation/{id}":
     get:
-      operationId: PiecesController_getTextPieceById
+      operationId: getTextPieceById
       parameters:
         - name: id
           required: true
@@ -163,7 +163,7 @@ paths:
           description: ""
   "/translation/{id}/actions":
     get:
-      operationId: PiecesController_getActions
+      operationId: getActions
       parameters:
         - name: id
           required: true
@@ -175,7 +175,7 @@ paths:
           description: ""
   "/translation/{id}/languages":
     get:
-      operationId: PiecesController_getLanguages
+      operationId: getLanguages
       parameters:
         - name: id
           required: true
@@ -187,7 +187,7 @@ paths:
           description: ""
   "/translation/{id}/language":
     get:
-      operationId: PiecesController_getLanguage
+      operationId: getLanguage
       parameters:
         - name: id
           required: true
@@ -199,7 +199,7 @@ paths:
           description: ""
   "/translation/{id}/suggest":
     post:
-      operationId: PiecesController_suggest
+      operationId: suggest
       parameters:
         - name: id
           required: true
@@ -211,7 +211,7 @@ paths:
           description: ""
   /translation:
     post:
-      operationId: PiecesController_putTranslations
+      operationId: putTranslations
       parameters: []
       requestBody:
         required: true
@@ -226,7 +226,7 @@ paths:
           description: ""
   "/language/{id}":
     get:
-      operationId: LanguageController_getLanguageById
+      operationId: getLanguageById
       parameters:
         - name: id
           required: true
@@ -238,7 +238,7 @@ paths:
           description: ""
   "/language/{id}/translations-orders":
     get:
-      operationId: LanguageController_getTranslationsByOrder
+      operationId: getTranslationsByOrder
       parameters:
         - name: id
           required: true
@@ -255,7 +255,7 @@ paths:
           description: ""
   "/language/{id}/translations":
     get:
-      operationId: LanguageController_getTranslationsByLanguage
+      operationId: getTranslationsByLanguage
       parameters:
         - name: id
           required: true
@@ -302,7 +302,7 @@ paths:
           description: ""
   "/language/{id}/assemble":
     post:
-      operationId: LanguageController_assembleFiles
+      operationId: assembleFiles
       parameters:
         - name: id
           required: true
@@ -314,7 +314,7 @@ paths:
           description: ""
   "/language/{id}/assemblies":
     get:
-      operationId: LanguageController_getAssemblies
+      operationId: getAssemblies
       parameters:
         - name: id
           required: true
@@ -326,7 +326,7 @@ paths:
           description: ""
   "/suggestions/{id}/approve":
     post:
-      operationId: SuggestionsController_approve
+      operationId: approve
       parameters:
         - name: id
           required: true
@@ -338,7 +338,7 @@ paths:
           description: ""
   "/suggestions/{id}/deny":
     post:
-      operationId: SuggestionsController_deny
+      operationId: deny
       parameters:
         - name: id
           required: true
@@ -352,7 +352,7 @@ paths:
         - bearer: []
   "/files/{id}/peek":
     post:
-      operationId: FilesController_getPeek
+      operationId: getPeek
       parameters:
         - name: id
           required: true
@@ -364,7 +364,7 @@ paths:
           description: ""
   "/files/{id}/split":
     post:
-      operationId: FilesController_splitFile
+      operationId: splitFile
       parameters:
         - name: id
           required: true
@@ -376,7 +376,7 @@ paths:
           description: ""
   "/files/{id}/assemble":
     get:
-      operationId: FilesController_assembleFile
+      operationId: assembleFile
       parameters:
         - name: id
           required: true
@@ -393,7 +393,7 @@ paths:
           description: ""
   "/assembly/{id}":
     get:
-      operationId: AssemblyController_getAssemblyById
+      operationId: getAssemblyById
       parameters:
         - name: id
           required: true
@@ -405,14 +405,20 @@ paths:
           description: ""
   /user/me:
     get:
-      operationId: UserController_getProfile
+      operationId: getProfile
       parameters: []
       responses:
-        "200":
+        default:
           description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetUserDto"
+      security:
+        - bearer: []
   "/user/{id}":
     get:
-      operationId: UserController_getUserById
+      operationId: getUserById
       parameters:
         - name: id
           required: true
@@ -423,7 +429,7 @@ paths:
         "200":
           description: ""
     post:
-      operationId: UserController_changeUser
+      operationId: changeUser
       parameters:
         - name: id
           required: true
@@ -441,7 +447,7 @@ paths:
           description: ""
   "/user/{id}/projects":
     get:
-      operationId: UserController_getProjectsByUser
+      operationId: getProjectsByUser
       parameters:
         - name: id
           required: true
@@ -453,14 +459,14 @@ paths:
           description: ""
   /auth/login:
     post:
-      operationId: AuthController_login
+      operationId: login
       parameters: []
       responses:
         "201":
           description: ""
   /auth/register:
     post:
-      operationId: AuthController_register
+      operationId: register
       parameters: []
       requestBody:
         required: true
@@ -473,14 +479,14 @@ paths:
           description: ""
   /auth/refresh:
     get:
-      operationId: AuthController_refresh
+      operationId: refresh
       parameters: []
       responses:
         "200":
           description: ""
   /regexp:
     get:
-      operationId: RegexpController_getAll
+      operationId: getAll
       parameters: []
       responses:
         "200":
@@ -512,9 +518,43 @@ components:
     PostTranslateLanguage:
       type: object
       properties: {}
+    GetUserDto:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        email:
+          type: string
+        info:
+          type: string
+      required:
+        - id
+        - name
+        - email
+        - info
     ChangeUserDto:
       type: object
-      properties: {}
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        name:
+          type: string
+        info:
+          type: string
     PostUserDto:
       type: object
-      properties: {}
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        name:
+          type: string
+      required:
+        - email
+        - password
+        - name

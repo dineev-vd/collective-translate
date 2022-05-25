@@ -5,8 +5,7 @@
   "workspaces": {
     "packages": [
       "frontend",
-      "backend",
-      "common"
+      "backend"
     ]
   }
 }

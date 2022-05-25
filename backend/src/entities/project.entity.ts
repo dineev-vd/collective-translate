@@ -40,9 +40,9 @@ export default class Project {
   files: File[];
 
   @Column({ default: false })
-  private: Boolean;
+  private: boolean;
 
-  @ManyToMany(() => User, user => user.editableProjects, { cascade: true })
+  @ManyToMany(() => User, (user) => user.editableProjects, { cascade: true })
   @JoinTable({
     joinColumn: {
       name: 'editor',

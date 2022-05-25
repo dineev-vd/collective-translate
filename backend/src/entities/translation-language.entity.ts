@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   RelationId,
 } from 'typeorm';
-import { Language } from 'common/enums';
+import { Language } from 'util/enums';
 import SegmentTranslation from './segment-translation.entity';
 import Project from './project.entity';
 import { Assembly } from './assembly.entity';
@@ -44,5 +44,5 @@ export class TranslationLanguage {
   assemblies: Assembly[];
 
   @Column({ default: false })
-  original: Boolean;
+  original: boolean;
 }

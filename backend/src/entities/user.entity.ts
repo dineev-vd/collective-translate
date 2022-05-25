@@ -1,4 +1,4 @@
-import { GetShortUserDto } from 'common/dto/user.dto';
+import { GetShortUserDto } from 'dto/user.dto';
 import {
   Column,
   Entity,
@@ -24,16 +24,16 @@ export default class User {
   @Column()
   password: string;
 
-  @Column({default: ''})
+  @Column({ default: '' })
   info: string;
 
-  @Column({default: ''})
+  @Column({ default: '' })
   refreshToken: string;
 
   @OneToMany(() => Project, (project) => project.owner)
   projects: Project[];
 
-  @ManyToMany(() => Project, project => project.editors)
+  @ManyToMany(() => Project, (project) => project.editors)
   editableProjects: Project[];
 
   toGetShortUserDto(): GetShortUserDto {

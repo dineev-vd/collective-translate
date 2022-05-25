@@ -7,7 +7,6 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import SegmentTranslation from './segment-translation.entity';
-import { TranslationLanguage } from './translation-language.entity';
 import User from './user.entity';
 
 @Entity()
@@ -22,7 +21,10 @@ export class Action {
   @Column()
   change: string;
 
-  @ManyToOne(() => SegmentTranslation, { cascade: ['update'], onDelete: 'CASCADE' })
+  @ManyToOne(() => SegmentTranslation, {
+    cascade: ['update'],
+    onDelete: 'CASCADE',
+  })
   segment: SegmentTranslation;
 
   @Column({ nullable: true })

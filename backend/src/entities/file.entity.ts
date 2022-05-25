@@ -8,7 +8,7 @@ import {
   RelationId,
 } from 'typeorm';
 import Project from './project.entity';
-import { FileStatus } from 'common/enums';
+import { FileStatus } from 'util/enums';
 import SegmentTranslation from './segment-translation.entity';
 
 @Entity()

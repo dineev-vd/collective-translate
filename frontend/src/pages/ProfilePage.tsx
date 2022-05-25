@@ -1,9 +1,9 @@
-import { GetUserDto } from "common/dto/user.dto";
 import { api } from "api/Api";
 import UserProjectList from "components/project/ProjectList";
 import { useEffect, useState } from "react";
 import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import UserInfo from "components/UserInfo";
+import { BaseAPI, GetUserDto } from "gen";
 
 const ProfilePage: React.FC = () => {
   const { profileId } = useParams();
@@ -17,7 +17,7 @@ const ProfilePage: React.FC = () => {
         setUser(response);
       });
     } else {
-      api.getProfile().then(([response, _]) => {
+      api.userControllerGetProfile().then((response) => {
         setUser(response);
         console.log(response);
       });

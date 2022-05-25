@@ -1,24 +1,24 @@
 import { Module } from '@nestjs/common';
-import { ProjectModule } from './project/project.module';
-import { UserModule } from './user/user.module';
+import { ProjectModule } from './modules/project/project.module';
+import { UserModule } from './modules/user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import Project from './entities/project.entity';
 import SegmentTranslation from './entities/segment-translation.entity';
 import User from './entities/user.entity';
-import { TranslationModule } from './translation/translation.module';
-import { AuthModule } from './auth/auth.module';
+import { TranslationModule } from './modules/translation/translation.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { Action } from 'entities/action.entity';
 import { File } from 'entities/file.entity';
 import { TranslationLanguage } from 'entities/translation-language.entity';
-import { LanguageModule } from './language/language.module';
-import { ActionsModule } from './actions/actions.module';
-import { FilesModule } from './files/files.module';
+import { LanguageModule } from './modules/language/language.module';
+import { ActionsModule } from './modules/actions/actions.module';
+import { FilesModule } from './modules/files/files.module';
 import { Comment } from 'entities/comment.entity';
-import { CommentModule } from './comment/comment.module';
+import { CommentModule } from './modules/comment/comment.module';
 import { Assembly } from 'entities/assembly.entity';
-import { AssemblyModule } from './assembly/assembly.module';
+import { AssemblyModule } from './modules/assembly/assembly.module';
 import { RegularExpression } from 'entities/regexp.entity';
-import { RegexpModule } from './regexp/regexp.module';
+import { RegexpModule } from './modules/regexp/regexp.module';
 import { Suggestion } from 'entities/suggestion.entity';
 
 const {
@@ -52,7 +52,7 @@ const {
         TranslationLanguage,
         Assembly,
         RegularExpression,
-        Suggestion
+        Suggestion,
       ],
     }),
     ProjectModule,
